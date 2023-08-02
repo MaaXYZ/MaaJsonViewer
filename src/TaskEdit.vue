@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { NButton, NCard, NSelect, NCode, NInput, NDivider } from 'naive-ui'
-import type { Task, Rect } from './types'
+import { NCard, NSelect, NCode, NButton } from 'naive-ui'
 import { computed, type Ref } from 'vue'
+import type { Task, Rect } from '@/types'
 import ClearButton from '@/components/ClearButton.vue'
-import SingleArrayEdit from './components/SingleArrayEdit.vue'
-import FloatInput from '@/components/FloatInput.vue'
+import SingleArrayEdit from '@/components/SingleArrayEdit.vue'
 import RectEdit from '@/components/RectEdit.vue'
-import TemplateEdit from './components/TemplateEdit.vue'
+import TemplateEdit from '@/components/TemplateEdit.vue'
+
+defineEmits<{
+  navigate: [string]
+}>()
 
 const task = defineModel<Task>('value', {
   required: true
@@ -46,14 +49,27 @@ const taskRoi = wrapProp(task, 'roi')
 
 const taskTemplate = wrapProp(task, 'template')
 const taskThreshold = wrapProp(task, 'threshold')
+
+const taskNext = wrapProp(task, 'next')
+const taskNextArr = computed(() =>
+  typeof taskNext.value === 'string'
+    ? [taskNext.value]
+    : taskNext.value === null
+    ? []
+    : taskNext.value
+)
 </script>
 
 <template>
   <NCard>
     <div class="flex flex-col gap-2">
       <div
-        class="grid gap-2 items-center"
-        style="grid-template-columns: max-content minmax(0, 1fr)"
+        class="grid items-center"
+        style="
+          grid-template-columns: max-content minmax(0, 1fr);
+          column-gap: 0.5rem;
+          row-gap: 1rem;
+        "
       >
         <ClearButton v-model="taskReco"> 识别 </ClearButton>
         <NSelect
@@ -81,6 +97,14 @@ const taskThreshold = wrapProp(task, 'threshold')
           v-model:template="taskTemplate"
           v-model:threshold="taskThreshold"
         ></TemplateEdit>
+        <ClearButton v-model="taskNext"> 导航 </ClearButton>
+        <div class="flex flex-col gap-2">
+          <div v-for="(s, i) in taskNextArr" :key="i" class="flex">
+            <NButton @click="$emit('navigate', s)">
+              {{ s }}
+            </NButton>
+          </div>
+        </div>
       </div>
       <NCode language="json" :code="JSON.stringify(task, null, 2)"></NCode>
     </div>

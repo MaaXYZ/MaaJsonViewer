@@ -31,6 +31,10 @@ export const taskTree = computed<TreeOption[]>(() => {
   for (const key in taskData.data) {
     const task = taskData.data[key]
     const path = (task.editor_info?.path ?? 'default').split('.')
+    task.editor_info = {
+      ...(task.editor_info ?? {}),
+      path: path.join('.')
+    }
     let opt = result
     let prf = ''
     for (const p of path) {

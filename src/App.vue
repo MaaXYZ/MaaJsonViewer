@@ -35,6 +35,7 @@ function doReset() {
 
 const searchText = ref('')
 const selectedKeys = ref<string[]>([])
+const selectedKeysHistory = ref<string[]>([])
 const selectedKeysFilter = computed({
   set(v: string[]) {
     if (v.length === 0) {
@@ -44,6 +45,7 @@ const selectedKeysFilter = computed({
       if (s.endsWith('.')) {
         return
       }
+      selectedKeysHistory.value.push(s)
       selectedKeys.value = [s]
     }
   },
@@ -51,6 +53,22 @@ const selectedKeysFilter = computed({
     return selectedKeys.value
   }
 })
+
+function navBack() {
+  selectedKeysHistory.value.pop()
+  selectedKeys.value = [
+    selectedKeysHistory.value[selectedKeysHistory.value.length - 1]
+  ]
+}
+
+function handleNavigate(task: string) {
+  if (task in taskData.data) {
+    selectedKeysFilter.value = [
+      `${taskData.data[task].editor_info!.path}.${task}`
+    ]
+  }
+}
+
 const active = computed(() => {
   return selectedKeys.value.length > 0
     ? selectedKeys.value[0].split('.').pop() ?? null
@@ -60,7 +78,7 @@ const active = computed(() => {
 
 <template>
   <NModal v-model:show="showEdit">
-    <NCard class="w-2/3" role="dialog">
+    <NCard style="width: 80vw" role="dialog">
       <div class="h-full flex flex-col gap-2">
         <NInput
           class="flex-1"
@@ -81,18 +99,19 @@ const active = computed(() => {
   </NModal>
 
   <div class="flex flex-col gap-2 flex-1 min-h-0">
-    <div>
+    <div class="flex gap-2">
       <NButton @click="popupEdit">编辑</NButton>
-      {{ active }}
+      <NButton v-if="selectedKeysHistory.length > 1" @click="navBack"
+        >返回</NButton
+      >
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard class="max-w-xs min-h-0" content-style="max-height: 100%">
-        <div class="flex flex-col gap-2 max-h-full items-stretch">
+        <div class="flex flex-col gap-2 max-h-full">
           <div class="flex items-center gap-2">
             <span class="whitespace-nowrap">搜索</span>
             <NInput v-model:value="searchText" placeholder="task"></NInput>
           </div>
-          <!-- {{ taskTree }} -->
           <NTree
             class="overflow-y-auto"
             :data="taskTree"
@@ -108,9 +127,12 @@ const active = computed(() => {
           ></NTree>
         </div>
       </NCard>
-      <NCard>
+      <NCard :title="active ?? '<Unselect>'">
         <div v-if="active">
-          <TaskEdit v-model:value="taskData.data[active]"></TaskEdit>
+          <TaskEdit
+            v-model:value="taskData.data[active]"
+            @navigate="handleNavigate"
+          ></TaskEdit>
         </div>
       </NCard>
     </div>
