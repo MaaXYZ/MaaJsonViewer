@@ -1,3 +1,5 @@
+import { computed, type Ref } from 'vue'
+
 export type Rect = [number, number, number, number]
 export type TextRepl = [string, string]
 
@@ -46,46 +48,74 @@ type Recognition = {
   custom_recognizer_param?: unknown
 }
 
-type DoNothing = {
-  action?: 'DoNothing'
-}
+// type DoNothing = {
+//   action?: 'DoNothing'
+// }
 
-type Click = {
-  action: 'Click'
+// type Click = {
+//   action: 'Click'
+//   target?: true | string | Rect
+//   target_offset?: Rect
+// }
+
+// type Swipe = {
+//   action: 'Swipe'
+//   begin?: true | string | Rect
+//   begin_offset?: Rect
+//   end: true | string | Rect
+//   end_offset?: Rect
+//   duration?: number
+// }
+
+// type Key = {
+//   action: 'Key'
+//   key: string | number | number[]
+// }
+
+// type StartApp = {
+//   action: 'StartApp'
+//   package?: string
+// }
+
+// type StopApp = {
+//   action: 'StopApp'
+//   package?: string
+// }
+
+// type StopTask = {
+//   action: 'StopTask'
+// }
+
+// type ActCustom = {
+//   action: 'Custom'
+//   custom_action: string
+//   custom_action_param: unknown
+// }
+
+type Action = {
+  action?:
+    | 'DoNothing'
+    | 'Click'
+    | 'Swipe'
+    | 'Key'
+    | 'StartApp'
+    | 'StopApp'
+    | 'StopTask'
+    | 'Custom'
+
   target?: true | string | Rect
   target_offset?: Rect
-}
 
-type Swipe = {
-  action: 'Swipe'
   begin?: true | string | Rect
   begin_offset?: Rect
-  end: true | string | Rect
+  end?: true | string | Rect
   end_offset?: Rect
   duration?: number
-}
 
-type Key = {
-  action: 'Key'
-  key: string | number | number[]
-}
+  key?: string | number | number[]
 
-type StartApp = {
-  action: 'StartApp'
   package?: string
-}
 
-type StopApp = {
-  action: 'StopApp'
-  package?: string
-}
-
-type StopTask = {
-  action: 'StopTask'
-}
-
-type ActCustom = {
-  action: 'Custom'
   custom_action: string
   custom_action_param: unknown
 }
@@ -99,15 +129,15 @@ type WaitFreezes = {
 }
 
 // type Recognition = DirectHit | TemplateMatch | OCR | RecCustom
-type Action =
-  | DoNothing
-  | Click
-  | Swipe
-  | Key
-  | StartApp
-  | StopApp
-  | StopTask
-  | ActCustom
+// type Action =
+//   | DoNothing
+//   | Click
+//   | Swipe
+//   | Key
+//   | StartApp
+//   | StopApp
+//   | StopTask
+//   | ActCustom
 
 export type Task = Recognition &
   Action & {
@@ -127,3 +157,24 @@ export type Task = Recognition &
       path?: string
     }
   }
+
+type RemUndefined<T> = T extends undefined ? never : T
+export function wrapProp<T extends Record<string, unknown>, K extends string>(
+  obj: Ref<T>,
+  key: K
+) {
+  return computed<RemUndefined<T[K]> | null>({
+    set(v: RemUndefined<T[K]> | null) {
+      if (v === null) {
+        if (key in obj.value) {
+          delete obj.value[key]
+        }
+      } else {
+        obj.value[key] = v
+      }
+    },
+    get(): RemUndefined<T[K]> | null {
+      return (obj.value[key] ?? null) as RemUndefined<T[K]> | null
+    }
+  })
+}

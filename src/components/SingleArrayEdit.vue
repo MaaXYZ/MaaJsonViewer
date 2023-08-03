@@ -6,13 +6,15 @@ import SingleArrayButton from './SingleArrayButton.vue'
 const props = withDefaults(
   defineProps<{
     nullable?: boolean
+    noSingle?: boolean
     def: () => T
     isT: (v: T | T[]) => boolean
     onAdd?: () => void
     onDel?: (idx: number) => void
   }>(),
   {
-    nullable: false
+    nullable: false,
+    noSingle: false
   }
 )
 
@@ -60,7 +62,11 @@ const single = computed({
 function add() {
   if (isSingle.value) {
     if (props.nullable && val.value === null) {
-      val.value = props.def()
+      if (props.noSingle) {
+        val.value = [props.def()]
+      } else {
+        val.value = props.def()
+      }
     }
   } else {
     ;(val.value as T[]).push(props.def())
@@ -92,7 +98,10 @@ function remove(idx: number) {
 <template>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
-      <SingleArrayButton v-model:value="single"></SingleArrayButton>
+      <SingleArrayButton
+        v-if="!noSingle"
+        v-model:value="single"
+      ></SingleArrayButton>
       <NButton :disabled="single && val !== null" @click="add"> 添加 </NButton>
     </div>
     <div
