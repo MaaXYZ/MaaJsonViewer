@@ -1,5 +1,5 @@
 export type Rect = [number, number, number, number]
-type TextRepl = [string, string]
+export type TextRepl = [string, string]
 
 // type DirectHit = {
 //   recognition?: 'DirectHit'

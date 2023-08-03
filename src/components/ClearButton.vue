@@ -20,6 +20,9 @@ const val = defineModel<T | null>({
     secondary
     @click="invalid || (val = null)"
     :type="val === null ? 'default' : 'primary'"
+    :style="{
+      cursor: invalid ? 'not-allowed' : 'pointer'
+    }"
   >
     <slot></slot>
   </NButton>

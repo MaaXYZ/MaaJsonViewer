@@ -62,7 +62,7 @@ const fixThre = (v: number) => {
 </script>
 
 <template>
-  <ClearButton v-model="taskTemplate" invalid> 模板 </ClearButton>
+  <ClearButton v-model="taskTemplate" invalid> 模板路径 </ClearButton>
   <SingleArrayEdit
     v-model:value="taskTemplate"
     :def="() => templDef"
@@ -94,7 +94,7 @@ const fixThre = (v: number) => {
       </div>
     </template>
   </SingleArrayEdit>
-  <ClearButton v-model="taskThreshold"> 阈值 </ClearButton>
+  <ClearButton v-model="taskThreshold"> 模板阈值 </ClearButton>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
       <SingleArrayButton

@@ -127,13 +127,14 @@ const active = computed(() => {
           ></NTree>
         </div>
       </NCard>
-      <NCard :title="active ?? '<Unselect>'">
-        <div v-if="active">
+      <NCard class="min-h-0" content-style="max-height: 100%">
+        <template v-if="active">
           <TaskEdit
+            :name="active"
             v-model:value="taskData.data[active]"
             @navigate="handleNavigate"
           ></TaskEdit>
-        </div>
+        </template>
       </NCard>
     </div>
   </div>
