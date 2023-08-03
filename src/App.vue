@@ -85,6 +85,11 @@ const active = computed(() => {
     ? selectedKeys.value[0].split('.').pop() ?? null
     : null
 })
+
+const treeParentEl = ref<HTMLDivElement | null>(null)
+const treeHeight = computed(() => {
+  return treeParentEl.value?.clientHeight ?? 600
+})
 </script>
 
 <template>
@@ -120,25 +125,33 @@ const active = computed(() => {
       </NButton>
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
-      <NCard class="max-w-xs min-h-0" content-style="max-height: 100%">
-        <div class="flex flex-col gap-2 max-h-full">
+      <NCard
+        class="max-w-xs min-h-0"
+        content-style="max-height: 100%; display: flex; flex-direction: column"
+      >
+        <div class="flex flex-col gap-2 flex-1 min-h-0">
           <div class="flex items-center gap-2">
             <span class="whitespace-nowrap">搜索</span>
             <NInput v-model:value="searchText" placeholder="task"></NInput>
           </div>
-          <NTree
-            class="overflow-y-auto"
-            :data="taskTree"
-            v-model:selected-keys="selectedKeysFilter"
-            block-line
-            selectable
-            expand-on-click
-            accordion
-            default-expand-all
-            :pattern="searchText"
-            :show-irrelevant-nodes="false"
-            :cancelable="false"
-          ></NTree>
+          <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
+            <NTree
+              :style="{
+                height: treeHeight
+              }"
+              :data="taskTree"
+              v-model:selected-keys="selectedKeysFilter"
+              block-line
+              selectable
+              expand-on-click
+              accordion
+              default-expand-all
+              :pattern="searchText"
+              :show-irrelevant-nodes="false"
+              :cancelable="false"
+              virtual-scroll
+            ></NTree>
+          </div>
         </div>
       </NCard>
       <NCard class="min-h-0" content-style="max-height: 100%">
