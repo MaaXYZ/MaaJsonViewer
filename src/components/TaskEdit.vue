@@ -28,7 +28,7 @@ const taskNext = wrapProp(task, 'next')
     </div>
     <div class="flex flex-col flex-1 overflow-auto">
       <div class="flex gap-2">
-        <NCollapse>
+        <NCollapse :default-expanded-names="['reco', 'act', 'misc']">
           <NCollapseItem title="识别" name="reco">
             <div
               class="grid items-center"
@@ -50,7 +50,10 @@ const taskNext = wrapProp(task, 'next')
                 row-gap: 1rem;
               "
             >
-              <ActionEdit v-model:value="task"></ActionEdit>
+              <ActionEdit
+                v-model:value="task"
+                :navigate="s => $emit('navigate', s)"
+              ></ActionEdit>
             </div>
           </NCollapseItem>
           <NCollapseItem title="其他" name="misc">

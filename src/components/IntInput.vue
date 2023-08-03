@@ -54,9 +54,5 @@ defineExpose({ setValue, getIndex })
 </script>
 
 <template>
-  <NInput ref="el" v-model:value="strVal">
-    <template #prefix>
-      <slot></slot>
-    </template>
-  </NInput>
+  <NInput ref="el" v-model:value="strVal"></NInput>
 </template>

@@ -6,7 +6,6 @@ import { ref } from 'vue'
 const rect = defineModel<Rect>('value', {
   required: true
 })
-const prefixs = ['X:', 'Y:', 'W:', 'H:']
 
 type IntInputType = InstanceType<typeof IntInput>
 const inputEl = ref<IntInputType[]>([])
@@ -36,7 +35,6 @@ function handleOverflow(s: string, i: number) {
       }"
       @overflow-input="s => handleOverflow(s, i - 1)"
     >
-      {{ prefixs[i - 1] }}
     </IntInput>
   </div>
 </template>

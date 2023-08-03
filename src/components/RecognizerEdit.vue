@@ -84,7 +84,11 @@ const taskCustomRecoParam = wrapProp(task, 'custom_recognizer_param')
   </template>
   <template v-if="taskRecoValue === 'OCR'">
     <ClearButton v-model="taskText" invalid> 文本 </ClearButton>
-    <StringArrayEdit v-model:value="taskText" :def="'test'"></StringArrayEdit>
+    <StringArrayEdit
+      v-model:value="taskText"
+      :def="''"
+      placeholder="text"
+    ></StringArrayEdit>
     <ClearButton v-model="taskReplace"> 文本替换 </ClearButton>
     <SingleArrayEdit
       v-model:value="taskReplace"
@@ -97,14 +101,14 @@ const taskCustomRecoParam = wrapProp(task, 'custom_recognizer_param')
           <NInput
             :value="value[0]"
             @update:value="(v: string) => update([v, value[1]])"
+            placeholder="替换"
           >
-            <template #prefix> 替换: </template>
           </NInput>
           <NInput
             :value="value[1]"
             @update:value="(v: string) => update([value[0], v])"
+            placeholder="为"
           >
-            <template #prefix> 为: </template>
           </NInput>
         </div>
       </template>

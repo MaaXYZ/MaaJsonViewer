@@ -6,7 +6,7 @@ import SingleArrayButton from './SingleArrayButton.vue'
 const props = withDefaults(
   defineProps<{
     nullable?: boolean
-    noSingle?: boolean
+    type?: 'both' | 'single' | 'multi'
     def: () => T
     isT: (v: T | T[]) => boolean
     onAdd?: () => void
@@ -14,7 +14,7 @@ const props = withDefaults(
   }>(),
   {
     nullable: false,
-    noSingle: false
+    type: 'both'
   }
 )
 
@@ -33,7 +33,7 @@ const isSingle = computed(() => {
 
 const valarr = computed(() => {
   return isSingle.value
-    ? val.value
+    ? val.value !== null
       ? [val.value as T]
       : props.nullable
       ? []
@@ -62,7 +62,7 @@ const single = computed({
 function add() {
   if (isSingle.value) {
     if (props.nullable && val.value === null) {
-      if (props.noSingle) {
+      if (props.type === 'multi') {
         val.value = [props.def()]
       } else {
         val.value = props.def()
@@ -99,7 +99,7 @@ function remove(idx: number) {
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
       <SingleArrayButton
-        v-if="!noSingle"
+        v-if="type === 'both'"
         v-model:value="single"
       ></SingleArrayButton>
       <NButton :disabled="single && val !== null" @click="add"> ➕ </NButton>

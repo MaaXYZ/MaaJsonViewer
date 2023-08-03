@@ -19,7 +19,7 @@ const val = defineModel<T | null>({
   <NButton
     secondary
     @click="invalid || (val = null)"
-    :type="val === null ? 'default' : 'primary'"
+    :type="val === null ? (invalid ? 'error' : 'default') : 'primary'"
     :style="{
       cursor: invalid ? 'not-allowed' : 'pointer'
     }"
