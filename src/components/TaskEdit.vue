@@ -69,6 +69,12 @@ function enterDelete() {
 }
 
 function tryDelete() {
+  if (
+    doTransfer.value &&
+    (!(transferTo.value in taskData.data) || transferTo.value === props.name)
+  ) {
+    return
+  }
   showDelete.value = false
   commitDelete(props.name, doTransfer.value ? transferTo.value : null)
 }
@@ -123,7 +129,10 @@ function tryDelete() {
         <NButton
           @click="tryDelete"
           type="primary"
-          :disabled="doTransfer && !(transferTo in taskData.data)"
+          :disabled="
+            doTransfer &&
+            (!(transferTo in taskData.data) || transferTo === name)
+          "
         >
           <template #icon>
             <NIcon>
