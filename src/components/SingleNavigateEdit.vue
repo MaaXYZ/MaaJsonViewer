@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NIcon, NAutoComplete } from 'naive-ui'
 import { computed } from 'vue'
-import { NavigateNextOutlined } from '@vicons/material'
+import { MovingOutlined } from '@vicons/material'
 import { taskData } from '@/data'
 
 defineProps<{
@@ -37,10 +37,9 @@ const options = computed(() => {
     <NButton @click="navigate(value)">
       <template #icon>
         <NIcon>
-          <NavigateNextOutlined></NavigateNextOutlined>
+          <MovingOutlined></MovingOutlined>
         </NIcon>
       </template>
-      🚀
     </NButton>
     <NAutoComplete
       v-model:value="val"

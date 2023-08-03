@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T">
-import { NButton } from 'naive-ui'
+import { NButton, NIcon } from 'naive-ui'
+import { DeleteOutlined, AddOutlined } from '@vicons/material'
 import { computed, ref } from 'vue'
 import SingleArrayButton from './SingleArrayButton.vue'
 
@@ -102,7 +103,13 @@ function remove(idx: number) {
         v-if="type === 'both'"
         v-model:value="single"
       ></SingleArrayButton>
-      <NButton :disabled="single && val !== null" @click="add"> ➕ </NButton>
+      <NButton :disabled="single && val !== null" @click="add">
+        <template #icon>
+          <NIcon>
+            <AddOutlined></AddOutlined>
+          </NIcon>
+        </template>
+      </NButton>
     </div>
     <div
       v-if="valarr.length > 0"
@@ -120,7 +127,11 @@ function remove(idx: number) {
           :disabled="!props.nullable && (single || valarr.length === 1)"
           @click="remove(i)"
         >
-          ❌
+          <template #icon>
+            <NIcon>
+              <DeleteOutlined></DeleteOutlined>
+            </NIcon>
+          </template>
         </NButton>
       </template>
     </div>

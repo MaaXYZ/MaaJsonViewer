@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { NButton, NTree, NCard, NInput, NModal } from 'naive-ui'
+import { NButton, NTree, NCard, NInput, NModal, NIcon } from 'naive-ui'
+import {
+  EditOutlined,
+  NavigateBeforeOutlined,
+  NavigateNextOutlined,
+  SearchOutlined
+} from '@vicons/material'
 import { taskData, taskTree } from './data'
 import TaskEdit from '@/components/TaskEdit.vue'
 
@@ -117,12 +123,26 @@ const treeHeight = computed(() => {
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
       <NButton :disabled="history.backward.length <= 1" @click="historyUndo">
-        ⏪
+        <template #icon>
+          <NIcon>
+            <NavigateBeforeOutlined></NavigateBeforeOutlined>
+          </NIcon>
+        </template>
       </NButton>
       <NButton :disabled="history.forward.length === 0" @click="historyRedo">
-        ⏩
+        <template #icon>
+          <NIcon>
+            <NavigateNextOutlined></NavigateNextOutlined>
+          </NIcon>
+        </template>
       </NButton>
-      <NButton @click="popupEdit"> ✏️ </NButton>
+      <NButton @click="popupEdit">
+        <template #icon>
+          <NIcon>
+            <EditOutlined></EditOutlined>
+          </NIcon>
+        </template>
+      </NButton>
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard
@@ -130,10 +150,13 @@ const treeHeight = computed(() => {
         content-style="max-height: 100%; display: flex; flex-direction: column"
       >
         <div class="flex flex-col gap-2 flex-1 min-h-0">
-          <div class="flex items-center gap-2">
-            <span class="whitespace-nowrap">🔎</span>
-            <NInput v-model:value="searchText" placeholder="task"></NInput>
-          </div>
+          <NInput v-model:value="searchText" placeholder="task">
+            <template #prefix>
+              <NIcon>
+                <SearchOutlined></SearchOutlined>
+              </NIcon>
+            </template>
+          </NInput>
           <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
             <NTree
               :style="{

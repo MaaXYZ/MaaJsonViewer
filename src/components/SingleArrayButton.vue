@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { NButton } from 'naive-ui'
+import { NButton, NIcon } from 'naive-ui'
+import { FolderOutlined, FolderCopyOutlined } from '@vicons/material'
 
 defineProps<{
   disabled?: boolean
@@ -16,6 +17,11 @@ const single = defineModel<boolean>('value', {
     :disabled="disabled"
     @click="single = !single"
   >
-    {{ single ? '🎵' : '🎶' }}
+    <template #icon>
+      <NIcon>
+        <FolderOutlined v-if="single"></FolderOutlined>
+        <FolderCopyOutlined v-else></FolderCopyOutlined>
+      </NIcon>
+    </template>
   </NButton>
 </template>

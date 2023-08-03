@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { NButton, NCode, NInput } from 'naive-ui'
+import { NButton, NCode, NInput, NIcon } from 'naive-ui'
+import { CheckOutlined, CloseOutlined, EditOutlined } from '@vicons/material'
 import { ref } from 'vue'
 
 const val = defineModel<unknown>('value', {
@@ -35,8 +36,20 @@ function cancelEdit() {
   <div class="flex flex-col gap-2">
     <template v-if="editing">
       <div class="flex gap-2">
-        <NButton @click="trySave"> 💾 </NButton>
-        <NButton @click="cancelEdit"> 🗙 </NButton>
+        <NButton @click="trySave">
+          <template #icon>
+            <NIcon>
+              <CheckOutlined></CheckOutlined>
+            </NIcon>
+          </template>
+        </NButton>
+        <NButton @click="cancelEdit">
+          <template #icon>
+            <NIcon>
+              <CloseOutlined></CloseOutlined>
+            </NIcon>
+          </template>
+        </NButton>
       </div>
       <NInput
         type="textarea"
@@ -49,7 +62,13 @@ function cancelEdit() {
     </template>
     <template v-else>
       <div class="flex">
-        <NButton @click="enterEdit"> ✏️ </NButton>
+        <NButton @click="enterEdit">
+          <template #icon>
+            <NIcon>
+              <EditOutlined></EditOutlined>
+            </NIcon>
+          </template>
+        </NButton>
       </div>
       <NCode language="json" :code="stringify(val)"></NCode>
     </template>
