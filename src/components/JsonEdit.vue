@@ -6,12 +6,16 @@ const val = defineModel<unknown>('value', {
   required: true
 })
 
-const cache = ref(JSON.stringify(val.value, null, 2))
+function stringify(v: unknown) {
+  return JSON.stringify(v, null, 4)
+}
+
+const cache = ref(stringify(val.value))
 
 const editing = ref(false)
 
 function enterEdit() {
-  cache.value = JSON.stringify(val.value, null, 2)
+  cache.value = stringify(val.value)
   editing.value = true
 }
 
@@ -47,7 +51,7 @@ function cancelEdit() {
       <div class="flex">
         <NButton @click="enterEdit"> 编辑 </NButton>
       </div>
-      <NCode language="json" :code="JSON.stringify(val, null, 2)"></NCode>
+      <NCode language="json" :code="stringify(val)"></NCode>
     </template>
   </div>
 </template>
