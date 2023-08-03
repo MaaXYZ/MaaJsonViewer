@@ -35,8 +35,8 @@ function cancelEdit() {
   <div class="flex flex-col gap-2">
     <template v-if="editing">
       <div class="flex gap-2">
-        <NButton @click="trySave"> 保存 </NButton>
-        <NButton @click="cancelEdit"> 取消 </NButton>
+        <NButton @click="trySave"> 💾 </NButton>
+        <NButton @click="cancelEdit"> 🗙 </NButton>
       </div>
       <NInput
         type="textarea"

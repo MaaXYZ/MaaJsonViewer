@@ -62,7 +62,7 @@ const taskNext = wrapProp(task, 'next')
                 row-gap: 1rem;
               "
             >
-              <ClearButton v-model="taskNext"> 导航 </ClearButton>
+              <ClearButton v-model="taskNext"> Next </ClearButton>
               <NavigateEdit
                 v-model:value="taskNext"
                 :navigate="s => $emit('navigate', s)"

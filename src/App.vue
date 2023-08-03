@@ -131,7 +131,7 @@ const treeHeight = computed(() => {
       >
         <div class="flex flex-col gap-2 flex-1 min-h-0">
           <div class="flex items-center gap-2">
-            <span class="whitespace-nowrap">搜索</span>
+            <span class="whitespace-nowrap">🔎</span>
             <NInput v-model:value="searchText" placeholder="task"></NInput>
           </div>
           <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
