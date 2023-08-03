@@ -102,7 +102,7 @@ function remove(idx: number) {
         v-if="!noSingle"
         v-model:value="single"
       ></SingleArrayButton>
-      <NButton :disabled="single && val !== null" @click="add"> 添加 </NButton>
+      <NButton :disabled="single && val !== null" @click="add"> ➕ </NButton>
     </div>
     <div
       v-if="valarr.length > 0"
@@ -120,7 +120,7 @@ function remove(idx: number) {
           :disabled="!props.nullable && (single || valarr.length === 1)"
           @click="remove(i)"
         >
-          删除
+          ❌
         </NButton>
       </template>
     </div>

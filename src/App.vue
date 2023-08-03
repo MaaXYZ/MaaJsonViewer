@@ -116,13 +116,13 @@ const treeHeight = computed(() => {
 
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton @click="popupEdit"> 编辑 </NButton>
       <NButton :disabled="history.backward.length <= 1" @click="historyUndo">
-        返回
+        ⏪
       </NButton>
       <NButton :disabled="history.forward.length === 0" @click="historyRedo">
-        前进
+        ⏩
       </NButton>
+      <NButton @click="popupEdit"> ✏️ </NButton>
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard

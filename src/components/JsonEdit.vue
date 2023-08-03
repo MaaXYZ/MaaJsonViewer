@@ -49,7 +49,7 @@ function cancelEdit() {
     </template>
     <template v-else>
       <div class="flex">
-        <NButton @click="enterEdit"> 编辑 </NButton>
+        <NButton @click="enterEdit"> ✏️ </NButton>
       </div>
       <NCode language="json" :code="stringify(val)"></NCode>
     </template>

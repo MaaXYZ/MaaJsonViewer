@@ -1,3 +1,3 @@
 # MaaPipelineViewer
 
-就是用来编辑pipeline的小玩意
+就是用来编辑 pipeline 的小玩意

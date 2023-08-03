@@ -40,7 +40,7 @@ const options = computed(() => {
           <NavigateNextOutlined></NavigateNextOutlined>
         </NIcon>
       </template>
-      跳转
+      🚀
     </NButton>
     <NAutoComplete
       v-model:value="val"

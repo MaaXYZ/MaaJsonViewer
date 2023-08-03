@@ -16,6 +16,6 @@ const single = defineModel<boolean>('value', {
     :disabled="disabled"
     @click="single = !single"
   >
-    {{ single ? '单个' : '多个' }}
+    {{ single ? '🎵' : '🎶' }}
   </NButton>
 </template>
