@@ -9,8 +9,8 @@ import { taskData, type TaskData } from '@/data'
 function appendPath(data: TaskData, path: string) {
   for (const key in data) {
     data[key].editor_info = {
-      path,
-      ...(data[key].editor_info ?? {})
+      ...(data[key].editor_info ?? {}),
+      path
     }
   }
   return data

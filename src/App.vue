@@ -154,8 +154,6 @@ const treeHeight = computed(() => {
               v-model:selected-keys="selectedKeysFilter"
               block-line
               selectable
-              expand-on-click
-              accordion
               default-expand-all
               :pattern="searchText"
               :show-irrelevant-nodes="false"

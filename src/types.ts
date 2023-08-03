@@ -153,8 +153,8 @@ export type Task = Recognition &
     post_wait_freezes?: number | WaitFreezes
     notify?: boolean
 
-    editor_info?: {
-      path?: string
+    editor_info: {
+      path: string
     }
   }
 

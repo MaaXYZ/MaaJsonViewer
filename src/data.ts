@@ -1,9 +1,7 @@
 import type { TreeOption } from 'naive-ui'
-import { NButton, NIcon } from 'naive-ui'
 import { computed, reactive } from 'vue'
 import type { Task } from './types'
 import { loadData } from './demo/loader'
-import { AddOutlined, CreateNewFolderOutlined } from '@vicons/material'
 
 export interface TaskData {
   [task: string]: Task
@@ -19,52 +17,10 @@ function getNext(prf: string, opt: TreeOption[], key: string): TreeOption[] {
     }
   }
 
-  const add = (e: MouseEvent) => {
-    e.stopPropagation()
-    for (let i = 1; ; i++) {
-      const name = `${key}_${i}`
-      if (!(name in taskData.data)) {
-        taskData.data[name] = {
-          editor_info: {
-            path: `${prf}${key}`
-          }
-        }
-        return
-      }
-    }
-  }
-  const addDir = (e: MouseEvent) => {
-    e.stopPropagation()
-  }
-
   const o: TreeOption = {
     key: `${prf}${key}.`,
     label: key,
-    children: [],
-    suffix: () => {
-      return (
-        <div class="flex gap-1">
-          <NButton text onClick={add}>
-            {{
-              icon: () => (
-                <NIcon>
-                  <AddOutlined></AddOutlined>
-                </NIcon>
-              )
-            }}
-          </NButton>
-          <NButton text onClick={addDir}>
-            {{
-              icon: () => (
-                <NIcon>
-                  <CreateNewFolderOutlined></CreateNewFolderOutlined>
-                </NIcon>
-              )
-            }}
-          </NButton>
-        </div>
-      )
-    }
+    children: []
   }
   opt.push(o)
   return o.children!
@@ -76,11 +32,8 @@ export const taskTree = computed<TreeOption>(() => {
 
   for (const key in taskData.data) {
     const task = taskData.data[key]
-    const path = (task.editor_info?.path ?? 'default').split('.')
-    task.editor_info = {
-      ...(task.editor_info ?? {}),
-      path: path.join('.')
-    }
+    const path = task.editor_info.path.split('.')
+
     let opt = result
     let prf = ''
     for (const p of path) {
