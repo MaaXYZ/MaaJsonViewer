@@ -9,6 +9,13 @@ import {
 } from '@vicons/material'
 import { taskData, taskTree } from './data'
 import TaskEdit from '@/components/TaskEdit.vue'
+import {
+  historyPush,
+  historyUndo,
+  historyRedo,
+  canUndo,
+  canRedo
+} from './history'
 
 const showEdit = ref(false)
 const cacheEdit = ref('')
@@ -42,25 +49,6 @@ function doReset() {
 const searchText = ref('')
 const selectedKeys = ref<string[]>([])
 
-const history = reactive<{
-  backward: string[]
-  forward: string[]
-}>({ backward: [], forward: [] })
-function historyPush(v: string) {
-  history.backward.push(v)
-  history.forward = []
-  selectedKeys.value = [v]
-}
-function historyUndo() {
-  history.forward.push(history.backward.pop()!)
-  selectedKeys.value = [history.backward[history.backward.length - 1]]
-}
-function historyRedo() {
-  const v = history.forward.pop()!
-  history.backward.push(v)
-  selectedKeys.value = [v]
-}
-
 const selectedKeysFilter = computed({
   set(v: string[]) {
     if (v.length === 0) {
@@ -70,7 +58,7 @@ const selectedKeysFilter = computed({
       if (s.endsWith('.')) {
         return
       }
-      historyPush(s)
+      selectedKeys.value = historyPush(s)
     }
   },
   get() {
@@ -122,14 +110,14 @@ const treeHeight = computed(() => {
 
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton :disabled="history.backward.length <= 1" @click="historyUndo">
+      <NButton :disabled="!canUndo" @click="selectedKeys = historyUndo()">
         <template #icon>
           <NIcon>
             <NavigateBeforeOutlined></NavigateBeforeOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton :disabled="history.forward.length === 0" @click="historyRedo">
+      <NButton :disabled="!canRedo" @click="selectedKeys = historyRedo()">
         <template #icon>
           <NIcon>
             <NavigateNextOutlined></NavigateNextOutlined>
@@ -178,7 +166,7 @@ const treeHeight = computed(() => {
         </div>
       </NCard>
       <NCard class="min-h-0" content-style="max-height: 100%">
-        <template v-if="active">
+        <template v-if="active && active in taskData.data">
           <TaskEdit
             :name="active"
             v-model:value="taskData.data[active]"

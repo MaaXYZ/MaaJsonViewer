@@ -5,7 +5,7 @@ import { MovingOutlined } from '@vicons/material'
 import { taskData } from '@/data'
 
 defineProps<{
-  navigate: (to: string) => void
+  navigate?: (to: string) => void
 }>()
 
 const val = defineModel<string>('value', {
@@ -34,7 +34,7 @@ const options = computed(() => {
 
 <template>
   <div class="flex gap-2">
-    <NButton @click="navigate(value)">
+    <NButton v-if="navigate" @click="navigate(value)">
       <template #icon>
         <NIcon>
           <MovingOutlined></MovingOutlined>
