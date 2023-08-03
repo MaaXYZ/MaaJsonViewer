@@ -65,3 +65,46 @@ export const taskTree = computed<TreeOption[]>(() => {
 })
 
 loadData()
+
+function performRename(
+  task: Record<string, unknown>,
+  key: string,
+  from: string,
+  to: string
+) {
+  if (!(key in task)) {
+    return
+  }
+  const val = task[key]
+  if (typeof val === 'string') {
+    if (val === from) {
+      task[key] = to
+      return
+    }
+  } else if (
+    val instanceof Array &&
+    val.length > 0 &&
+    typeof val[0] === 'string'
+  ) {
+    task[key] = val.map(x => {
+      if (x === from) {
+        return to
+      } else {
+        return x
+      }
+    })
+  }
+}
+
+export function commitRename(from: string, to: string) {
+  const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
+  const data: Record<string, Task> = {}
+  for (const name in taskData.data) {
+    const task = JSON.parse(JSON.stringify(taskData.data[name]))
+    for (const key of keys) {
+      performRename(task, key, from, to)
+    }
+    data[name === from ? to : name] = task
+  }
+  taskData.data = data
+}
