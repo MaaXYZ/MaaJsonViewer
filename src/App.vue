@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { NButton, NTree, NCard, NInput, NModal } from 'naive-ui'
 import { taskData, taskTree } from './data'
-import TaskEdit from './TaskEdit.vue'
+import TaskEdit from '@/components/TaskEdit.vue'
 
 const showEdit = ref(false)
 const cacheEdit = ref('')

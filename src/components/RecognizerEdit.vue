@@ -8,7 +8,6 @@ import RectEdit from './RectEdit.vue'
 import TemplateEdit from './TemplateEdit.vue'
 import StringArrayEdit from './StringArrayEdit.vue'
 import JsonEdit from './JsonEdit.vue'
-import NavigateEdit from './NavigateEdit.vue'
 
 const task = defineModel<Task>('value', {
   required: true
