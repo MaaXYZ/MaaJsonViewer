@@ -15,8 +15,7 @@ const val = defineModel<string | string[] | null>('value', {
   <SingleArrayEdit
     v-model:value="val"
     :nullable="true"
-    :no-single="true"
-    :def="() => 'FakeTask'"
+    :def="() => ''"
     :is-t="(v: string | string[]) => (typeof v === 'string')"
   >
     <template #edit="{ value, update }">

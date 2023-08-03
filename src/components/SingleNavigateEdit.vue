@@ -48,7 +48,7 @@ const options = computed(() => {
         autocomplete: 'disabled'
       }"
       :options="options"
-      placeholder="邮箱"
+      placeholder="task"
     ></NAutoComplete>
   </div>
 </template>

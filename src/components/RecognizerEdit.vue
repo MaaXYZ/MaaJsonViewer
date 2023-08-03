@@ -90,7 +90,7 @@ const taskCustomRecoParam = wrapProp(task, 'custom_recognizer_param')
     <SingleArrayEdit
       v-model:value="taskReplace"
       :nullable="true"
-      :def="() => (['aaa', 'bbb'] as TextRepl)"
+      :def="() => (['', ''] as TextRepl)"
       :is-t="(v: TextRepl | TextRepl[]) => (v.length === 2 && typeof v[0] === 'string')"
     >
       <template #edit="{ value, update }">
@@ -121,7 +121,7 @@ const taskCustomRecoParam = wrapProp(task, 'custom_recognizer_param')
   <template v-if="taskRecoValue === 'Custom'">
     <ClearButton v-model="taskCustomReco" invalid> 识别器 </ClearButton>
     <NInput
-      :value="taskCustomReco ?? 'demo_reco'"
+      :value="taskCustomReco ?? ''"
       @update:value="v => (taskCustomReco = v)"
     ></NInput>
     <ClearButton v-model="taskCustomRecoParam"> 识别参数 </ClearButton>

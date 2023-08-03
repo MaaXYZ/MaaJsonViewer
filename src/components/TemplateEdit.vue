@@ -6,7 +6,7 @@ import ClearButton from './ClearButton.vue'
 import SingleArrayButton from './SingleArrayButton.vue'
 import FloatInput from './FloatInput.vue'
 
-const templDef = 'template/temp.png'
+const templDef = ''
 const threDef = 0.7
 
 const taskTemplate = defineModel<string | string[] | null>('template', {
@@ -80,7 +80,11 @@ const fixThre = (v: number) => {
   >
     <template #edit="{ value, update, index }">
       <div class="flex gap-2">
-        <NInput :value="value" @update:value="update"></NInput>
+        <NInput
+          :value="value"
+          @update:value="update"
+          placeholder="template"
+        ></NInput>
         <FloatInput
           v-if="!isThresholdSingle"
           :nullable="false"
