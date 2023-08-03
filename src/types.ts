@@ -116,8 +116,8 @@ type Action = {
 
   package?: string
 
-  custom_action: string
-  custom_action_param: unknown
+  custom_action?: string
+  custom_action_param?: unknown
 }
 
 type WaitFreezes = {

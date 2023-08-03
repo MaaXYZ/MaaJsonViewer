@@ -1,7 +1,9 @@
 import type { TreeOption } from 'naive-ui'
+import { NButton, NIcon } from 'naive-ui'
 import { computed, reactive } from 'vue'
 import type { Task } from './types'
 import { loadData } from './demo/loader'
+import { AddOutlined, CreateNewFolderOutlined } from '@vicons/material'
 
 export interface TaskData {
   [task: string]: Task
@@ -16,17 +18,60 @@ function getNext(prf: string, opt: TreeOption[], key: string): TreeOption[] {
       return o.children
     }
   }
+
+  const add = (e: MouseEvent) => {
+    e.stopPropagation()
+    for (let i = 1; ; i++) {
+      const name = `${key}_${i}`
+      if (!(name in taskData.data)) {
+        taskData.data[name] = {
+          editor_info: {
+            path: `${prf}${key}`
+          }
+        }
+        return
+      }
+    }
+  }
+  const addDir = (e: MouseEvent) => {
+    e.stopPropagation()
+  }
+
   const o: TreeOption = {
     key: `${prf}${key}.`,
     label: key,
-    children: []
+    children: [],
+    suffix: () => {
+      return (
+        <div class="flex gap-1">
+          <NButton text onClick={add}>
+            {{
+              icon: () => (
+                <NIcon>
+                  <AddOutlined></AddOutlined>
+                </NIcon>
+              )
+            }}
+          </NButton>
+          <NButton text onClick={addDir}>
+            {{
+              icon: () => (
+                <NIcon>
+                  <CreateNewFolderOutlined></CreateNewFolderOutlined>
+                </NIcon>
+              )
+            }}
+          </NButton>
+        </div>
+      )
+    }
   }
   opt.push(o)
   return o.children!
 }
 
 export const taskData = reactive<{ data: TaskData }>({ data: {} })
-export const taskTree = computed<TreeOption[]>(() => {
+export const taskTree = computed<TreeOption>(() => {
   const result: TreeOption[] = []
 
   for (const key in taskData.data) {
@@ -61,7 +106,11 @@ export const taskTree = computed<TreeOption[]>(() => {
 
   doSort(result)
 
-  return result
+  return {
+    label: '[ROOT]',
+    key: 'root.',
+    children: result
+  }
 })
 
 loadData()

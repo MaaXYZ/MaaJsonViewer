@@ -150,7 +150,7 @@ const treeHeight = computed(() => {
               :style="{
                 height: treeHeight
               }"
-              :data="taskTree"
+              :data="[taskTree]"
               v-model:selected-keys="selectedKeysFilter"
               block-line
               selectable
