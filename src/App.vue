@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { NButton, NTree, NCard, NInput, NModal } from 'naive-ui'
 import { taskData, taskTree } from './data'
 import TaskEdit from './TaskEdit.vue'
@@ -35,7 +35,26 @@ function doReset() {
 
 const searchText = ref('')
 const selectedKeys = ref<string[]>([])
-const selectedKeysHistory = ref<string[]>([])
+
+const history = reactive<{
+  backward: string[]
+  forward: string[]
+}>({ backward: [], forward: [] })
+function historyPush(v: string) {
+  history.backward.push(v)
+  history.forward = []
+  selectedKeys.value = [v]
+}
+function historyUndo() {
+  history.forward.push(history.backward.pop()!)
+  selectedKeys.value = [history.backward[history.backward.length - 1]]
+}
+function historyRedo() {
+  const v = history.forward.pop()!
+  history.backward.push(v)
+  selectedKeys.value = [v]
+}
+
 const selectedKeysFilter = computed({
   set(v: string[]) {
     if (v.length === 0) {
@@ -45,21 +64,13 @@ const selectedKeysFilter = computed({
       if (s.endsWith('.')) {
         return
       }
-      selectedKeysHistory.value.push(s)
-      selectedKeys.value = [s]
+      historyPush(s)
     }
   },
   get() {
     return selectedKeys.value
   }
 })
-
-function navBack() {
-  selectedKeysHistory.value.pop()
-  selectedKeys.value = [
-    selectedKeysHistory.value[selectedKeysHistory.value.length - 1]
-  ]
-}
 
 function handleNavigate(task: string) {
   if (task in taskData.data) {
@@ -100,10 +111,13 @@ const active = computed(() => {
 
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton @click="popupEdit">编辑</NButton>
-      <NButton v-if="selectedKeysHistory.length > 1" @click="navBack"
-        >返回</NButton
-      >
+      <NButton @click="popupEdit"> 编辑 </NButton>
+      <NButton :disabled="history.backward.length <= 1" @click="historyUndo">
+        返回
+      </NButton>
+      <NButton :disabled="history.forward.length === 0" @click="historyRedo">
+        前进
+      </NButton>
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard class="max-w-xs min-h-0" content-style="max-height: 100%">
