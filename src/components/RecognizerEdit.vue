@@ -42,92 +42,101 @@ const taskCustomRecoParam = wrapProp(task, 'custom_recognizer_param')
 </script>
 
 <template>
-  <ClearButton v-model="taskReco"> 识别 </ClearButton>
-  <NSelect
-    v-model:value="taskReco"
-    :options="recoOptions"
-    :placeholder="recoOptions[0].label"
-  ></NSelect>
-  <template v-if="taskRecoValue !== 'Custom'">
-    <ClearButton v-model="taskRoi"> 识别区域 </ClearButton>
-    <SingleArrayEdit
-      v-model:value="taskRoi"
-      :nullable="true"
-      :def="() => [0, 0, 0, 0] as Rect"
-      :is-t="
-        v => v instanceof Array && v.length === 4 && typeof v[0] === 'number'
-      "
-    >
-      <template #edit="{ value, update }">
-        <RectEdit :value="value" @update:value="update"></RectEdit>
-      </template>
-    </SingleArrayEdit>
-  </template>
-  <template v-if="taskRecoValue === 'TemplateMatch'">
-    <TemplateEdit
-      v-model:template="taskTemplate"
-      v-model:threshold="taskThreshold"
-    ></TemplateEdit>
-    <ClearButton v-model="taskMethod"> 匹配算法 </ClearButton>
+  <div
+    class="grid items-center"
+    style="
+      grid-template-columns: max-content minmax(0, 1fr);
+      column-gap: 0.5rem;
+      row-gap: 1rem;
+    "
+  >
+    <ClearButton v-model="taskReco"> 识别 </ClearButton>
     <NSelect
-      :options="templMethodOptions"
-      v-model:value="taskMethod"
-      placeholder="5"
+      v-model:value="taskReco"
+      :options="recoOptions"
+      :placeholder="recoOptions[0].label"
     ></NSelect>
-    <ClearButton v-model="taskGMask"> 绿色掩码 </ClearButton>
-    <div>
-      <NSwitch
-        :value="taskGMask ?? false"
-        @update:value="(v: boolean) => taskGMask = v"
-      ></NSwitch>
-    </div>
-  </template>
-  <template v-if="taskRecoValue === 'OCR'">
-    <ClearButton v-model="taskText" invalid> 文本 </ClearButton>
-    <StringArrayEdit
-      v-model:value="taskText"
-      :def="''"
-      placeholder="text"
-    ></StringArrayEdit>
-    <ClearButton v-model="taskReplace"> 文本替换 </ClearButton>
-    <SingleArrayEdit
-      v-model:value="taskReplace"
-      :nullable="true"
-      :def="() => (['', ''] as TextRepl)"
-      :is-t="(v: TextRepl | TextRepl[]) => (v.length === 2 && typeof v[0] === 'string')"
-    >
-      <template #edit="{ value, update }">
-        <div class="flex gap-2">
-          <NInput
-            :value="value[0]"
-            @update:value="(v: string) => update([v, value[1]])"
-            placeholder="替换"
-          >
-          </NInput>
-          <NInput
-            :value="value[1]"
-            @update:value="(v: string) => update([value[0], v])"
-            placeholder="为"
-          >
-          </NInput>
-        </div>
-      </template>
-    </SingleArrayEdit>
-    <ClearButton v-model="taskOnlyRec"> 仅识别 </ClearButton>
-    <div>
-      <NSwitch
-        :value="taskOnlyRec ?? false"
-        @update:value="(v: boolean) => taskOnlyRec = v"
-      ></NSwitch>
-    </div>
-  </template>
-  <template v-if="taskRecoValue === 'Custom'">
-    <ClearButton v-model="taskCustomReco" invalid> 识别器 </ClearButton>
-    <NInput
-      :value="taskCustomReco ?? ''"
-      @update:value="v => (taskCustomReco = v)"
-    ></NInput>
-    <ClearButton v-model="taskCustomRecoParam"> 识别参数 </ClearButton>
-    <JsonEdit v-model:value="taskCustomRecoParam"></JsonEdit>
-  </template>
+    <template v-if="taskRecoValue !== 'Custom'">
+      <ClearButton v-model="taskRoi"> 识别区域 </ClearButton>
+      <SingleArrayEdit
+        v-model:value="taskRoi"
+        :nullable="true"
+        :def="() => [0, 0, 0, 0] as Rect"
+        :is-t="
+          v => v instanceof Array && v.length === 4 && typeof v[0] === 'number'
+        "
+      >
+        <template #edit="{ value, update }">
+          <RectEdit :value="value" @update:value="update"></RectEdit>
+        </template>
+      </SingleArrayEdit>
+    </template>
+    <template v-if="taskRecoValue === 'TemplateMatch'">
+      <TemplateEdit
+        v-model:template="taskTemplate"
+        v-model:threshold="taskThreshold"
+      ></TemplateEdit>
+      <ClearButton v-model="taskMethod"> 匹配算法 </ClearButton>
+      <NSelect
+        :options="templMethodOptions"
+        v-model:value="taskMethod"
+        placeholder="5"
+      ></NSelect>
+      <ClearButton v-model="taskGMask"> 绿色掩码 </ClearButton>
+      <div>
+        <NSwitch
+          :value="taskGMask ?? false"
+          @update:value="(v: boolean) => taskGMask = v"
+        ></NSwitch>
+      </div>
+    </template>
+    <template v-if="taskRecoValue === 'OCR'">
+      <ClearButton v-model="taskText" invalid> 文本 </ClearButton>
+      <StringArrayEdit
+        v-model:value="taskText"
+        :def="''"
+        placeholder="text"
+      ></StringArrayEdit>
+      <ClearButton v-model="taskReplace"> 文本替换 </ClearButton>
+      <SingleArrayEdit
+        v-model:value="taskReplace"
+        :nullable="true"
+        :def="() => (['', ''] as TextRepl)"
+        :is-t="(v: TextRepl | TextRepl[]) => (v.length === 2 && typeof v[0] === 'string')"
+      >
+        <template #edit="{ value, update }">
+          <div class="flex gap-2">
+            <NInput
+              :value="value[0]"
+              @update:value="(v: string) => update([v, value[1]])"
+              placeholder="替换"
+            >
+            </NInput>
+            <NInput
+              :value="value[1]"
+              @update:value="(v: string) => update([value[0], v])"
+              placeholder="为"
+            >
+            </NInput>
+          </div>
+        </template>
+      </SingleArrayEdit>
+      <ClearButton v-model="taskOnlyRec"> 仅识别 </ClearButton>
+      <div>
+        <NSwitch
+          :value="taskOnlyRec ?? false"
+          @update:value="(v: boolean) => taskOnlyRec = v"
+        ></NSwitch>
+      </div>
+    </template>
+    <template v-if="taskRecoValue === 'Custom'">
+      <ClearButton v-model="taskCustomReco" invalid> 识别器 </ClearButton>
+      <NInput
+        :value="taskCustomReco ?? ''"
+        @update:value="v => (taskCustomReco = v)"
+      ></NInput>
+      <ClearButton v-model="taskCustomRecoParam"> 识别参数 </ClearButton>
+      <JsonEdit v-model:value="taskCustomRecoParam"></JsonEdit>
+    </template>
+  </div>
 </template>

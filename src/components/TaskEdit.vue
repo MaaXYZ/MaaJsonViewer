@@ -180,31 +180,13 @@ function tryDelete() {
       <div class="flex gap-2">
         <NCollapse :default-expanded-names="['reco', 'act', 'misc']">
           <NCollapseItem title="识别" name="reco">
-            <div
-              class="grid items-center"
-              style="
-                grid-template-columns: max-content minmax(0, 1fr);
-                column-gap: 0.5rem;
-                row-gap: 1rem;
-              "
-            >
-              <RecognizerEdit v-model:value="task"></RecognizerEdit>
-            </div>
+            <RecognizerEdit v-model:value="task"></RecognizerEdit>
           </NCollapseItem>
           <NCollapseItem title="动作" name="act">
-            <div
-              class="grid items-center"
-              style="
-                grid-template-columns: max-content minmax(0, 1fr);
-                column-gap: 0.5rem;
-                row-gap: 1rem;
-              "
-            >
-              <ActionEdit
-                v-model:value="task"
-                :navigate="s => $emit('navigate', s)"
-              ></ActionEdit>
-            </div>
+            <ActionEdit
+              v-model:value="task"
+              :navigate="s => $emit('navigate', s)"
+            ></ActionEdit>
           </NCollapseItem>
           <NCollapseItem title="其他" name="misc">
             <div
