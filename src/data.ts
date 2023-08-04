@@ -1,12 +1,12 @@
 import { NIcon, type TreeOption } from 'naive-ui'
-import { computed, reactive, h } from 'vue'
+import { computed, reactive, h, ref } from 'vue'
 import {
   FolderOutlined,
   InsertDriveFileOutlined,
   DataObjectOutlined
 } from '@vicons/material'
 import type { Task } from './types'
-import { loadData } from './loader'
+import { history, historyPush } from './history'
 
 export interface TaskData {
   [task: string]: Task
@@ -41,6 +41,17 @@ function getNext(
 }
 
 export const taskData = reactive<{ data: TaskData }>({ data: {} })
+
+export const active = computed(() => {
+  return history.backward.length > 0
+    ? history.backward[history.backward.length - 1]
+    : null
+})
+
+export function navigate(task: string) {
+  historyPush(task)
+}
+
 export const taskTree = computed<TreeOption>(() => {
   const result: TreeOption[] = []
 
@@ -87,8 +98,6 @@ export const taskTree = computed<TreeOption>(() => {
       })
   }
 })
-
-loadData()
 
 function performRename(
   task: Record<string, unknown>,
