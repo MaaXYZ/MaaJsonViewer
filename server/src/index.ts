@@ -10,8 +10,8 @@ type ListEntry = {
 
 const app = express()
 
-const webDir = path.join(__dirname, 'web')
-const resDir = path.join(__dirname, 'res')
+const webDir = path.resolve('./web')
+const resDir = path.resolve('./res')
 
 app.use(express.static(webDir))
 app.use('/res', express.static(resDir))
