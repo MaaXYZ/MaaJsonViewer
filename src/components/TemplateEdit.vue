@@ -6,6 +6,7 @@ import SingleArrayEdit from './SingleArrayEdit.vue'
 import ClearButton from './ClearButton.vue'
 import SingleArrayButton from './SingleArrayButton.vue'
 import FloatInput from './FloatInput.vue'
+import ImageHover from './ImageHover.vue'
 
 const templDef = ''
 const threDef = 0.7
@@ -67,17 +68,21 @@ const fixThre = (v: number) => {
   <SingleArrayEdit
     v-model:value="taskTemplate"
     :def="() => templDef"
-    :is-t="(v: string | string[]) => (typeof v === 'string')"
-    :on-add="() => {
-      if (!isThresholdSingle) {
-        (taskThreshold as number[]).push(threDef)
+    :is-t="(v: string | string[]) => typeof v === 'string'"
+    :on-add="
+      () => {
+        if (!isThresholdSingle) {
+          ;(taskThreshold as number[]).push(threDef)
+        }
       }
-    }"
-    :on-del="idx => {
-      if (!isThresholdSingle) {
-        (taskThreshold as number[]).splice(idx, 1)
+    "
+    :on-del="
+      idx => {
+        if (!isThresholdSingle) {
+          ;(taskThreshold as number[]).splice(idx, 1)
+        }
       }
-    }"
+    "
   >
     <template #edit="{ value, update, index }">
       <div class="flex gap-2">
@@ -91,24 +96,14 @@ const fixThre = (v: number) => {
           :nullable="false"
           :def="threDef"
           :value="(taskThreshold as number[])[index]"
-          @update:value="v => {
-            (taskThreshold as number[])[index] = v
-          }"
+          @update:value="
+            v => {
+              ;(taskThreshold as number[])[index] = v
+            }
+          "
           :alter="fixThre"
         ></FloatInput>
-        <NPopover trigger="hover" placement="bottom">
-          <template #trigger>
-            <NButton>
-              <template #icon>
-                <NIcon>
-                  <SearchOutlined></SearchOutlined>
-                </NIcon>
-              </template>
-            </NButton>
-          </template>
-
-          <img :src="`/res/${value}`" />
-        </NPopover>
+        <ImageHover :url="value"></ImageHover>
       </div>
     </template>
   </SingleArrayEdit>
@@ -124,7 +119,7 @@ const fixThre = (v: number) => {
       v-if="isThresholdSingle"
       :nullable="true"
       :def="threDef"
-      :value="(taskThreshold as number)"
+      :value="taskThreshold as number"
       @update:value="
         v => {
           taskThreshold = v

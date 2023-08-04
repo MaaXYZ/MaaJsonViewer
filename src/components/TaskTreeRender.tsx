@@ -17,10 +17,12 @@ import { NButton, NIcon, useDialog, type TreeOption, NInput } from 'naive-ui'
 import { computed, ref } from 'vue'
 
 export function renderLabel({ option }: { option: TreeOption }) {
-  if (isModified(option.label!)) {
-    return option.label + '*'
+  const label = option.label!
+  const text = isModified(label) ? label + '*' : label
+  if (label.endsWith('.json')) {
+    return <span class=" text-green-600">{text}</span>
   } else {
-    return option.label
+    return <span>{text}</span>
   }
 }
 

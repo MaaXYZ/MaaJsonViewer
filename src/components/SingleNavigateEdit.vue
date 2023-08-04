@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { NButton, NIcon, NAutoComplete } from 'naive-ui'
+import { NButton, NIcon, NAutoComplete, NPopover } from 'naive-ui'
 import { computed } from 'vue'
-import { MovingOutlined } from '@vicons/material'
+import {
+  MovingOutlined,
+  WavingHandOutlined,
+  AdsClickOutlined,
+  SwipeRightOutlined,
+  TranslateOutlined
+} from '@vicons/material'
 import { taskData } from '@/data'
+import ImageHover from './ImageHover.vue'
 
 defineProps<{
   navigate?: (to: string) => void
@@ -10,6 +17,14 @@ defineProps<{
 
 const val = defineModel<string>('value', {
   required: true
+})
+
+const navTask = computed(() => {
+  if (val.value in taskData.data) {
+    return taskData.data[val.value]
+  } else {
+    return null
+  }
 })
 
 const options = computed(() => {
@@ -49,5 +64,42 @@ const options = computed(() => {
       :options="options"
       placeholder="task"
     ></NAutoComplete>
+    <template v-if="navTask">
+      <template v-if="navTask.template">
+        <ImageHover :url="navTask.template"></ImageHover>
+      </template>
+      <template v-else-if="navTask.text">
+        <NPopover trigger="hover">
+          <template #trigger>
+            <NButton>
+              <template #icon>
+                <NIcon>
+                  <TranslateOutlined></TranslateOutlined>
+                </NIcon>
+              </template>
+            </NButton>
+          </template>
+
+          <span>
+            {{ navTask.text }}
+          </span>
+        </NPopover>
+      </template>
+      <NButton>
+        <template #icon>
+          <NIcon>
+            <WavingHandOutlined
+              v-if="!navTask.action || navTask.action === 'DoNothing'"
+            ></WavingHandOutlined>
+            <AdsClickOutlined
+              v-else-if="navTask.action === 'Click'"
+            ></AdsClickOutlined>
+            <SwipeRightOutlined
+              v-else-if="navTask.action === 'Swipe'"
+            ></SwipeRightOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+    </template>
   </div>
 </template>
