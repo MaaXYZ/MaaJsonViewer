@@ -1,22 +1,48 @@
 <script setup lang="ts">
 import { NButton, NCode, NInput, NIcon } from 'naive-ui'
 import { CheckOutlined, CloseOutlined, EditOutlined } from '@vicons/material'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import * as prettier from 'prettier/standalone'
+import babel from 'prettier/plugins/babel'
+import estree from 'prettier/plugins/estree'
 
 const val = defineModel<unknown>('value', {
   required: true
 })
 
-function stringify(v: unknown) {
-  return JSON.stringify(v, null, 4)
+async function stringify(v: unknown) {
+  return await prettier.format(JSON.stringify(v), {
+    parser: 'json',
+    plugins: [babel, estree],
+    tabWidth: 4
+  })
 }
 
-const cache = ref(stringify(val.value))
+const cache = ref('')
+let counter = 0
+let version = 0
+
+watch(
+  val,
+  nv => {
+    let id = ++counter
+    stringify(nv).then(src => {
+      if (id > version) {
+        version = id
+        cache.value = src
+      }
+    })
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
 
 const editing = ref(false)
 
-function enterEdit() {
-  cache.value = stringify(val.value)
+async function enterEdit() {
+  cache.value = await stringify(val.value)
   editing.value = true
 }
 
@@ -33,7 +59,7 @@ function cancelEdit() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-2 p-2">
     <template v-if="editing">
       <div class="flex gap-2">
         <NButton @click="trySave">
@@ -70,7 +96,7 @@ function cancelEdit() {
           </template>
         </NButton>
       </div>
-      <NCode language="json" :code="stringify(val)"></NCode>
+      <NCode language="json" :code="cache" word-wrap></NCode>
     </template>
   </div>
 </template>
