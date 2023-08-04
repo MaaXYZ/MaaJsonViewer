@@ -31,8 +31,12 @@ import {
 } from './history'
 import { loadData, syncData } from './loader'
 
+const expands = ref<string[]>(['root.'])
+
 onMounted(() => {
-  loadData()
+  loadData().then(folders => {
+    expands.value = ['root.', ...folders]
+  })
 })
 
 const someBackward = computed(() => {
@@ -115,10 +119,10 @@ const fastNavigate = computed<number>({
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard
-        class="max-w-xs min-h-0"
+        class="max-w-md min-h-0"
         content-style="max-height: 100%; display: flex; flex-direction: column"
       >
-        <TaskTree></TaskTree>
+        <TaskTree v-model:expand="expands"></TaskTree>
       </NCard>
       <NCard class="min-h-0" content-style="max-height: 100%">
         <template v-if="active && active in taskData.data">

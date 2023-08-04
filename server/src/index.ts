@@ -56,31 +56,60 @@ app.post('/api/list', async (req, res) => {
 
 app.post('/api/sync', async (req, res) => {
   const makePath = (p: string) => {
-    return path.join(...p.split('.')) + '.json'
+    return path.join(...p.split('/').filter(x => x))
   }
 
   const data = req.body as {
-    [task: string]: {
-      editor_info: {
-        path: string
+    dir: string[][]
+    file: string[][]
+    task: {
+      [task: string]: {
+        editor_info: {
+          path: string
+        }
       }
     }
   }
 
   const result: Record<string, Record<string, unknown>> = {}
 
-  for (const name in data) {
-    const task = data[name]
+  for (const dir of data.dir) {
+    await fs.mkdir(path.join(resDir, ...dir), { recursive: true })
+  }
+
+  const rmJson = async (dir: string) => {
+    for (const filename of await fs.readdir(dir)) {
+      const file = path.join(dir, filename)
+      if ((await fs.stat(file)).isDirectory()) {
+        await rmJson(file)
+      } else {
+        if (path.extname(filename) === '.json') {
+          await fs.rm(file)
+        }
+      }
+    }
+  }
+
+  await rmJson(resDir)
+
+  for (const file of data.file) {
+    if (file[file.length - 1].endsWith('.json')) {
+      result[path.join(...file)] = {}
+    }
+  }
+
+  for (const name in data.task) {
+    const task = data.task[name]
     const file = makePath(task.editor_info.path)
     result[file] = result[file] ?? {}
     result[file][name] = task
   }
 
   for (const file in result) {
-    await fs.writeFile(
-      path.join(resDir, file),
-      JSON.stringify(result[file], null, 4)
-    )
+    const target = path.join(resDir, file)
+    const dir = path.dirname(target)
+    await fs.mkdir(dir, { recursive: true })
+    await fs.writeFile(target, JSON.stringify(result[file], null, 4))
   }
 
   res.send({

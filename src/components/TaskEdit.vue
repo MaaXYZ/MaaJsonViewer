@@ -23,7 +23,13 @@ import NavigateEdit from './NavigateEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
 import ActionEdit from './ActionEdit.vue'
 import { type Task, type Rect, type TextRepl, wrapProp } from '@/types'
-import { commitRename, taskData, commitDuplicate, commitDelete } from '@/data'
+import {
+  commitRename,
+  taskData,
+  commitDuplicate,
+  commitDelete,
+  isModified
+} from '@/data'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
 
 const props = defineProps<{
@@ -153,7 +159,7 @@ function tryDelete() {
 
   <div class="flex flex-col gap-4 max-h-full">
     <div class="flex justify-center gap-2 items-center">
-      <span class="text-lg"> {{ name }} </span>
+      <span class="text-lg"> {{ name }}{{ isModified(name) ? '*' : '' }} </span>
       <NButton @click="enterRename">
         <template #icon>
           <NIcon>

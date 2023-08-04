@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { NInput, NTree, NIcon } from 'naive-ui'
-import { ref, computed } from 'vue'
-import { SearchOutlined } from '@vicons/material'
-import { taskTree, navigate, active } from '@/data'
+import { NInput, NTree, NIcon, type TreeOption } from 'naive-ui'
+import { ref, computed, h } from 'vue'
+import { ChangeCircleOutlined, SearchOutlined } from '@vicons/material'
+import { taskTree, navigate, active, isModified } from '@/data'
+import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
+
+const expand = defineModel<string[]>('expand', {
+  required: true
+})
 
 const searchText = ref('')
 
@@ -16,10 +21,10 @@ const selectedKeysFilter = computed({
       return
     } else {
       const s = v[0]
-      if (s.endsWith('.')) {
+      if (s.endsWith('/')) {
         return
       }
-      const ps = s.split('.')
+      const ps = s.split('/')
       navigate(ps[ps.length - 1])
     }
   },
@@ -49,6 +54,7 @@ const treeHeight = computed(() => {
           height: treeHeight
         }"
         :data="[taskTree]"
+        v-model:expanded-keys="expand"
         v-model:selected-keys="selectedKeysFilter"
         block-line
         selectable
@@ -57,6 +63,9 @@ const treeHeight = computed(() => {
         :show-irrelevant-nodes="false"
         :cancelable="false"
         virtual-scroll
+        :render-label="renderLabel"
+        :render-prefix="renderPrefix"
+        :render-suffix="renderSuffix"
       ></NTree>
     </div>
   </div>

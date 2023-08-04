@@ -1,46 +1,26 @@
-import { NIcon, type TreeOption } from 'naive-ui'
-import { computed, reactive, h, ref } from 'vue'
-import {
-  FolderOutlined,
-  InsertDriveFileOutlined,
-  DataObjectOutlined
-} from '@vicons/material'
+import { type TreeOption } from 'naive-ui'
+import { computed, reactive } from 'vue'
 import type { Task } from './types'
 import { history, historyPush } from './history'
+import { buildEntries, type FSEntry } from './fs'
 
 export interface TaskData {
   [task: string]: Task
 }
 
-function getNext(
-  prf: string,
-  opt: TreeOption[],
-  key: string,
-  last: boolean
-): TreeOption[] {
-  for (const o of opt) {
-    if (o.key === `${prf}${key}.`) {
-      if (!o.children) {
-        o.children = []
-      }
-      return o.children
-    }
-  }
+export const folderData = reactive<{ data: string[][] }>({ data: [] })
 
-  const o: TreeOption = {
-    key: `${prf}${key}.`,
-    label: key,
-    children: [],
-    prefix: () =>
-      h(NIcon, null, {
-        default: () => (last ? h(InsertDriveFileOutlined) : h(FolderOutlined))
-      })
-  }
-  opt.push(o)
-  return o.children!
-}
+export const fileData = reactive<{ data: string[][] }>({ data: [] })
 
 export const taskData = reactive<{ data: TaskData }>({ data: {} })
+export const taskDataSaved = reactive<{ data: TaskData }>({ data: {} })
+
+export function isModified(task: string) {
+  return (
+    JSON.stringify(taskData.data[task]) !==
+    JSON.stringify(taskDataSaved.data[task])
+  )
+}
 
 export const active = computed(() => {
   return history.backward.length > 0
@@ -53,50 +33,51 @@ export function navigate(task: string) {
 }
 
 export const taskTree = computed<TreeOption>(() => {
-  const result: TreeOption[] = []
+  const root = buildEntries(folderData.data, fileData.data)
 
-  for (const key in taskData.data) {
-    const task = taskData.data[key]
-    const path = task.editor_info.path.split('.')
-
-    let opt = result
-    let prf = ''
-    for (const [i, p] of path.entries()) {
-      opt = getNext(prf, opt, p, i === path.length - 1)
-      prf += `${p}.`
-    }
-    opt.push({
-      key: `${path}.${key}`,
-      label: key,
-      prefix: () =>
-        h(NIcon, null, {
-          default: () => h(DataObjectOutlined)
-        })
-    })
+  const viaKey = (a: TreeOption, b: TreeOption) => {
+    return (a.key as string).localeCompare(b.key as string)
   }
 
-  const doSort = (arr: TreeOption[]) => {
-    arr.sort((a, b) => {
-      return a.label!.localeCompare(b.label!)
-    })
-    for (const a of arr) {
-      if (a.children) {
-        doSort(a.children)
+  const makeFileOption = (prefix: string, name: string): TreeOption => {
+    const key = `${prefix}${name}/`
+    if (name.endsWith('.json')) {
+      return {
+        key,
+        label: name,
+        children: Object.keys(taskData.data)
+          .map(key => [key, taskData.data[key]] as const)
+          .filter(([, task]) => task.editor_info.path === key)
+          .map(([name]) => ({
+            key: `${key}${name}`,
+            label: name
+          }))
+          .sort(viaKey)
+      }
+    } else {
+      return {
+        key,
+        label: name
       }
     }
   }
 
-  doSort(result)
-
-  return {
-    label: '[ROOT]',
-    key: 'root.',
-    children: result,
-    prefix: () =>
-      h(NIcon, null, {
-        default: () => h(FolderOutlined)
-      })
+  const makeOption = (prefix: string, entry: FSEntry): TreeOption => {
+    return {
+      key: `@${prefix}${entry.name}/`,
+      label: entry.name,
+      children: [
+        ...entry.dir
+          .map(sube => makeOption(`${prefix}${entry.name}/`, sube))
+          .sort(viaKey),
+        ...entry.file
+          .map(file => makeFileOption(`${prefix}${entry.name}/`, file))
+          .sort(viaKey)
+      ]
+    }
   }
+
+  return makeOption('', root)
 })
 
 function performRename(

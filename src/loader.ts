@@ -1,15 +1,11 @@
-import { taskData, type TaskData } from '@/data'
+import {
+  taskData,
+  taskDataSaved,
+  type TaskData,
+  folderData,
+  fileData
+} from '@/data'
 import axios from 'axios'
-
-function appendPath(data: TaskData, path: string) {
-  for (const key in data) {
-    data[key].editor_info = {
-      ...(data[key].editor_info ?? {}),
-      path
-    }
-  }
-  return data
-}
 
 export async function loadData() {
   const entry = (await axios.post('/api/list')).data as {
@@ -21,14 +17,20 @@ export async function loadData() {
       }
     }
   }
+
+  folderData.data = structuredClone(entry.data.info.dir)
+  fileData.data = structuredClone(entry.data.info.file)
+
   let mergeData: TaskData = {}
+  const files: string[] = []
   for (const file of entry.data.info.file) {
     const url = `/res/` + file.join('/')
     if (url.endsWith('.json')) {
+      files.push('/' + file.join('/') + '/')
       const data = (await axios(url)).data as TaskData
       for (const key in data) {
         data[key].editor_info = {
-          path: file.join('.').replace(/\.json$/, '')
+          path: '/' + file.join('/') + '/'
         }
       }
       mergeData = {
@@ -37,9 +39,22 @@ export async function loadData() {
       }
     }
   }
-  taskData.data = mergeData
+  taskDataSaved.data = structuredClone(mergeData)
+  taskData.data = structuredClone(mergeData)
+  return [
+    '@/',
+    ...folderData.data.map(p => `@/${p.join('/')}/`),
+    ...fileData.data
+      .map(p => `/${p.join('/')}/`)
+      .filter(p => p.endsWith('.json/'))
+  ]
 }
 
 export async function syncData() {
-  await axios.post('/api/sync', taskData.data)
+  await axios.post('/api/sync', {
+    dir: folderData.data,
+    file: fileData.data,
+    task: taskData.data
+  })
+  taskDataSaved.data = JSON.parse(JSON.stringify(taskData.data))
 }
