@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
+    "watch": "run-p type-check build-watch",
     "preview": "vite preview",
     "build-only": "vite build",
+    "build-watch": "vite build --watch",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {

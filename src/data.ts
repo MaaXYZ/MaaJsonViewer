@@ -1,13 +1,23 @@
-import type { TreeOption } from 'naive-ui'
-import { computed, reactive } from 'vue'
+import { NIcon, type TreeOption } from 'naive-ui'
+import { computed, reactive, h } from 'vue'
+import {
+  FolderOutlined,
+  InsertDriveFileOutlined,
+  DataObjectOutlined
+} from '@vicons/material'
 import type { Task } from './types'
-import { loadData } from './demo/loader'
+import { loadData } from './loader'
 
 export interface TaskData {
   [task: string]: Task
 }
 
-function getNext(prf: string, opt: TreeOption[], key: string): TreeOption[] {
+function getNext(
+  prf: string,
+  opt: TreeOption[],
+  key: string,
+  last: boolean
+): TreeOption[] {
   for (const o of opt) {
     if (o.key === `${prf}${key}.`) {
       if (!o.children) {
@@ -20,7 +30,11 @@ function getNext(prf: string, opt: TreeOption[], key: string): TreeOption[] {
   const o: TreeOption = {
     key: `${prf}${key}.`,
     label: key,
-    children: []
+    children: [],
+    prefix: () =>
+      h(NIcon, null, {
+        default: () => (last ? h(InsertDriveFileOutlined) : h(FolderOutlined))
+      })
   }
   opt.push(o)
   return o.children!
@@ -36,13 +50,17 @@ export const taskTree = computed<TreeOption>(() => {
 
     let opt = result
     let prf = ''
-    for (const p of path) {
-      opt = getNext(prf, opt, p)
+    for (const [i, p] of path.entries()) {
+      opt = getNext(prf, opt, p, i === path.length - 1)
       prf += `${p}.`
     }
     opt.push({
       key: `${path}.${key}`,
-      label: key
+      label: key,
+      prefix: () =>
+        h(NIcon, null, {
+          default: () => h(DataObjectOutlined)
+        })
     })
   }
 
@@ -62,7 +80,11 @@ export const taskTree = computed<TreeOption>(() => {
   return {
     label: '[ROOT]',
     key: 'root.',
-    children: result
+    children: result,
+    prefix: () =>
+      h(NIcon, null, {
+        default: () => h(FolderOutlined)
+      })
   }
 })
 

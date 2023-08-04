@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { NInput } from 'naive-ui'
+import { NInput, NPopover, NButton, NIcon } from 'naive-ui'
+import { SearchOutlined } from '@vicons/material'
 import { computed, ref, watch } from 'vue'
 import SingleArrayEdit from './SingleArrayEdit.vue'
 import ClearButton from './ClearButton.vue'
@@ -95,6 +96,19 @@ const fixThre = (v: number) => {
           }"
           :alter="fixThre"
         ></FloatInput>
+        <NPopover trigger="hover" placement="bottom">
+          <template #trigger>
+            <NButton>
+              <template #icon>
+                <NIcon>
+                  <SearchOutlined></SearchOutlined>
+                </NIcon>
+              </template>
+            </NButton>
+          </template>
+
+          <img :src="`/res/${value}`" />
+        </NPopover>
       </div>
     </template>
   </SingleArrayEdit>

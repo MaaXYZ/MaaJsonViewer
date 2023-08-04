@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages
+name: Build test
 
 on:
   push:
@@ -24,18 +24,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Setup node_modules
-        run: npm ci
+      - name: Build webpage
+        run: |
+          npm ci
+          npm run build
 
-      - name: Build
-        run: npm run build
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        # If you're changing the branch from main,
-        # also change the `main` in `refs/heads/main`
-        # below accordingly.
-        if: github.ref == 'refs/heads/main'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+      - name: Build server
+        run: |
+          cd server
+          npm ci
+          npm run build
