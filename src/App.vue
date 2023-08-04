@@ -5,7 +5,9 @@ import {
   EditOutlined,
   NavigateBeforeOutlined,
   NavigateNextOutlined,
-  SearchOutlined
+  SearchOutlined,
+  SaveAltOutlined,
+  SyncOutlined
 } from '@vicons/material'
 import { taskData, taskTree } from './data'
 import TaskEdit from '@/components/TaskEdit.vue'
@@ -16,35 +18,7 @@ import {
   canUndo,
   canRedo
 } from './history'
-
-const showEdit = ref(false)
-const cacheEdit = ref('')
-
-function popupEdit() {
-  cacheEdit.value = JSON.stringify(taskData.data, null, 2)
-  showEdit.value = true
-}
-
-function tryReplace() {
-  try {
-    taskData.data = JSON.parse(cacheEdit.value)
-    showEdit.value = false
-  } catch (_err) {}
-}
-
-function tryAppend() {
-  try {
-    taskData.data = {
-      ...taskData.data,
-      ...JSON.parse(cacheEdit.value)
-    }
-    showEdit.value = false
-  } catch (_err) {}
-}
-
-function doReset() {
-  cacheEdit.value = JSON.stringify(taskData.data, null, 2)
-}
+import { loadData, syncData } from './loader'
 
 const searchText = ref('')
 const selectedKeys = ref<string[]>([])
@@ -87,27 +61,6 @@ const treeHeight = computed(() => {
 </script>
 
 <template>
-  <NModal v-model:show="showEdit">
-    <NCard style="width: 80vw" role="dialog">
-      <div class="h-full flex flex-col gap-2">
-        <NInput
-          class="flex-1"
-          type="textarea"
-          :autosize="{
-            minRows: 20,
-            maxRows: 30
-          }"
-          v-model:value="cacheEdit"
-        ></NInput>
-        <div class="flex justify-center gap-2">
-          <NButton @click="tryReplace">替换</NButton>
-          <NButton @click="tryAppend">追加</NButton>
-          <NButton @click="doReset">重置</NButton>
-        </div>
-      </div>
-    </NCard>
-  </NModal>
-
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
       <NButton :disabled="!canUndo" @click="selectedKeys = historyUndo()">
@@ -124,10 +77,17 @@ const treeHeight = computed(() => {
           </NIcon>
         </template>
       </NButton>
-      <NButton @click="popupEdit">
+      <NButton @click="syncData">
         <template #icon>
           <NIcon>
-            <EditOutlined></EditOutlined>
+            <SaveAltOutlined></SaveAltOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="loadData">
+        <template #icon>
+          <NIcon>
+            <SyncOutlined></SyncOutlined>
           </NIcon>
         </template>
       </NButton>

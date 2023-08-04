@@ -12,7 +12,7 @@ function appendPath(data: TaskData, path: string) {
 }
 
 export async function loadData() {
-  const entry = (await axios('/api/list_flat')).data as {
+  const entry = (await axios.post('/api/list')).data as {
     success: boolean
     data: {
       info: {
@@ -37,6 +37,9 @@ export async function loadData() {
       }
     }
   }
-
   taskData.data = mergeData
+}
+
+export async function syncData() {
+  await axios.post('/api/sync', taskData.data)
 }

@@ -2,51 +2,17 @@ import express, { json } from 'express'
 import path from 'path'
 import fs from 'fs/promises'
 
-type ListEntry = {
-  name: string
-  dir: ListEntry[]
-  file: string[]
-}
-
 const app = express()
 
 const webDir = path.resolve('./web')
 const resDir = path.resolve('./res')
+const port = 8080
 
 app.use(express.static(webDir))
 app.use('/res', express.static(resDir))
 app.use(json())
 
-app.get('/api/list', async (req, res) => {
-  const enumDir = async (dir: string) => {
-    const res: ListEntry = {
-      name: path.basename(dir),
-      dir: [],
-      file: []
-    }
-    for (const filename of await fs.readdir(dir)) {
-      const file = path.join(dir, filename)
-      if ((await fs.stat(file)).isDirectory()) {
-        res.dir.push(await enumDir(file))
-      } else {
-        if (['.json', '.png'].includes(path.extname(filename))) {
-          res.file.push(filename)
-        }
-      }
-    }
-    return res
-  }
-
-  const info = await enumDir(resDir)
-  res.send({
-    success: true,
-    data: {
-      info
-    }
-  })
-})
-
-app.get('/api/list_flat', async (req, res) => {
+app.post('/api/list', async (req, res) => {
   const info: {
     dir: string[][]
     file: string[][]
@@ -88,4 +54,43 @@ app.get('/api/list_flat', async (req, res) => {
   })
 })
 
-app.listen(8080)
+app.post('/api/sync', async (req, res) => {
+  const makePath = (p: string) => {
+    return path.join(...p.split('.')) + '.json'
+  }
+
+  const data = req.body as {
+    [task: string]: {
+      editor_info: {
+        path: string
+      }
+    }
+  }
+
+  const result: Record<string, Record<string, unknown>> = {}
+
+  for (const name in data) {
+    const task = data[name]
+    const file = makePath(task.editor_info.path)
+    result[file] = result[file] ?? {}
+    result[file][name] = task
+  }
+
+  for (const file in result) {
+    await fs.writeFile(
+      path.join(resDir, file),
+      JSON.stringify(result[file], null, 4)
+    )
+  }
+
+  res.send({
+    success: true,
+    data: {
+      result
+    }
+  })
+})
+
+app.listen(port, () => {
+  console.log(`server started: http://localhost:${port}/`)
+})
