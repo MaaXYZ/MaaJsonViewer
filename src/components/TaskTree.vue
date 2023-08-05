@@ -2,8 +2,10 @@
 import { NInput, NTree, NIcon, type TreeOption } from 'naive-ui'
 import { ref, computed, h } from 'vue'
 import { ChangeCircleOutlined, SearchOutlined } from '@vicons/material'
-import { taskTree, navigate, active, isModified } from '@/data'
+import { navigate, active } from '@/data'
+import { fsTree } from '@/data/fs'
 import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
+import { Util } from '@/fs'
 
 const expand = defineModel<string[]>('expand', {
   required: true
@@ -24,8 +26,7 @@ const selectedKeysFilter = computed({
       if (s.endsWith('/')) {
         return
       }
-      const ps = s.split('/')
-      navigate(ps[ps.length - 1])
+      navigate(s)
     }
   },
   get() {
@@ -50,10 +51,11 @@ const treeHeight = computed(() => {
     </NInput>
     <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
       <NTree
+        v-if="fsTree"
         :style="{
           height: treeHeight
         }"
-        :data="[taskTree]"
+        :data="[fsTree]"
         v-model:expanded-keys="expand"
         v-model:selected-keys="selectedKeysFilter"
         block-line

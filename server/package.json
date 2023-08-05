@@ -7,9 +7,11 @@
   "devDependencies": {
     "@tsconfig/node18": "^18.2.0",
     "@types/express": "^4.17.17",
+    "@types/multer": "^1.4.7",
     "@types/node": "^18.17.2",
     "esbuild": "^0.18.17",
     "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
     "pkg": "^5.8.1",
     "typescript": "^5.1.6"
   },

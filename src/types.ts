@@ -1,4 +1,10 @@
-import { computed, type Ref } from 'vue'
+import {
+  computed,
+  type ComputedRef,
+  type Ref,
+  type WritableComputedRef
+} from 'vue'
+import type { ImmerInfo, Producer } from './persis'
 
 export type Rect = [number, number, number, number]
 export type TextRepl = [string, string]
@@ -152,29 +158,4 @@ export type Task = Recognition &
     pre_wait_freezes?: number | WaitFreezes
     post_wait_freezes?: number | WaitFreezes
     notify?: boolean
-
-    editor_info: {
-      path: string
-    }
   }
-
-type RemUndefined<T> = T extends undefined ? never : T
-export function wrapProp<T extends Record<string, unknown>, K extends string>(
-  obj: Ref<T>,
-  key: K
-) {
-  return computed<RemUndefined<T[K]> | null>({
-    set(v: RemUndefined<T[K]> | null) {
-      if (v === null) {
-        if (key in obj.value) {
-          delete obj.value[key]
-        }
-      } else {
-        obj.value[key] = v
-      }
-    },
-    get(): RemUndefined<T[K]> | null {
-      return (obj.value[key] ?? null) as RemUndefined<T[K]> | null
-    }
-  })
-}

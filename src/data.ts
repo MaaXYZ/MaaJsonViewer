@@ -1,24 +1,13 @@
-import { type TreeOption } from 'naive-ui'
 import { computed, reactive } from 'vue'
 import type { Task } from './types'
 import { history } from './history'
-import { buildEntries, type FSEntry } from './fs'
+import { delTask, getTask, setTask, taskIndex } from './data/task'
+import { FS, Util } from './fs'
+import { fs } from './data/fs'
+import { produce } from 'immer'
 
 export interface TaskData {
   [task: string]: Task
-}
-
-export const folderData = reactive<{ data: string[][] }>({ data: [] })
-export const fileData = reactive<{ data: string[][] }>({ data: [] })
-
-export const taskData = reactive<{ data: TaskData }>({ data: {} })
-export const taskDataSaved = reactive<{ data: TaskData }>({ data: {} })
-
-export function isModified(task: string) {
-  return (
-    JSON.stringify(taskData.data[task]) !==
-    JSON.stringify(taskDataSaved.data[task])
-  )
 }
 
 export const active = computed(() => {
@@ -28,54 +17,6 @@ export const active = computed(() => {
 export function navigate(task: string) {
   history.push(task)
 }
-
-export const taskTree = computed<TreeOption>(() => {
-  const root = buildEntries(folderData.data, fileData.data)
-
-  const viaKey = (a: TreeOption, b: TreeOption) => {
-    return (a.key as string).localeCompare(b.key as string)
-  }
-
-  const makeFileOption = (prefix: string, name: string): TreeOption => {
-    const key = `${prefix}${name}/`
-    if (name.endsWith('.json')) {
-      return {
-        key,
-        label: name,
-        children: Object.keys(taskData.data)
-          .map(key => [key, taskData.data[key]] as const)
-          .filter(([, task]) => task.editor_info.path === key)
-          .map(([name]) => ({
-            key: `${key}${name}`,
-            label: name
-          }))
-          .sort(viaKey)
-      }
-    } else {
-      return {
-        key,
-        label: name
-      }
-    }
-  }
-
-  const makeOption = (prefix: string, entry: FSEntry): TreeOption => {
-    return {
-      key: `@${prefix}${entry.name}/`,
-      label: entry.name,
-      children: [
-        ...entry.dir
-          .map(sube => makeOption(`${prefix}${entry.name}/`, sube))
-          .sort(viaKey),
-        ...entry.file
-          .map(file => makeFileOption(`${prefix}${entry.name}/`, file))
-          .sort(viaKey)
-      ]
-    }
-  }
-
-  return makeOption('', root)
-})
 
 function performRename(
   task: Record<string, unknown>,
@@ -115,25 +56,42 @@ function performRename(
   }
 }
 
-export function commitRename(from: string, to: string) {
+export function commitMove(from: string, to: string) {
   const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
-  const data: Record<string, Task> = {}
-  for (const name in taskData.data) {
-    const task = JSON.parse(JSON.stringify(taskData.data[name]))
-    for (const key of keys) {
-      performRename(task, key, from, to)
+
+  const [fd, ff, fh] = Util.pathdiv(from)
+  const [td, tf, th] = Util.pathdiv(to)
+
+  fs.enterBlock()
+
+  for (const name in taskIndex.value) {
+    const task = getTask(taskIndex.value[name])
+    if (!task) {
+      continue
     }
-    data[name === from ? to : name] = task
+    const ntask = produce(task, dt => {
+      for (const key of keys) {
+        performRename(dt, key, fh!, th)
+      }
+    })
+    if (name === fh) {
+      delTask(from)
+      setTask(to, ntask)
+    } else {
+      setTask(taskIndex.value[name], ntask)
+    }
   }
-  taskData.data = data
+
+  fs.leaveBlock()
 }
 
 export function commitDuplicate(name: string) {
-  const task = JSON.parse(JSON.stringify(taskData.data[name]))
+  const [dir, file, hash] = Util.pathdiv(name)
+  const task = produce(getTask(name)!, draft => draft)
   for (let i = 1; ; i++) {
-    const name2 = `${name}${i}`
-    if (!(name2 in taskData.data)) {
-      taskData.data[name2] = task
+    const name2 = `${hash}${i}`
+    if (!(name2 in taskIndex.value)) {
+      setTask(Util.pathjoin(dir, file, name2), task)
       return
     }
   }
@@ -141,16 +99,31 @@ export function commitDuplicate(name: string) {
 
 export function commitDelete(from: string, to: string | null) {
   const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
-  const data: Record<string, Task> = {}
-  for (const name in taskData.data) {
-    if (from === name) {
+
+  console.log(from)
+
+  const [fd, ff, fh] = Util.pathdiv(from)
+  const th = to ? Util.pathdiv(to)[2] : null
+
+  fs.enterBlock()
+
+  for (const name in taskIndex.value) {
+    const task = getTask(taskIndex.value[name])
+    if (!task) {
       continue
     }
-    const task = JSON.parse(JSON.stringify(taskData.data[name]))
-    for (const key of keys) {
-      performRename(task, key, from, to)
+    const ntask = produce(task, dt => {
+      for (const key of keys) {
+        performRename(dt, key, fh!, th)
+      }
+    })
+    // console.log(name, ntask)
+    if (name === fh) {
+      delTask(from)
+    } else {
+      setTask(taskIndex.value[name], ntask)
     }
-    data[name] = task
   }
-  taskData.data = data
+
+  fs.leaveBlock()
 }

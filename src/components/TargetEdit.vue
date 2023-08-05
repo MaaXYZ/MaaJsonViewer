@@ -5,42 +5,42 @@ import type { Rect } from '@/types'
 import ClearButton from './ClearButton.vue'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
 import RectEdit from './RectEdit.vue'
-import SingleArrayEdit from './SingleArrayEdit.vue'
+import SingleEdit from './SingleEdit.vue'
+import type { UseProducer } from '@/persis'
 
-defineProps<{
+type TTarget = 1 | string | Rect | null
+type TTargetOut = true | string | Rect | null
+type TOffset = Rect | null
+
+const props = defineProps<{
   name: string
-  navigate: (to: string) => void
+  target: TTarget
+  editTarget: UseProducer<TTargetOut>
+  offset: TOffset
+  editOffset: UseProducer<TOffset>
   required?: boolean
 }>()
-
-const val = defineModel<1 | string | Rect | null>('value', {
-  required: true
-})
-
-const ofs = defineModel<Rect | null>('offset', {
-  required: true
-})
 
 const state = computed<number>({
   set(v) {
     switch (v) {
       case 1:
-        val.value = 1
+        props.editTarget(() => true)
         break
       case 2:
-        val.value = ''
+        props.editTarget(() => '')
         break
       case 3:
-        val.value = [0, 0, 0, 0]
+        props.editTarget(() => [0, 0, 0, 0])
         break
     }
   },
   get() {
-    if (val.value === 1 || val.value === null) {
+    if (props.target === 1 || props.target === null) {
       return 1
-    } else if (typeof val.value === 'string') {
+    } else if (typeof props.target === 'string') {
       return 2
-    } else if (val.value instanceof Array) {
+    } else if (props.target instanceof Array) {
       return 3
     } else {
       return 0
@@ -56,7 +56,9 @@ const marks = {
 </script>
 
 <template>
-  <ClearButton v-model="val" :invalid="required"> {{ name }} </ClearButton>
+  <ClearButton :value="target" :edit="editTarget" :invalid="required">
+    {{ name }}
+  </ClearButton>
   <div class="flex flex-col">
     <div class="flex">
       <div class="w-64 mx-8">
@@ -73,36 +75,26 @@ const marks = {
     </div>
     <SingleNavigateEdit
       v-if="state === 2"
-      :value="(val as string)"
-      @update:value="
-        v => {
-          val = v
-        }
-      "
-      :navigate="navigate"
+      :value="target as string"
+      :edit="editTarget as UseProducer<string>"
     ></SingleNavigateEdit>
     <RectEdit
       v-if="state === 3"
-      :value="(val as Rect)"
-      @update:value="
-        v => {
-          val = v
-        }
-      "
+      :value="target as Rect"
+      :edit="editTarget as UseProducer<Rect>"
     ></RectEdit>
   </div>
-  <ClearButton v-model="ofs"> {{ name }}偏移 </ClearButton>
-  <SingleArrayEdit
-    v-model:value="ofs"
-    type="single"
-    :nullable="true"
+  <ClearButton :value="offset" :edit="editOffset"> {{ name }}偏移 </ClearButton>
+  <SingleEdit
+    :value="offset"
+    :edit="editOffset"
     :def="() => [0, 0, 0, 0] as Rect"
     :is-t="
       v => v instanceof Array && v.length === 4 && typeof v[0] === 'number'
     "
   >
-    <template #edit="{ value, update }">
-      <RectEdit :value="value" @update:value="update"></RectEdit>
+    <template #edit="{ value, edit }">
+      <RectEdit :value="value" :edit="edit"></RectEdit>
     </template>
-  </SingleArrayEdit>
+  </SingleEdit>
 </template>

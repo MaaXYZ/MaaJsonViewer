@@ -4,23 +4,22 @@ import SingleArrayEdit from './SingleArrayEdit.vue'
 import { updateEdit, type UseProducer } from '@/persis'
 
 type T = string | string[] | null
+type V = string | null
 
 defineProps<{
-  value: T
-  edit: UseProducer<T>
+  value: V
+  edit: UseProducer<V>
   def: string
   placeholder: string
-  type?: 'both' | 'single' | 'multi'
-  nullable?: boolean
 }>()
 </script>
 
 <template>
   <SingleArrayEdit
-    :value="value"
-    :edit="edit"
-    :type="type"
-    :nullable="nullable"
+    :value="value as T"
+    :edit="edit as UseProducer<T>"
+    type="single"
+    :nullable="true"
     :def="() => def"
     :is-t="(v: string | string[]) => typeof v === 'string'"
   >

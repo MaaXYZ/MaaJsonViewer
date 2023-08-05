@@ -1,27 +1,29 @@
 <script setup lang="ts">
+import type { UseProducer } from '@/persis'
 import SingleArrayEdit from './SingleArrayEdit.vue'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
+import { navigate } from '@/data'
+
+type T = string | string[] | null
 
 defineProps<{
-  navigate: (to: string) => void
+  value: T
+  edit: UseProducer<T>
 }>()
-
-const val = defineModel<string | string[] | null>('value', {
-  required: true
-})
 </script>
 
 <template>
   <SingleArrayEdit
-    v-model:value="val"
+    :value="value"
+    :edit="edit"
     :nullable="true"
     :def="() => ''"
-    :is-t="(v: string | string[]) => (typeof v === 'string')"
+    :is-t="(v: string | string[]) => typeof v === 'string'"
   >
-    <template #edit="{ value, update }">
+    <template #edit="{ value, edit }">
       <SingleNavigateEdit
         :value="value"
-        @update:value="update"
+        :edit="edit"
         :navigate="navigate"
       ></SingleNavigateEdit>
     </template>

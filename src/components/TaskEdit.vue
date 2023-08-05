@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue'
+import { computed, ref, type ComputedRef } from 'vue'
 import {
   NButton,
   NCollapse,
@@ -22,44 +22,48 @@ import JsonEdit from './JsonEdit.vue'
 import NavigateEdit from './NavigateEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
 import ActionEdit from './ActionEdit.vue'
-import { type Task, type Rect, type TextRepl, wrapProp } from '@/types'
+import { type Task, type Rect, type TextRepl } from '@/types'
 import {
-  commitRename,
-  taskData,
+  commitMove,
   commitDuplicate,
   commitDelete,
-  isModified
+  navigate,
+  type TaskData
 } from '@/data'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
+import { taskIndex } from '@/data/task'
+import { produce } from 'immer'
+import { type UseProducer, applyEditOn } from '@/persis'
+import { Util } from '@/fs'
 
 const props = defineProps<{
   name: string
-}>()
-const emits = defineEmits<{
-  navigate: [string]
+  value: Task
+  edit: UseProducer<Task>
 }>()
 
-const task = defineModel<Task>('value', {
-  required: true
+const hash = computed(() => {
+  const [, , hash] = Util.pathdiv(props.name)
+  return hash
 })
-
-const taskNext = wrapProp(task, 'next')
 
 const showRename = ref(false)
 const titleCache = ref('')
 
 function enterRename() {
-  titleCache.value = props.name
+  titleCache.value = hash.value!
   showRename.value = true
 }
 
 function tryRename() {
-  if (!titleCache || titleCache.value in taskData.data) {
+  if (!titleCache || titleCache.value in taskIndex.value) {
     return
   }
   showRename.value = false
-  commitRename(props.name, titleCache.value)
-  emits('navigate', titleCache.value)
+  const [dir, file] = Util.pathdiv(props.name)
+  const into = Util.pathjoin(dir, file, titleCache.value)
+  commitMove(props.name, into)
+  navigate(into)
 }
 
 function tryDuplicate() {
@@ -77,12 +81,15 @@ function enterDelete() {
 function tryDelete() {
   if (
     doTransfer.value &&
-    (!(transferTo.value in taskData.data) || transferTo.value === props.name)
+    (!(transferTo.value in taskIndex.value) || transferTo.value === hash.value)
   ) {
     return
   }
   showDelete.value = false
-  commitDelete(props.name, doTransfer.value ? transferTo.value : null)
+  commitDelete(
+    props.name,
+    doTransfer.value ? taskIndex.value[transferTo.value] : null
+  )
 }
 </script>
 
@@ -92,13 +99,13 @@ function tryDelete() {
       style="width: 60vw"
       content-style="display: flex; flex-direction: column; gap: 0.5rem"
     >
-      <span class="text-lg">重命名 {{ name }}</span>
+      <span class="text-lg">重命名 {{ hash }}</span>
       <NInput v-model:value="titleCache" placeholder="task"></NInput>
       <div class="flex gap-2 justify-end">
         <NButton
           @click="tryRename"
           type="primary"
-          :disabled="!titleCache || titleCache in taskData.data"
+          :disabled="!titleCache || titleCache in taskIndex"
         >
           <template #icon>
             <NIcon>
@@ -122,22 +129,26 @@ function tryDelete() {
       style="width: 60vw"
       content-style="display: flex; flex-direction: column; gap: 0.5rem"
     >
-      <span class="text-lg">删除 {{ name }}</span>
+      <span class="text-lg">删除 {{ hash }}</span>
       <div class="flex gap-2 items-center">
         <span> 替换 </span>
         <NSwitch v-model:value="doTransfer"></NSwitch>
       </div>
       <SingleNavigateEdit
         v-show="doTransfer"
-        v-model:value="transferTo"
+        :value="transferTo"
+        :edit="
+          p => {
+            transferTo = produce(transferTo, p)
+          }
+        "
       ></SingleNavigateEdit>
       <div class="flex gap-2 justify-end">
         <NButton
           @click="tryDelete"
           type="primary"
           :disabled="
-            doTransfer &&
-            (!(transferTo in taskData.data) || transferTo === name)
+            doTransfer && (!(transferTo in taskIndex) || transferTo === hash)
           "
         >
           <template #icon>
@@ -159,7 +170,7 @@ function tryDelete() {
 
   <div class="flex flex-col gap-4 max-h-full">
     <div class="flex justify-center gap-2 items-center">
-      <span class="text-lg"> {{ name }}{{ isModified(name) ? '*' : '' }} </span>
+      <span class="text-lg"> {{ hash }} </span>
       <NButton @click="enterRename">
         <template #icon>
           <NIcon>
@@ -186,13 +197,10 @@ function tryDelete() {
       <div class="flex gap-2">
         <NCollapse :default-expanded-names="['reco', 'act', 'misc']">
           <NCollapseItem title="识别" name="reco">
-            <RecognizerEdit v-model:value="task"></RecognizerEdit>
+            <RecognizerEdit :value="value" :edit="edit"></RecognizerEdit>
           </NCollapseItem>
           <NCollapseItem title="动作" name="act">
-            <ActionEdit
-              v-model:value="task"
-              :navigate="s => $emit('navigate', s)"
-            ></ActionEdit>
+            <ActionEdit :value="value" :edit="edit"></ActionEdit>
           </NCollapseItem>
           <NCollapseItem title="其他" name="misc">
             <div
@@ -203,15 +211,24 @@ function tryDelete() {
                 row-gap: 1rem;
               "
             >
-              <ClearButton v-model="taskNext"> Next </ClearButton>
+              <ClearButton
+                :value="value.next ?? null"
+                :edit="applyEditOn(edit, 'next')"
+              >
+                Next
+              </ClearButton>
               <NavigateEdit
-                v-model:value="taskNext"
-                :navigate="s => $emit('navigate', s)"
+                :value="value.next ?? null"
+                :edit="applyEditOn(edit, 'next')"
               ></NavigateEdit>
             </div>
           </NCollapseItem>
         </NCollapse>
-        <JsonEdit style="min-width: 28rem" v-model:value="task"></JsonEdit>
+        <JsonEdit
+          style="min-width: 28rem"
+          :value="value"
+          @update:value="v => edit(() => v)"
+        ></JsonEdit>
       </div>
     </div>
   </div>

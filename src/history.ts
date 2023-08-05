@@ -6,7 +6,7 @@ class History {
   current: ComputedRef<string | null>
 
   constructor() {
-    this.info = new Persis({
+    this.info = new Persis<{ active: string | null }>({
       active: null
     })
     this.current = computed(() => {
@@ -18,26 +18,6 @@ class History {
     this.info.change(h => {
       h.active = v
     })
-  }
-
-  canUndo() {
-    return this.info.canUndo
-  }
-
-  canRedo() {
-    return this.info.canRedo
-  }
-
-  undo() {
-    this.info.undo()
-  }
-
-  redo() {
-    this.info.redo()
-  }
-
-  move(ofs: number) {
-    this.info.move(ofs)
   }
 }
 

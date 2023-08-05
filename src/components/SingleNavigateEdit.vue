@@ -10,26 +10,23 @@ import {
 } from '@vicons/material'
 import { taskData } from '@/data'
 import ImageHover from './ImageHover.vue'
+import type { UseProducer } from '@/persis'
+import { getTask, taskIndex } from '@/data/task'
 
-defineProps<{
-  navigate?: (to: string) => void
+type T = string
+
+const props = defineProps<{
+  value: T
+  edit: UseProducer<T>
 }>()
 
-const val = defineModel<string>('value', {
-  required: true
-})
-
 const navTask = computed(() => {
-  if (val.value in taskData.data) {
-    return taskData.data[val.value]
-  } else {
-    return null
-  }
+  return getTask(taskIndex.value[props.value] ?? null)
 })
 
 const options = computed(() => {
-  const lowerSearch = val.value.toLowerCase()
-  return Object.keys(taskData.data)
+  const lowerSearch = props.value.toLowerCase()
+  return Object.keys(taskIndex.value)
     .map(name => ({
       name,
       type: name.toLowerCase().startsWith(lowerSearch)
@@ -49,7 +46,7 @@ const options = computed(() => {
 
 <template>
   <div class="flex gap-2">
-    <NButton v-if="navigate" @click="navigate(value)">
+    <NButton>
       <template #icon>
         <NIcon>
           <MovingOutlined></MovingOutlined>
@@ -57,7 +54,12 @@ const options = computed(() => {
       </template>
     </NButton>
     <NAutoComplete
-      v-model:value="val"
+      :value="value"
+      @update:value="
+        v => {
+          edit(() => v)
+        }
+      "
       :input-props="{
         autocomplete: 'disabled'
       }"

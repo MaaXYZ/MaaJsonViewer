@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NAvatar, NPopover } from 'naive-ui'
+import { fs } from '@/data/fs'
+import { FS } from '@/fs'
 
 const props = defineProps<{
   url: string | string[]
 }>()
 
 function makeUrl(v: string | null) {
-  return v ? `/res/${v}` : '/favicon-32x32.png'
+  const fallback = '/favicon-32x32.png'
+  if (v && v.endsWith('.png')) {
+    const hash = fs.now().value?.getFile(v)?.ref
+    if (hash) {
+      const url = FS.getBufferUrl(hash)
+      if (url) {
+        return url
+      }
+    }
+  }
+  return fallback
 }
 
 const first = computed(() => {
@@ -20,7 +32,7 @@ const first = computed(() => {
 </script>
 
 <template>
-  <NPopover trigger="hover" placement="bottom">
+  <NPopover trigger="hover">
     <template #trigger>
       <!-- <img :src="url" /> -->
       <div class="w-8 h-8 flex justify-center items-center">

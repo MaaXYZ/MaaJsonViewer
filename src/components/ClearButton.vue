@@ -1,25 +1,30 @@
-<script setup lang="ts" generic="T">
+<script setup lang="ts" generic="T, U">
+import type { UseProducer } from '@/persis'
 import { NButton } from 'naive-ui'
 
 withDefaults(
   defineProps<{
+    value: T | null
+    edit: UseProducer<U | null>
     invalid?: boolean
   }>(),
   {
     invalid: false
   }
 )
-
-const val = defineModel<T | null>({
-  required: true
-})
 </script>
 
 <template>
   <NButton
     secondary
-    @click="invalid || (val = null)"
-    :type="val === null ? (invalid ? 'error' : 'default') : 'primary'"
+    @click="
+      () => {
+        if (!invalid) {
+          edit(() => null)
+        }
+      }
+    "
+    :type="value === null ? (invalid ? 'error' : 'default') : 'primary'"
     :style="{
       cursor: invalid ? 'not-allowed' : 'pointer'
     }"

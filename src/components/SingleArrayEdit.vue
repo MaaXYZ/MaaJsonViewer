@@ -3,13 +3,19 @@ import { NButton, NIcon } from 'naive-ui'
 import { DeleteOutlined, AddOutlined } from '@vicons/material'
 import { computed, ref } from 'vue'
 import SingleArrayButton from './SingleArrayButton.vue'
+import type { UseProducer } from '@/persis'
+import { produce } from 'immer'
+
+type U = T | T[] | null
 
 const props = withDefaults(
   defineProps<{
-    nullable?: boolean
-    type?: 'both' | 'single' | 'multi'
+    value: U
+    edit: UseProducer<U>
     def: () => T
     isT: (v: T | T[]) => boolean
+    nullable?: boolean
+    type?: 'both' | 'single' | 'multi'
     onAdd?: () => void
     onDel?: (idx: number) => void
   }>(),
@@ -19,27 +25,23 @@ const props = withDefaults(
   }
 )
 
-const val = defineModel<T | T[] | null>('value', {
-  required: true
-})
-
 function nullVal(): null | T {
   return props.nullable ? null : props.def()
 }
 
 const isSingle = computed(() => {
-  const v = val.value
+  const v = props.value
   return v === null || props.isT(v)
 })
 
 const valarr = computed(() => {
   return isSingle.value
-    ? val.value !== null
-      ? [val.value as T]
+    ? props.value !== null
+      ? [props.value as T]
       : props.nullable
       ? []
       : [props.def()]
-    : (val.value as T[])
+    : (props.value as T[])
 })
 
 const single = computed({
@@ -47,12 +49,16 @@ const single = computed({
     if (nv === isSingle.value) {
       return
     }
-    const v = val.value
+    const v = props.value
     if (nv) {
       const varr = v as T[]
-      val.value = varr.length === 0 ? nullVal() : varr[0]
+      props.edit(() => {
+        return varr.length === 0 ? nullVal() : varr[0]
+      })
     } else {
-      val.value = v ? [v as T] : props.nullable ? [] : [props.def()]
+      props.edit(() => {
+        return v ? [v as T] : props.nullable ? [] : [props.def()]
+      })
     }
   },
   get() {
@@ -62,35 +68,49 @@ const single = computed({
 
 function add() {
   if (isSingle.value) {
-    if (props.nullable && val.value === null) {
+    if (props.nullable && props.value === null) {
       if (props.type === 'multi') {
-        val.value = [props.def()]
+        props.edit(() => {
+          return [props.def()]
+        })
       } else {
-        val.value = props.def()
+        props.edit(() => {
+          return props.def()
+        })
       }
     }
   } else {
-    ;(val.value as T[]).push(props.def())
+    props.edit(draft => {
+      ;(draft as T[]).push(props.def())
+    })
     props.onAdd?.()
   }
 }
 
 function set(idx: number, v: T) {
   if (isSingle.value) {
-    val.value = v
+    props.edit(() => {
+      return v
+    })
   } else {
-    ;(val.value as T[])[idx] = v
+    props.edit(draft => {
+      ;(draft as T[])[idx] = v
+    })
   }
 }
 
 function remove(idx: number) {
   if (isSingle.value) {
     if (props.nullable) {
-      val.value = null
+      props.edit(() => {
+        return null
+      })
       props.onDel?.(idx)
     }
   } else {
-    ;(val.value as T[]).splice(idx, 1)
+    props.edit(draft => {
+      ;(draft as T[]).splice(idx, 1)
+    })
     props.onDel?.(idx)
   }
 }
@@ -103,7 +123,7 @@ function remove(idx: number) {
         v-if="type === 'both'"
         v-model:value="single"
       ></SingleArrayButton>
-      <NButton :disabled="single && val !== null" @click="add">
+      <NButton :disabled="single && value !== null" @click="add">
         <template #icon>
           <NIcon>
             <AddOutlined></AddOutlined>
@@ -121,10 +141,20 @@ function remove(idx: number) {
           name="edit"
           :index="i"
           :value="v"
-          :update="(x: T) => set(i, x)"
+          :edit="
+            (p => {
+              edit(draft => {
+                if (isSingle) {
+                  return produce(v, p)
+                } else {
+                  ;(draft as T[])[i] = produce(v, p)
+                }
+              })
+            }) as UseProducer<T>
+          "
         ></slot>
         <NButton
-          :disabled="!props.nullable && (single || valarr.length === 1)"
+          :disabled="!nullable && (single || valarr.length === 1)"
           @click="remove(i)"
         >
           <template #icon>

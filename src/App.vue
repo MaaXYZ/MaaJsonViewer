@@ -1,49 +1,41 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { NButton, NCard, NIcon } from 'naive-ui'
 import {
-  NButton,
-  NTree,
-  NCard,
-  NInput,
-  NModal,
-  NIcon,
-  NTabs,
-  NTab
-} from 'naive-ui'
-import {
-  EditOutlined,
   NavigateBeforeOutlined,
   NavigateNextOutlined,
-  SearchOutlined,
-  SaveAltOutlined,
-  SyncOutlined
+  FileDownloadOutlined,
+  FileUploadOutlined,
+  UndoOutlined,
+  RedoOutlined
 } from '@vicons/material'
-import { taskData, active, navigate } from './data'
+import { active, navigate, type TaskData } from './data'
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
 import { history } from './history'
-import { loadData, syncData } from './loader'
+import { loadFS, saveFS } from './loader'
+import { getTask, setTask } from './data/task'
+import { produce } from 'immer'
+import { fs } from '@/data/fs'
 
 const expands = ref<string[]>(['root.'])
 
-onMounted(() => {
-  loadData().then(folders => {
-    expands.value = ['root.', ...folders]
-  })
+onMounted(async () => {
+  await loadFS()
 })
 
 const someBackward = computed(() => {
-  return history.info.prev[0].value.slice(-4).map(x => x.active)
+  return history.info.prev.value.slice(-4).map(x => x.active)
 })
 const someForward = computed(() => {
-  return history.info.next[0].value
+  return history.info.next.value
     .slice(-4)
     .reverse()
     .map(x => x.active)
 })
 const fastNavigate = computed<number>({
   set(ofs: number) {
-    history.move(ofs)
+    history.info.move(ofs)
   },
   get() {
     return 0
@@ -54,31 +46,51 @@ const fastNavigate = computed<number>({
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton :disabled="!history.canUndo()" @click="history.undo()">
+      <NButton :disabled="!fs.canUndo()" @click="() => fs.undo()">
+        <template #icon>
+          <NIcon>
+            <UndoOutlined></UndoOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton :disabled="!fs.canRedo()" @click="() => fs.redo()">
+        <template #icon>
+          <NIcon>
+            <RedoOutlined></RedoOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton
+        :disabled="!history.info.canUndo()"
+        @click="() => history.info.undo()"
+      >
         <template #icon>
           <NIcon>
             <NavigateBeforeOutlined></NavigateBeforeOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton :disabled="!history.canRedo()" @click="history.redo()">
+      <NButton
+        :disabled="!history.info.canRedo()"
+        @click="() => history.info.redo()"
+      >
         <template #icon>
           <NIcon>
             <NavigateNextOutlined></NavigateNextOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton @click="syncData">
+      <NButton @click="saveFS">
         <template #icon>
           <NIcon>
-            <SaveAltOutlined></SaveAltOutlined>
+            <FileDownloadOutlined></FileDownloadOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton @click="loadData">
+      <NButton @click="loadFS">
         <template #icon>
           <NIcon>
-            <SyncOutlined></SyncOutlined>
+            <FileUploadOutlined></FileUploadOutlined>
           </NIcon>
         </template>
       </NButton>
@@ -95,7 +107,7 @@ const fastNavigate = computed<number>({
             {{ h }}
           </NButton>
         </div>
-        <NButton v-if="active" type="primary" disabled>
+        <NButton type="primary" disabled>
           {{ active }}
         </NButton>
         <div class="flex gap-2">
@@ -117,11 +129,15 @@ const fastNavigate = computed<number>({
         <TaskTree v-model:expand="expands"></TaskTree>
       </NCard>
       <NCard class="min-h-0" content-style="max-height: 100%">
-        <template v-if="active && active in taskData.data">
+        <template v-if="active && getTask(active)">
           <TaskEdit
             :name="active"
-            v-model:value="taskData.data[active]"
-            @navigate="navigate"
+            :value="getTask(active)!"
+            :edit="
+              prod => {
+                setTask(active!, produce(getTask(active)!, prod))
+              }
+            "
           ></TaskEdit>
         </template>
       </NCard>

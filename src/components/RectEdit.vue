@@ -2,10 +2,12 @@
 import type { Rect } from '@/types'
 import IntInput from './IntInput.vue'
 import { ref } from 'vue'
+import type { UseProducer } from '@/persis'
 
-const rect = defineModel<Rect>('value', {
-  required: true
-})
+const props = defineProps<{
+  value: Rect
+  edit: UseProducer<Rect>
+}>()
 
 type IntInputType = InstanceType<typeof IntInput>
 const inputEl = ref<IntInputType[]>([])
@@ -29,10 +31,14 @@ function handleOverflow(s: string, i: number) {
       :key="i"
       :idx="i - 1"
       ref="inputEl"
-      :value="rect[i - 1]"
-      @update:value="(v: number) => {
-        rect[i - 1] = v
-      }"
+      :value="value[i - 1]"
+      @update:value="
+        (v: number) => {
+          edit(draft => {
+            draft[i - 1] = v
+          })
+        }
+      "
       @overflow-input="s => handleOverflow(s, i - 1)"
     >
     </IntInput>

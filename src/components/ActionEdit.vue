@@ -1,23 +1,17 @@
 <script setup lang="ts">
-import { NSelect, NButton, NSwitch, NInput } from 'naive-ui'
-import { computed, watch, type Ref } from 'vue'
-import { type Task, type Rect, type TextRepl, wrapProp } from '@/types'
+import { NSelect, NInput } from 'naive-ui'
+import { computed } from 'vue'
+import { type Task } from '@/types'
 import ClearButton from './ClearButton.vue'
-import SingleArrayEdit from './SingleArrayEdit.vue'
-import RectEdit from './RectEdit.vue'
-import TemplateEdit from './TemplateEdit.vue'
-import StringArrayEdit from './StringArrayEdit.vue'
 import JsonEdit from './JsonEdit.vue'
-import NavigateEdit from './NavigateEdit.vue'
+import SingleStringEdit from './SingleStringEdit.vue'
 import TargetEdit from './TargetEdit.vue'
+import { type UseProducer, updateEditOn, applyEditOn } from '@/persis'
 
-defineProps<{
-  navigate: (to: string) => void
+const props = defineProps<{
+  value: Task
+  edit: UseProducer<Task>
 }>()
-
-const task = defineModel<Task>('value', {
-  required: true
-})
 
 const actOptions = [
   'DoNothing',
@@ -33,23 +27,7 @@ const actOptions = [
   value: x
 }))
 
-const taskAct = wrapProp(task, 'action')
-const taskActValue = computed(() => taskAct.value ?? 'DoNothing')
-
-const taskTarget = wrapProp(task, 'target')
-const taskTargetOfs = wrapProp(task, 'target_offset')
-
-const taskBegin = wrapProp(task, 'begin')
-const taskBeginOfs = wrapProp(task, 'begin_offset')
-const taskEnd = wrapProp(task, 'end')
-const taskEndOfs = wrapProp(task, 'end_offset')
-
-const taskKey = wrapProp(task, 'key')
-
-const taskPackage = wrapProp(task, 'package')
-
-const taskCustomAct = wrapProp(task, 'custom_action')
-const taskCustomActParam = wrapProp(task, 'custom_action_param')
+const taskActValue = computed(() => props.value.action ?? 'DoNothing')
 </script>
 
 <template>
@@ -61,81 +39,106 @@ const taskCustomActParam = wrapProp(task, 'custom_action_param')
       row-gap: 1rem;
     "
   >
-    <ClearButton v-model="taskAct"> 动作 </ClearButton>
+    <ClearButton
+      :value="value.action ?? null"
+      :edit="applyEditOn(edit, 'action')"
+    >
+      动作
+    </ClearButton>
     <NSelect
-      v-model:value="taskAct"
+      :value="value.action ?? null"
+      @update:value="v => updateEditOn(edit, 'action', v)"
       :options="actOptions"
       :placeholder="actOptions[0].label"
     ></NSelect>
     <template v-if="taskActValue === 'Click'">
       <TargetEdit
         name="目标"
-        v-model:offset="taskTargetOfs"
-        :value="taskTarget === true ? 1 : taskTarget"
-        :navigate="navigate"
-        @update:value="
-          v => {
-            taskTarget = v === 1 ? true : v
-          }
-        "
+        :target="value.target === true ? 1 : value.target ?? null"
+        :edit-target="applyEditOn(edit, 'target')"
+        :offset="value.target_offset ?? null"
+        :edit-offset="applyEditOn(edit, 'target_offset')"
       ></TargetEdit>
     </template>
     <template v-else-if="taskActValue === 'Swipe'">
       <TargetEdit
         name="起点"
-        v-model:offset="taskBeginOfs"
-        :value="taskBegin === true ? 1 : taskBegin"
-        :navigate="navigate"
-        @update:value="
-          v => {
-            taskBegin = v === 1 ? true : v
-          }
-        "
+        :target="value.begin === true ? 1 : value.begin ?? null"
+        :edit-target="applyEditOn(edit, 'begin')"
+        :offset="value.begin_offset ?? null"
+        :edit-offset="applyEditOn(edit, 'begin_offset')"
       ></TargetEdit>
       <TargetEdit
         required
         name="终点"
-        v-model:offset="taskEndOfs"
-        :value="taskEnd === true ? 1 : taskEnd"
-        :navigate="navigate"
-        @update:value="
-          v => {
-            taskEnd = v === 1 ? true : v
-          }
-        "
+        :target="value.end === true ? 1 : value.end ?? null"
+        :edit-target="applyEditOn(edit, 'end')"
+        :offset="value.end_offset ?? null"
+        :edit-offset="applyEditOn(edit, 'end_offset')"
       ></TargetEdit>
     </template>
     <template v-else-if="taskActValue === 'Key'">
-      <ClearButton v-model="taskKey"> 按键 </ClearButton>
-      <span> {{ taskKey }} </span>
+      <ClearButton :value="value.key ?? null" :edit="applyEditOn(edit, 'key')">
+        按键
+      </ClearButton>
+      <!-- TODO -->
+      <span> {{ value.key }} </span>
     </template>
     <template v-else-if="taskActValue === 'StartApp'">
-      <ClearButton v-model="taskPackage"> 包名 </ClearButton>
-      <StringArrayEdit
+      <ClearButton
+        :value="value.package ?? null"
+        :edit="applyEditOn(edit, 'package')"
+      >
+        包名
+      </ClearButton>
+      <SingleStringEdit
         type="single"
         :nullable="true"
         def=""
-        :value="taskPackage"
-        @update:value="v => {taskPackage = v as string}"
+        :value="value.package ?? null"
+        :edit="applyEditOn(edit, 'package')"
         placeholder="package/activity"
-      ></StringArrayEdit>
+      ></SingleStringEdit>
     </template>
     <template v-else-if="taskActValue === 'StopApp'">
-      <ClearButton v-model="taskPackage"> 包名 </ClearButton>
-      <StringArrayEdit
+      <ClearButton
+        :value="value.package ?? null"
+        :edit="applyEditOn(edit, 'package')"
+      >
+        包名
+      </ClearButton>
+      <SingleStringEdit
         type="single"
         :nullable="true"
         def=""
-        :value="taskPackage"
-        @update:value="v => {taskPackage = v as string}"
+        :value="value.package ?? null"
+        :edit="applyEditOn(edit, 'package')"
         placeholder="package"
-      ></StringArrayEdit>
+      ></SingleStringEdit>
     </template>
     <template v-else-if="taskActValue === 'Custom'">
-      <ClearButton v-model="taskCustomAct" invalid> 任务名 </ClearButton>
-      <NInput v-model:value="taskCustomAct" placeholder="task"></NInput>
-      <ClearButton v-model="taskCustomActParam"> 任务参数 </ClearButton>
-      <JsonEdit v-model:value="taskCustomActParam"></JsonEdit>
+      <ClearButton
+        :value="value.custom_action ?? null"
+        :edit="applyEditOn(edit, 'custom_action')"
+        invalid
+      >
+        任务名
+      </ClearButton>
+      <NInput
+        :value="value.custom_action ?? null"
+        @update:value="v => updateEditOn(edit, 'custom_action', v)"
+        placeholder="task"
+      ></NInput>
+      <ClearButton
+        :value="value.custom_action_param ?? null"
+        :edit="applyEditOn(edit, 'custom_action_param')"
+      >
+        任务参数
+      </ClearButton>
+      <JsonEdit
+        :value="value.custom_action_param ?? null"
+        @update:value="v => updateEditOn(edit, 'custom_action_param', v)"
+      ></JsonEdit>
     </template>
   </div>
 </template>
