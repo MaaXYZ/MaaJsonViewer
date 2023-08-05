@@ -6,8 +6,24 @@ import {
   fileData
 } from '@/data'
 import axios from 'axios'
+import { Buffer } from 'buffer'
+import JSZip from 'jszip'
+
+async function loadZip() {
+  const res: Blob = (
+    await axios.post('/api/zip', null, {
+      responseType: 'blob'
+    })
+  ).data
+  const zip = new JSZip()
+  await zip.loadAsync(res)
+  zip.forEach((p, f) => {
+    console.log(p, f.dir)
+  })
+}
 
 export async function loadData() {
+  loadZip()
   const entry = (await axios.post('/api/list')).data as {
     success: boolean
     data: {

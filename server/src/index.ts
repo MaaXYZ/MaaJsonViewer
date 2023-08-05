@@ -12,6 +12,10 @@ app.use(express.static(webDir))
 app.use('/res', express.static(resDir))
 app.use(json())
 
+app.post('/api/zip', async (req, res) => {
+  res.sendFile(path.resolve('./res.zip'))
+})
+
 app.post('/api/list', async (req, res) => {
   const info: {
     dir: string[][]
