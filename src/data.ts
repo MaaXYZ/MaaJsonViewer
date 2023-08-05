@@ -1,7 +1,7 @@
 import { type TreeOption } from 'naive-ui'
 import { computed, reactive } from 'vue'
 import type { Task } from './types'
-import { history, historyPush } from './history'
+import { history } from './history'
 import { buildEntries, type FSEntry } from './fs'
 
 export interface TaskData {
@@ -9,7 +9,6 @@ export interface TaskData {
 }
 
 export const folderData = reactive<{ data: string[][] }>({ data: [] })
-
 export const fileData = reactive<{ data: string[][] }>({ data: [] })
 
 export const taskData = reactive<{ data: TaskData }>({ data: {} })
@@ -23,13 +22,11 @@ export function isModified(task: string) {
 }
 
 export const active = computed(() => {
-  return history.backward.length > 0
-    ? history.backward[history.backward.length - 1]
-    : null
+  return history.current.value
 })
 
 export function navigate(task: string) {
-  historyPush(task)
+  history.push(task)
 }
 
 export const taskTree = computed<TreeOption>(() => {

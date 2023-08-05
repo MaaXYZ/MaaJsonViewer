@@ -6,7 +6,6 @@ import {
   fileData
 } from '@/data'
 import axios from 'axios'
-import { Buffer } from 'buffer'
 import JSZip from 'jszip'
 
 async function loadZip() {
@@ -23,7 +22,7 @@ async function loadZip() {
 }
 
 export async function loadData() {
-  loadZip()
+  // loadZip()
   const entry = (await axios.post('/api/list')).data as {
     success: boolean
     data: {

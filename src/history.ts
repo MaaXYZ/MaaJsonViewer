@@ -1,23 +1,44 @@
-import { computed, reactive } from 'vue'
+import { computed, type ComputedRef } from 'vue'
+import { Persis } from './persis'
 
-export const history = reactive<{
-  backward: string[]
-  forward: string[]
-}>({ backward: [], forward: [] })
+class History {
+  info: Persis<{ active: string | null }>
+  current: ComputedRef<string | null>
 
-export function historyPush(v: string) {
-  history.backward.push(v)
-  history.forward = []
+  constructor() {
+    this.info = new Persis({
+      active: null
+    })
+    this.current = computed(() => {
+      return this.info.now().value.active
+    })
+  }
+
+  push(v: string) {
+    this.info.change(h => {
+      h.active = v
+    })
+  }
+
+  canUndo() {
+    return this.info.canUndo
+  }
+
+  canRedo() {
+    return this.info.canRedo
+  }
+
+  undo() {
+    this.info.undo()
+  }
+
+  redo() {
+    this.info.redo()
+  }
+
+  move(ofs: number) {
+    this.info.move(ofs)
+  }
 }
 
-export const canUndo = computed(() => history.backward.length > 0)
-export const canRedo = computed(() => history.forward.length > 0)
-
-export function historyUndo() {
-  history.forward.push(history.backward.pop()!)
-}
-
-export function historyRedo() {
-  const v = history.forward.pop()!
-  history.backward.push(v)
-}
+export const history = new History()

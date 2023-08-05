@@ -21,14 +21,7 @@ import {
 import { taskData, active, navigate } from './data'
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
-import {
-  history,
-  historyPush,
-  historyUndo,
-  historyRedo,
-  canUndo,
-  canRedo
-} from './history'
+import { history } from './history'
 import { loadData, syncData } from './loader'
 
 const expands = ref<string[]>(['root.'])
@@ -40,18 +33,17 @@ onMounted(() => {
 })
 
 const someBackward = computed(() => {
-  return history.backward.slice(-5).slice(0, -1)
+  return history.info.prev[0].value.slice(-4).map(x => x.active)
 })
 const someForward = computed(() => {
-  return history.forward.slice(-4).reverse()
+  return history.info.next[0].value
+    .slice(-4)
+    .reverse()
+    .map(x => x.active)
 })
 const fastNavigate = computed<number>({
   set(ofs: number) {
-    if (ofs < 0) {
-      history.forward.push(...history.backward.splice(ofs).reverse())
-    } else {
-      history.backward.push(...history.forward.splice(-ofs).reverse())
-    }
+    history.move(ofs)
   },
   get() {
     return 0
@@ -62,14 +54,14 @@ const fastNavigate = computed<number>({
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton :disabled="!canUndo" @click="historyUndo()">
+      <NButton :disabled="!history.canUndo()" @click="history.undo()">
         <template #icon>
           <NIcon>
             <NavigateBeforeOutlined></NavigateBeforeOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton :disabled="!canRedo" @click="historyRedo()">
+      <NButton :disabled="!history.canRedo()" @click="history.redo()">
         <template #icon>
           <NIcon>
             <NavigateNextOutlined></NavigateNextOutlined>
