@@ -10,7 +10,8 @@
     "build-only": "vite build",
     "build-watch": "vite build --watch",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
-    "backend": "cd server && npm run run"
+    "backend": "cd server && npm run run",
+    "build-all": "npm run build && cd server && npm run build"
   },
   "dependencies": {
     "vue": "^3.3.4"

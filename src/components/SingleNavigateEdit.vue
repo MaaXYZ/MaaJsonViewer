@@ -8,7 +8,6 @@ import {
   SwipeRightOutlined,
   TranslateOutlined
 } from '@vicons/material'
-import { taskData } from '@/data'
 import ImageHover from './ImageHover.vue'
 import type { UseProducer } from '@/persis'
 import { getTask, taskIndex } from '@/data/task'
