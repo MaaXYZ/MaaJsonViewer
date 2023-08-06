@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DataArrayOutlined } from '@vicons/material'
 import { NButton, NIcon } from 'naive-ui'
 
 defineProps<{
@@ -19,7 +18,7 @@ const single = defineModel<boolean>('value', {
   >
     <template #icon>
       <NIcon>
-        <DataArrayOutlined></DataArrayOutlined>
+        <slot></slot>
       </NIcon>
     </template>
   </NButton>

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import {
   AdsClickOutlined,
+  ErrorOutlineOutlined,
   MovingOutlined,
   RepeatOutlined,
+  StartOutlined,
+  StopOutlined,
   SwipeRightOutlined,
   TranslateOutlined,
   WavingHandOutlined
@@ -50,14 +53,14 @@ const options = computed(() => {
 <template>
   <div class="flex gap-2">
     <NButton
-      v-if="navTask"
       :disabled="!(value in taskIndex)"
       @click="navigate(taskIndex[value])"
     >
       <template #icon>
         <NIcon>
-          <RepeatOutlined v-if="navTask.is_sub"></RepeatOutlined>
-          <MovingOutlined v-else></MovingOutlined>
+          <RepeatOutlined v-if="navTask?.is_sub"></RepeatOutlined>
+          <MovingOutlined v-else-if="navTask"></MovingOutlined>
+          <ErrorOutlineOutlined v-else></ErrorOutlineOutlined>
         </NIcon>
       </template>
     </NButton>
@@ -107,6 +110,14 @@ const options = computed(() => {
             <SwipeRightOutlined
               v-else-if="navTask.action === 'Swipe'"
             ></SwipeRightOutlined>
+            <StartOutlined
+              v-else-if="navTask.action === 'StartApp'"
+            ></StartOutlined>
+            <StopOutlined
+              v-else-if="
+                navTask.action === 'StopApp' || navTask.action === 'StopTask'
+              "
+            ></StopOutlined>
           </NIcon>
         </template>
       </NButton>

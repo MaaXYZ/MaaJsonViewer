@@ -14,7 +14,8 @@ async function stringify(v: unknown) {
   return await prettier.format(JSON.stringify(v), {
     parser: 'json',
     plugins: [babel, estree],
-    tabWidth: 4
+    tabWidth: 4,
+    printWidth: 50
   })
 }
 

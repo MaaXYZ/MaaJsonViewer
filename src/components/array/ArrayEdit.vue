@@ -1,12 +1,16 @@
 <script setup lang="ts" generic="T">
-import { AddOutlined, DeleteOutlined } from '@vicons/material'
+import {
+  AddOutlined,
+  DataArrayOutlined,
+  DeleteOutlined
+} from '@vicons/material'
 import { produce } from 'immer'
 import { NButton, NIcon } from 'naive-ui'
 import { computed } from 'vue'
 
 import type { UseProducer } from '@/persis'
 
-import SwitchButton from './SwitchButton.vue'
+import SwitchButton from '@/components/atomic/SwitchButton.vue'
 
 type U = T | T[] | null
 
@@ -89,18 +93,6 @@ function add() {
   }
 }
 
-function set(idx: number, v: T) {
-  if (isSingle.value) {
-    props.edit(() => {
-      return v
-    })
-  } else {
-    props.edit(draft => {
-      ;(draft as T[])[idx] = v
-    })
-  }
-}
-
 function remove(idx: number) {
   if (isSingle.value) {
     if (props.nullable) {
@@ -120,12 +112,11 @@ function remove(idx: number) {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex gap-2">
-      <SwitchButton
-        v-if="type === 'both'"
-        v-model:value="single"
-      ></SwitchButton>
-      <NButton :disabled="single && value !== null" @click="add">
+    <div class="flex gap-2" v-if="type === 'both' || !single || value === null">
+      <SwitchButton v-if="type === 'both'" v-model:value="single">
+        <DataArrayOutlined></DataArrayOutlined>
+      </SwitchButton>
+      <NButton v-if="!single || value === null" @click="add">
         <template #icon>
           <NIcon>
             <AddOutlined></AddOutlined>

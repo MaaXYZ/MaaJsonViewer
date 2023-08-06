@@ -5,10 +5,10 @@ import { computed } from 'vue'
 import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
 import type { Task } from '@/types'
 
-import TargetEdit from './TargetEdit.vue'
 import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
+import TargetEdit from '@/components/task/TargetEdit.vue'
 
 const props = defineProps<{
   value: Task

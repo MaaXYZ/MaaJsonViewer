@@ -118,7 +118,7 @@ type Action = {
   custom_action_param?: unknown
 }
 
-type WaitFreezes = {
+export type WaitFreezes = {
   time?: number
   target?: true | string | Rect
   target_offset?: Rect

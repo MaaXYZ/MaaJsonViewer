@@ -10,6 +10,7 @@ import ArrayNavigateEdit from './task/ArrayNavigateEdit.vue'
 import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import IntInput from '@/components/atomic/IntInput.vue'
+import FreezeEdit from '@/components/task/FreezeEdit.vue'
 
 const props = defineProps<{
   value: Task
@@ -119,6 +120,28 @@ const props = defineProps<{
     >
       <template #suffix>ms</template>
     </NInputNumber>
+    <ClearButton
+      :value="value.pre_wait_freezes ?? null"
+      :edit="applyEditOn(edit, 'pre_wait_freezes')"
+    >
+      前静止等待
+    </ClearButton>
+    <FreezeEdit
+      :value="value.pre_wait_freezes ?? null"
+      :edit="applyEditOn(edit, 'pre_wait_freezes')"
+    >
+    </FreezeEdit>
+    <ClearButton
+      :value="value.post_wait_freezes ?? null"
+      :edit="applyEditOn(edit, 'post_wait_freezes')"
+    >
+      后静止等待
+    </ClearButton>
+    <FreezeEdit
+      :value="value.post_wait_freezes ?? null"
+      :edit="applyEditOn(edit, 'post_wait_freezes')"
+    >
+    </FreezeEdit>
     <ClearButton
       :value="value.notify ?? null"
       :edit="applyEditOn(edit, 'notify')"

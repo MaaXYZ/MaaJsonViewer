@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { DataArrayOutlined } from '@vicons/material'
 import { computed, watch } from 'vue'
 
 import { type UseProducer, updateEdit } from '@/persis'
 
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
-import SwitchButton from '@/components/array/SwitchButton.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import FloatInput from '@/components/atomic/FloatInput.vue'
 import ImageHover from '@/components/atomic/ImageHover.vue'
+import SwitchButton from '@/components/atomic/SwitchButton.vue'
 import SingleTemplateEdit from '@/components/task/SingleTemplateEdit.vue'
 
 type TTemp = string | string[] | null
@@ -127,7 +128,9 @@ const fixThre = (v: number) => {
       <SwitchButton
         v-model:value="thresholdSingle"
         :disabled="isTemplateSingle"
-      ></SwitchButton>
+      >
+        <DataArrayOutlined></DataArrayOutlined>
+      </SwitchButton>
     </div>
     <FloatInput
       v-if="isThresholdSingle"

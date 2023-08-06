@@ -206,7 +206,7 @@ function tryDelete() {
         </NCollapse>
       </div>
       <JsonEdit
-        style="min-width: 350px"
+        style="width: 400px"
         :value="value"
         @update:value="v => edit(() => v)"
       ></JsonEdit>
