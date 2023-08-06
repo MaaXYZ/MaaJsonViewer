@@ -140,7 +140,8 @@ const fastNavigate = computed<number>({
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard
-        class="max-w-sm min-h-0"
+        class="min-h-0"
+        style="max-width: 400px"
         content-style="max-height: 100%; display: flex; flex-direction: column"
       >
         <TaskTree v-model:expand="expands"></TaskTree>

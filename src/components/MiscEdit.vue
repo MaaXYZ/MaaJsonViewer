@@ -67,7 +67,7 @@ defineProps<{
       :value="value.timeout_next ?? null"
       :edit="applyEditOn(edit, 'timeout_next')"
     >
-      超时后
+      超时后续
     </ClearButton>
     <ArrayNavigateEdit
       :value="value.timeout_next ?? null"
@@ -91,7 +91,7 @@ defineProps<{
       :value="value.runout_next ?? null"
       :edit="applyEditOn(edit, 'runout_next')"
     >
-      超次数后
+      超次数后续
     </ClearButton>
     <ArrayNavigateEdit
       :value="value.runout_next ?? null"
