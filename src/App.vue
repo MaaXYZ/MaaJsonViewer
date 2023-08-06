@@ -40,24 +40,6 @@ onMounted(async () => {
     }
   }
 })
-
-const someBackward = computed(() => {
-  return history.info.prev.value.slice(-4).map(x => x.active)
-})
-const someForward = computed(() => {
-  return history.info.next.value
-    .slice(-4)
-    .reverse()
-    .map(x => x.active)
-})
-const fastNavigate = computed<number>({
-  set(ofs: number) {
-    history.info.move(ofs)
-  },
-  get() {
-    return 0
-  }
-})
 </script>
 
 <template>
@@ -111,32 +93,6 @@ const fastNavigate = computed<number>({
           </NIcon>
         </template>
       </NButton>
-      <div
-        class="flex-1 grid gap-2"
-        style="grid-template-columns: 1fr max-content 1fr"
-      >
-        <div class="flex gap-2 justify-end">
-          <NButton
-            v-for="(h, i) in someBackward"
-            :key="`${h}-${i}`"
-            @click="fastNavigate = i - someBackward.length"
-          >
-            {{ h }}
-          </NButton>
-        </div>
-        <NButton type="primary" disabled>
-          {{ active }}
-        </NButton>
-        <div class="flex gap-2">
-          <NButton
-            v-for="(h, i) in someForward"
-            :key="`${h}-${i}`"
-            @click="fastNavigate = i + 1"
-          >
-            {{ h }}
-          </NButton>
-        </div>
-      </div>
     </div>
     <div class="flex gap-2 flex-1 min-h-0">
       <NCard
