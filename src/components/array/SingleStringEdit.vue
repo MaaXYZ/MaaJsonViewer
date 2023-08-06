@@ -3,25 +3,22 @@ import { NInput } from 'naive-ui'
 
 import { type UseProducer, updateEdit } from '@/persis'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
+import SingleEdit from './SingleEdit.vue'
 
-type T = string | string[] | null
-type V = string | null
+type T = string | null
 
 defineProps<{
-  value: V
-  edit: UseProducer<V>
+  value: T
+  edit: UseProducer<T>
   def: string
   placeholder: string
 }>()
 </script>
 
 <template>
-  <SingleArrayEdit
-    :value="value as T"
-    :edit="edit as UseProducer<T>"
-    type="single"
-    :nullable="true"
+  <SingleEdit
+    :value="value"
+    :edit="edit"
     :def="() => def"
     :is-t="(v: string | string[]) => typeof v === 'string'"
   >
@@ -34,5 +31,5 @@ defineProps<{
         ></NInput>
       </div>
     </template>
-  </SingleArrayEdit>
+  </SingleEdit>
 </template>

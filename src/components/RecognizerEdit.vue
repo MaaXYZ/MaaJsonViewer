@@ -5,9 +5,9 @@ import { computed } from 'vue'
 import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
 import type { Rect, Task, TextRepl } from '@/types'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
-import StringArrayEdit from './StringArrayEdit.vue'
 import TemplateEdit from './TemplateEdit.vue'
+import ArrayEdit from '@/components/array/ArrayEdit.vue'
+import ArrayStringEdit from '@/components/array/ArrayStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
 import RectEdit from '@/components/atomic/RectEdit.vue'
@@ -55,7 +55,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
       <ClearButton :value="value.roi ?? null" :edit="applyEditOn(edit, 'roi')">
         识别区域
       </ClearButton>
-      <SingleArrayEdit
+      <ArrayEdit
         :value="value.roi ?? null"
         :edit="applyEditOn(edit, 'roi')"
         :nullable="true"
@@ -67,7 +67,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         <template #edit="{ value, edit }">
           <RectEdit :value="value" :edit="edit"></RectEdit>
         </template>
-      </SingleArrayEdit>
+      </ArrayEdit>
     </template>
     <template v-if="taskRecoValue === 'TemplateMatch'">
       <TemplateEdit
@@ -109,19 +109,19 @@ const templMethodOptions = [1, 3, 5].map(x => ({
       >
         文本
       </ClearButton>
-      <StringArrayEdit
+      <ArrayStringEdit
         :value="value.text ?? null"
         :edit="applyEditOn(edit, 'text')"
         :def="''"
         placeholder="text"
-      ></StringArrayEdit>
+      ></ArrayStringEdit>
       <ClearButton
         :value="value.replace ?? null"
         :edit="applyEditOn(edit, 'replace')"
       >
         文本替换
       </ClearButton>
-      <SingleArrayEdit
+      <ArrayEdit
         :value="value.replace ?? null"
         :edit="applyEditOn(edit, 'replace')"
         :nullable="true"
@@ -159,7 +159,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
             </NInput>
           </div>
         </template>
-      </SingleArrayEdit>
+      </ArrayEdit>
       <ClearButton
         :value="value.only_rec ?? null"
         :edit="applyEditOn(edit, 'only_rec')"

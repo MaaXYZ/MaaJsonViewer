@@ -3,12 +3,12 @@ import { computed, watch } from 'vue'
 
 import { type UseProducer, updateEdit } from '@/persis'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
-import SingleTemplateEdit from './SingleTemplateEdit.vue'
+import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import SwitchButton from '@/components/array/SwitchButton.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import FloatInput from '@/components/atomic/FloatInput.vue'
 import ImageHover from '@/components/atomic/ImageHover.vue'
+import SingleTemplateEdit from '@/components/task/SingleTemplateEdit.vue'
 
 type TTemp = string | string[] | null
 type TThre = number | number[] | null
@@ -76,7 +76,7 @@ const fixThre = (v: number) => {
   <ClearButton :value="template" :edit="editTemplate" invalid>
     模板路径
   </ClearButton>
-  <SingleArrayEdit
+  <ArrayEdit
     :value="template"
     :edit="editTemplate"
     :def="() => templDef"
@@ -120,7 +120,7 @@ const fixThre = (v: number) => {
         <ImageHover :url="value"></ImageHover>
       </div>
     </template>
-  </SingleArrayEdit>
+  </ArrayEdit>
   <ClearButton :value="threshold" :edit="editThreshold"> 模板阈值 </ClearButton>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">

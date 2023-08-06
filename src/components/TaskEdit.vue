@@ -26,11 +26,11 @@ import { type UseProducer, applyEditOn } from '@/persis'
 import { type Task } from '@/types'
 
 import ActionEdit from './ActionEdit.vue'
-import NavigateEdit from './NavigateEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
-import SingleNavigateEdit from './SingleNavigateEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
+import ArrayNavigateEdit from '@/components/task/ArrayNavigateEdit.vue'
+import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 
 const props = defineProps<{
   name: string
@@ -213,10 +213,10 @@ function tryDelete() {
               >
                 Next
               </ClearButton>
-              <NavigateEdit
+              <ArrayNavigateEdit
                 :value="value.next ?? null"
                 :edit="applyEditOn(edit, 'next')"
-              ></NavigateEdit>
+              ></ArrayNavigateEdit>
             </div>
           </NCollapseItem>
         </NCollapse>

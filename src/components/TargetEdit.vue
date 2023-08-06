@@ -5,10 +5,10 @@ import { computed } from 'vue'
 import type { UseProducer } from '@/persis'
 import type { Rect } from '@/types'
 
-import SingleEdit from './SingleEdit.vue'
-import SingleNavigateEdit from './SingleNavigateEdit.vue'
+import SingleEdit from '@/components/array/SingleEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import RectEdit from '@/components/atomic/RectEdit.vue'
+import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 
 type TTarget = 1 | string | Rect | null
 type TTargetOut = true | string | Rect | null

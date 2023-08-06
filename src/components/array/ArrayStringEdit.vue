@@ -3,7 +3,7 @@ import { NInput } from 'naive-ui'
 
 import { type UseProducer, updateEdit } from '@/persis'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
+import ArrayEdit from './ArrayEdit.vue'
 
 type T = string | string[] | null
 
@@ -18,7 +18,7 @@ defineProps<{
 </script>
 
 <template>
-  <SingleArrayEdit
+  <ArrayEdit
     :value="value"
     :edit="edit"
     :type="type"
@@ -35,5 +35,5 @@ defineProps<{
         ></NInput>
       </div>
     </template>
-  </SingleArrayEdit>
+  </ArrayEdit>
 </template>

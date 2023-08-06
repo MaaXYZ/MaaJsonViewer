@@ -2,8 +2,8 @@
 import { navigate } from '@/data'
 import type { UseProducer } from '@/persis'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
+import ArrayEdit from '@/components/array/ArrayEdit.vue'
 
 type T = string | string[] | null
 
@@ -14,7 +14,7 @@ defineProps<{
 </script>
 
 <template>
-  <SingleArrayEdit
+  <ArrayEdit
     :value="value"
     :edit="edit"
     :nullable="true"
@@ -28,5 +28,5 @@ defineProps<{
         :navigate="navigate"
       ></SingleNavigateEdit>
     </template>
-  </SingleArrayEdit>
+  </ArrayEdit>
 </template>

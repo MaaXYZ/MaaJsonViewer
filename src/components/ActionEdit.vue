@@ -5,8 +5,8 @@ import { computed } from 'vue'
 import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
 import type { Task } from '@/types'
 
-import SingleStringEdit from './SingleStringEdit.vue'
 import TargetEdit from './TargetEdit.vue'
+import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
 

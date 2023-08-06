@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T">
 import type { UseProducer } from '@/persis'
 
-import SingleArrayEdit from './SingleArrayEdit.vue'
+import ArrayEdit from './ArrayEdit.vue'
 
 type U = T | T[] | null
 type V = T | null
@@ -15,7 +15,7 @@ defineProps<{
 </script>
 
 <template>
-  <SingleArrayEdit
+  <ArrayEdit
     :value="value as U"
     :edit="edit as UseProducer<U>"
     type="single"
@@ -26,5 +26,5 @@ defineProps<{
     <template #edit="{ value, edit }">
       <slot name="edit" :value="value" :edit="edit"></slot>
     </template>
-  </SingleArrayEdit>
+  </ArrayEdit>
 </template>

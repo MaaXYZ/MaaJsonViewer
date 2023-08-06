@@ -6,7 +6,7 @@ import { computed } from 'vue'
 
 import type { UseProducer } from '@/persis'
 
-import SwitchButton from '@/components/array/SwitchButton.vue'
+import SwitchButton from './SwitchButton.vue'
 
 type U = T | T[] | null
 
