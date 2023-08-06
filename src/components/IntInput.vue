@@ -22,9 +22,10 @@ const strVal = computed({
     }
     const m = /^([0-9]+)(.*)$/.exec(v)
     if (m) {
-      val.value = parseInt(m[1])
       if (m[2]) {
-        emits('overflowInput', m[2])
+        emits('overflowInput', v)
+      } else {
+        val.value = parseInt(m[1])
       }
     }
   },

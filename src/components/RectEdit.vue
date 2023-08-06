@@ -12,14 +12,16 @@ const props = defineProps<{
 type IntInputType = InstanceType<typeof IntInput>
 const inputEl = ref<IntInputType[]>([])
 function handleOverflow(s: string, i: number) {
-  if (i < 3) {
-    for (const el of inputEl.value) {
-      if (el.getIndex() === i + 1) {
-        el.setValue(s)
-        break
-      }
+  props.edit(draft => {
+    const ns = s
+      .split(/[^\d]+/)
+      .filter(x => x)
+      .map(x => parseInt(x))
+    while (i < 3 && ns.length > 0) {
+      draft[i] = ns.shift()!
+      i += 1
     }
-  }
+  })
 }
 // 123, 456, 789, 122
 </script>
