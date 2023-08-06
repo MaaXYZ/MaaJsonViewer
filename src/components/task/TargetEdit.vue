@@ -15,6 +15,7 @@ type TTargetOut = true | string | Rect | null
 type TOffset = Rect | null
 
 const props = defineProps<{
+  propkey: string
   name: string
   target: TTarget
   editTarget: UseProducer<TTargetOut>
@@ -58,7 +59,12 @@ const marks = {
 </script>
 
 <template>
-  <ClearButton :value="target" :edit="editTarget" :invalid="required">
+  <ClearButton
+    :propkey="propkey"
+    :value="target"
+    :edit="editTarget"
+    :invalid="required"
+  >
     {{ name }}
   </ClearButton>
   <div class="flex flex-col">
@@ -86,7 +92,13 @@ const marks = {
       :edit="editTarget as UseProducer<Rect>"
     ></RectEdit>
   </div>
-  <ClearButton :value="offset" :edit="editOffset"> {{ name }}偏移 </ClearButton>
+  <ClearButton
+    :propkey="`${propkey}_offset`"
+    :value="offset"
+    :edit="editOffset"
+  >
+    {{ name }}偏移
+  </ClearButton>
   <SingleEdit
     :value="offset"
     :edit="editOffset"

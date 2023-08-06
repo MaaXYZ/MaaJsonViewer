@@ -40,6 +40,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
     "
   >
     <ClearButton
+      propkey="recognition"
       :value="value.recognition ?? null"
       :edit="applyEditOn(edit, 'recognition')"
     >
@@ -54,7 +55,11 @@ const templMethodOptions = [1, 3, 5].map(x => ({
     <template
       v-if="taskRecoValue === 'TemplateMatch' || taskRecoValue === 'OCR'"
     >
-      <ClearButton :value="value.roi ?? null" :edit="applyEditOn(edit, 'roi')">
+      <ClearButton
+        propkey="roi"
+        :value="value.roi ?? null"
+        :edit="applyEditOn(edit, 'roi')"
+      >
         识别区域
       </ClearButton>
       <ArrayEdit
@@ -79,6 +84,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         :edit-threshold="applyEditOn(edit, 'threshold')"
       ></TemplateEdit>
       <ClearButton
+        propkey="method"
         :value="value.method ?? null"
         :edit="applyEditOn(edit, 'method')"
       >
@@ -91,6 +97,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         placeholder="5"
       ></NSelect>
       <ClearButton
+        propkey="green_mask"
         :value="value.green_mask ?? null"
         :edit="applyEditOn(edit, 'green_mask')"
       >
@@ -105,6 +112,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
     </template>
     <template v-if="taskRecoValue === 'OCR'">
       <ClearButton
+        propkey="text"
         :value="value.text ?? null"
         :edit="applyEditOn(edit, 'text')"
         invalid
@@ -118,6 +126,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         placeholder="text"
       ></ArrayStringEdit>
       <ClearButton
+        propkey="replace"
         :value="value.replace ?? null"
         :edit="applyEditOn(edit, 'replace')"
       >
@@ -163,6 +172,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         </template>
       </ArrayEdit>
       <ClearButton
+        propkey="only_rec"
         :value="value.only_rec ?? null"
         :edit="applyEditOn(edit, 'only_rec')"
       >
@@ -177,6 +187,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
     </template>
     <template v-if="taskRecoValue === 'Custom'">
       <ClearButton
+        propkey="custom_recognizer"
         :value="value.custom_recognizer ?? null"
         :edit="applyEditOn(edit, 'custom_recognizer')"
         invalid
@@ -189,6 +200,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         placeholder="recognizer"
       ></NInput>
       <ClearButton
+        propkey="custom_recognizer_param"
         :value="value.custom_recognizer_param ?? null"
         :edit="applyEditOn(edit, 'custom_recognizer_param')"
       >

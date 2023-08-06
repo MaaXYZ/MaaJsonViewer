@@ -74,7 +74,12 @@ const fixThre = (v: number) => {
 </script>
 
 <template>
-  <ClearButton :value="template" :edit="editTemplate" invalid>
+  <ClearButton
+    :propkey="`template`"
+    :value="template"
+    :edit="editTemplate"
+    invalid
+  >
     模板路径
   </ClearButton>
   <ArrayEdit
@@ -122,7 +127,9 @@ const fixThre = (v: number) => {
       </div>
     </template>
   </ArrayEdit>
-  <ClearButton :value="threshold" :edit="editThreshold"> 模板阈值 </ClearButton>
+  <ClearButton :propkey="`threshold`" :value="threshold" :edit="editThreshold">
+    模板阈值
+  </ClearButton>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
       <SwitchButton

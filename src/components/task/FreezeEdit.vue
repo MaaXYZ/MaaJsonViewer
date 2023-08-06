@@ -14,6 +14,7 @@ import TargetEdit from '@/components/task/TargetEdit.vue'
 type T = null | number | WaitFreezes
 
 const props = defineProps<{
+  propkey: string
   value: T
   edit: UseProducer<T>
 }>()
@@ -55,6 +56,9 @@ const templMethodOptions = [1, 3, 5].map(x => ({
 </script>
 
 <template>
+  <ClearButton :propkey="propkey" :value="value" :edit="edit">
+    <slot></slot>
+  </ClearButton>
   <div class="flex flex-col gap-2">
     <div>
       <SwitchButton v-model:value="notObject">
@@ -70,9 +74,6 @@ const templMethodOptions = [1, 3, 5].map(x => ({
       "
     >
       <template v-if="notObject">
-        <ClearButton :value="value" :edit="() => edit(() => null)">
-          延时
-        </ClearButton>
         <NInputNumber
           :value="value as number | null"
           @update:value="v => edit(() => v)"
@@ -82,7 +83,11 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         </NInputNumber>
       </template>
       <template v-else>
-        <ClearButton :value="wfv.time ?? null" :edit="applyEditOn(wfe, 'time')">
+        <ClearButton
+          :propkey="`${propkey}.time`"
+          :value="wfv.time ?? null"
+          :edit="applyEditOn(wfe, 'time')"
+        >
           延时
         </ClearButton>
         <NInputNumber
@@ -93,6 +98,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
           <template #suffix> ms </template>
         </NInputNumber>
         <TargetEdit
+          propkey="target"
           name="目标"
           :target="wfv.target === true ? 1 : wfv.target ?? null"
           :edit-target="applyEditOn(wfe, 'target')"
@@ -101,6 +107,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         >
         </TargetEdit>
         <ClearButton
+          :propkey="`${propkey}.threshold`"
           :value="wfv.threshold ?? null"
           :edit="applyEditOn(wfe, 'threshold')"
         >
@@ -115,6 +122,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         >
         </FloatInput>
         <ClearButton
+          :propkey="`${propkey}.method`"
           :value="wfv.method ?? null"
           :edit="applyEditOn(wfe, 'method')"
         >

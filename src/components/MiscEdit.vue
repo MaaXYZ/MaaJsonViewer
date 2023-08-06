@@ -23,7 +23,11 @@ defineProps<{
       row-gap: 1rem;
     "
   >
-    <ClearButton :value="value.next ?? null" :edit="applyEditOn(edit, 'next')">
+    <ClearButton
+      propkey="next"
+      :value="value.next ?? null"
+      :edit="applyEditOn(edit, 'next')"
+    >
       正常后续
     </ClearButton>
     <ArrayNavigateEdit
@@ -31,6 +35,7 @@ defineProps<{
       :edit="applyEditOn(edit, 'next')"
     ></ArrayNavigateEdit>
     <ClearButton
+      propkey="is_sub"
       :value="value.is_sub ?? null"
       :edit="applyEditOn(edit, 'is_sub')"
     >
@@ -43,6 +48,7 @@ defineProps<{
       ></NSwitch>
     </div>
     <ClearButton
+      propkey="timeout"
       :value="value.timeout ?? null"
       :edit="applyEditOn(edit, 'timeout')"
     >
@@ -57,6 +63,7 @@ defineProps<{
       <template #suffix>ms</template></NInputNumber
     >
     <ClearButton
+      propkey="timeout_next"
       :value="value.timeout_next ?? null"
       :edit="applyEditOn(edit, 'timeout_next')"
     >
@@ -67,6 +74,7 @@ defineProps<{
       :edit="applyEditOn(edit, 'timeout_next')"
     ></ArrayNavigateEdit>
     <ClearButton
+      propkey="times_limit"
       :value="value.times_limit ?? null"
       :edit="applyEditOn(edit, 'times_limit')"
     >
@@ -79,6 +87,7 @@ defineProps<{
       :min="0"
     ></NInputNumber>
     <ClearButton
+      propkey="runout_next"
       :value="value.runout_next ?? null"
       :edit="applyEditOn(edit, 'runout_next')"
     >
@@ -89,6 +98,7 @@ defineProps<{
       :edit="applyEditOn(edit, 'runout_next')"
     ></ArrayNavigateEdit>
     <ClearButton
+      propkey="pre_delay"
       :value="value.pre_delay ?? null"
       :edit="applyEditOn(edit, 'pre_delay')"
     >
@@ -103,6 +113,7 @@ defineProps<{
       <template #suffix>ms</template></NInputNumber
     >
     <ClearButton
+      propkey="post_delay"
       :value="value.post_delay ?? null"
       :edit="applyEditOn(edit, 'post_delay')"
     >
@@ -116,29 +127,23 @@ defineProps<{
     >
       <template #suffix>ms</template>
     </NInputNumber>
-    <ClearButton
+    <FreezeEdit
+      propkey="pre_wait_freezes"
+      key="pre_wait_freezes"
       :value="value.pre_wait_freezes ?? null"
       :edit="applyEditOn(edit, 'pre_wait_freezes')"
     >
       前静止等待
-    </ClearButton>
-    <FreezeEdit
-      :value="value.pre_wait_freezes ?? null"
-      :edit="applyEditOn(edit, 'pre_wait_freezes')"
-    >
     </FreezeEdit>
-    <ClearButton
+    <FreezeEdit
+      propkey="post_wait_freezes"
+      key="post_wait_freezes"
       :value="value.post_wait_freezes ?? null"
       :edit="applyEditOn(edit, 'post_wait_freezes')"
-    >
-      后静止等待
-    </ClearButton>
-    <FreezeEdit
-      :value="value.post_wait_freezes ?? null"
-      :edit="applyEditOn(edit, 'post_wait_freezes')"
-    >
+      >后静止等待
     </FreezeEdit>
     <ClearButton
+      propkey="notify"
       :value="value.notify ?? null"
       :edit="applyEditOn(edit, 'notify')"
     >

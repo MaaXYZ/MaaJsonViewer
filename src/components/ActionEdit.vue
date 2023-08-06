@@ -43,6 +43,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     "
   >
     <ClearButton
+      propkey="action"
       :value="value.action ?? null"
       :edit="applyEditOn(edit, 'action')"
     >
@@ -56,6 +57,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     ></NSelect>
     <template v-if="taskActValue === 'Click'">
       <TargetEdit
+        propkey="target"
         name="目标"
         :target="value.target === true ? 1 : value.target ?? null"
         :edit-target="applyEditOn(edit, 'target')"
@@ -65,6 +67,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     </template>
     <template v-else-if="taskActValue === 'Swipe'">
       <TargetEdit
+        propkey="begin"
         name="起点"
         :target="value.begin === true ? 1 : value.begin ?? null"
         :edit-target="applyEditOn(edit, 'begin')"
@@ -72,6 +75,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
         :edit-offset="applyEditOn(edit, 'begin_offset')"
       ></TargetEdit>
       <TargetEdit
+        propkey="end"
         required
         name="终点"
         :target="value.end === true ? 1 : value.end ?? null"
@@ -81,7 +85,11 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
       ></TargetEdit>
     </template>
     <template v-else-if="taskActValue === 'Key'">
-      <ClearButton :value="value.key ?? null" :edit="applyEditOn(edit, 'key')">
+      <ClearButton
+        propkey="key"
+        :value="value.key ?? null"
+        :edit="applyEditOn(edit, 'key')"
+      >
         按键
       </ClearButton>
       <ArrayEdit
@@ -101,6 +109,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     </template>
     <template v-else-if="taskActValue === 'StartApp'">
       <ClearButton
+        propkey="package"
         :value="value.package ?? null"
         :edit="applyEditOn(edit, 'package')"
       >
@@ -117,6 +126,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     </template>
     <template v-else-if="taskActValue === 'StopApp'">
       <ClearButton
+        propkey="package"
         :value="value.package ?? null"
         :edit="applyEditOn(edit, 'package')"
       >
@@ -133,6 +143,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
     </template>
     <template v-else-if="taskActValue === 'Custom'">
       <ClearButton
+        propkey="custom_action"
         :value="value.custom_action ?? null"
         :edit="applyEditOn(edit, 'custom_action')"
         invalid
@@ -145,6 +156,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
         placeholder="task"
       ></NInput>
       <ClearButton
+        propkey="custom_action_param"
         :value="value.custom_action_param ?? null"
         :edit="applyEditOn(edit, 'custom_action_param')"
       >
