@@ -22,6 +22,21 @@ const expands = ref<string[]>(['root.'])
 
 onMounted(async () => {
   await loadFS()
+  window.onkeydown = ev => {
+    if (ev.ctrlKey && (ev.key === 'z' || ev.key === 'Z')) {
+      ev.stopPropagation()
+      ev.preventDefault()
+      if (ev.shiftKey) {
+        if (fs.canRedo()) {
+          fs.redo()
+        }
+      } else {
+        if (fs.canUndo()) {
+          fs.undo()
+        }
+      }
+    }
+  }
 })
 
 const someBackward = computed(() => {

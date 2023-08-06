@@ -100,8 +100,6 @@ export function commitDuplicate(name: string) {
 export function commitDelete(from: string, to: string | null) {
   const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
 
-  console.log(from)
-
   const [fd, ff, fh] = Util.pathdiv(from)
   const th = to ? Util.pathdiv(to)[2] : null
 
