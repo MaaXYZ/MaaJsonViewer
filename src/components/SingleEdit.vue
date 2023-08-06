@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T">
 import type { UseProducer } from '@/persis'
+
 import SingleArrayEdit from './SingleArrayEdit.vue'
 
 type U = T | T[] | null

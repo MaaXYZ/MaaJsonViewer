@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { NButton, NCode, NInput, NIcon } from 'naive-ui'
 import { CheckOutlined, CloseOutlined, EditOutlined } from '@vicons/material'
-import { ref, watch } from 'vue'
-import * as prettier from 'prettier/standalone'
+import { NButton, NCode, NIcon, NInput } from 'naive-ui'
 import babel from 'prettier/plugins/babel'
 import estree from 'prettier/plugins/estree'
+import * as prettier from 'prettier/standalone'
+import { ref, watch } from 'vue'
 
 const val = defineModel<unknown>('value', {
   required: true

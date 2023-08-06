@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { NInput } from 'naive-ui'
+
+import { type UseProducer, updateEdit } from '@/persis'
+
 import SingleArrayEdit from './SingleArrayEdit.vue'
-import { updateEdit, type UseProducer } from '@/persis'
 
 type T = string | string[] | null
 

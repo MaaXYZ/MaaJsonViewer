@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { NConfigProvider, NDialogProvider } from 'naive-ui'
-import App from './App.vue'
 import hljs from 'highlight.js/lib/core'
 import hljs_json from 'highlight.js/lib/languages/json'
+import { NConfigProvider, NDialogProvider } from 'naive-ui'
+
+import App from './App.vue'
 
 hljs.registerLanguage('json', hljs_json)
 </script>

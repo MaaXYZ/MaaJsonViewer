@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { NSelect, NButton, NSwitch, NInput } from 'naive-ui'
-import { computed, type Ref } from 'vue'
-import { type Task, type Rect, type TextRepl } from '@/types'
-import ClearButton from './ClearButton.vue'
+import { NInput, NSelect, NSwitch } from 'naive-ui'
+import { computed } from 'vue'
+
+import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
+import type { Rect, Task, TextRepl } from '@/types'
+
 import SingleArrayEdit from './SingleArrayEdit.vue'
-import RectEdit from './RectEdit.vue'
-import TemplateEdit from './TemplateEdit.vue'
 import StringArrayEdit from './StringArrayEdit.vue'
-import JsonEdit from './JsonEdit.vue'
-import { applyEditOn, type UseProducer, updateEditOn } from '@/persis'
+import TemplateEdit from './TemplateEdit.vue'
+import ClearButton from '@/components/atomic/ClearButton.vue'
+import JsonEdit from '@/components/atomic/JsonEdit.vue'
+import RectEdit from '@/components/atomic/RectEdit.vue'
 
 const props = defineProps<{
   value: Task

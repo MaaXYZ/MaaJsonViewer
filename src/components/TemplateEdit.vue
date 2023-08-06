@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { NInput, NPopover, NButton, NIcon } from 'naive-ui'
-import { SearchOutlined } from '@vicons/material'
-import { computed, ref, watch } from 'vue'
-import SingleArrayEdit from './SingleArrayEdit.vue'
-import ClearButton from './ClearButton.vue'
-import SingleArrayButton from './SingleArrayButton.vue'
-import FloatInput from './FloatInput.vue'
-import ImageHover from './ImageHover.vue'
+import { computed, watch } from 'vue'
+
 import { type UseProducer, updateEdit } from '@/persis'
+
+import SingleArrayEdit from './SingleArrayEdit.vue'
 import SingleTemplateEdit from './SingleTemplateEdit.vue'
+import SwitchButton from '@/components/array/SwitchButton.vue'
+import ClearButton from '@/components/atomic/ClearButton.vue'
+import FloatInput from '@/components/atomic/FloatInput.vue'
+import ImageHover from '@/components/atomic/ImageHover.vue'
 
 type TTemp = string | string[] | null
 type TThre = number | number[] | null
@@ -124,10 +124,10 @@ const fixThre = (v: number) => {
   <ClearButton :value="threshold" :edit="editThreshold"> 模板阈值 </ClearButton>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
-      <SingleArrayButton
+      <SwitchButton
         v-model:value="thresholdSingle"
         :disabled="isTemplateSingle"
-      ></SingleArrayButton>
+      ></SwitchButton>
     </div>
     <FloatInput
       v-if="isThresholdSingle"

@@ -1,7 +1,3 @@
-import { commitDelete } from '@/data'
-import { fs } from '@/data/fs'
-import { setTask, taskIndex } from '@/data/task'
-import { Util } from '@/fs'
 import {
   AddOutlined,
   CreateNewFolderOutlined,
@@ -14,12 +10,17 @@ import {
 import {
   NButton,
   NIcon,
-  useDialog,
-  type TreeOption,
   NInput,
-  NSwitch
+  NSwitch,
+  type TreeOption,
+  useDialog
 } from 'naive-ui'
 import { computed, ref } from 'vue'
+
+import { commitDelete } from '@/data'
+import { fs } from '@/data/fs'
+import { setTask, taskIndex } from '@/data/task'
+import { Util } from '@/fs'
 
 export function renderLabel({ option }: { option: TreeOption }) {
   const key = option.key as string

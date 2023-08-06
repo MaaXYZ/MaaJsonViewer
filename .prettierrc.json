@@ -1,0 +1,12 @@
+{
+  "semi": false,
+  "singleQuote": true,
+  "arrowParens": "avoid",
+  "trailingComma": "none",
+
+  "importOrder": ["^(?!@/).*(?<!\\.vue)$", "(?<!\\.vue)$", ""],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+
+  "plugins": ["@trivago/prettier-plugin-sort-imports"]
+}

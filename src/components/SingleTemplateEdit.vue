@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { NAutoComplete } from 'naive-ui'
 import { computed } from 'vue'
-import type { UseProducer } from '@/persis'
+
 import { imgIndex } from '@/data/image'
+import type { UseProducer } from '@/persis'
 
 const props = defineProps<{
   value: string

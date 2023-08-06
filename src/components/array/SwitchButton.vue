@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { DataArrayOutlined } from '@vicons/material'
 import { NButton, NIcon } from 'naive-ui'
-import { MusicNoteOutlined, DataArrayOutlined } from '@vicons/material'
 
 defineProps<{
   disabled?: boolean

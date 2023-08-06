@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { Rect } from '@/types'
-import IntInput from './IntInput.vue'
 import { ref } from 'vue'
+
 import type { UseProducer } from '@/persis'
+import type { Rect } from '@/types'
+
+import IntInput from '@/components/atomic/IntInput.vue'
 
 const props = defineProps<{
   value: Rect

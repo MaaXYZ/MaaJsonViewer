@@ -1,11 +1,3 @@
-import {
-  computed,
-  type ComputedRef,
-  type Ref,
-  type WritableComputedRef
-} from 'vue'
-import type { ImmerInfo, Producer } from './persis'
-
 export type Rect = [number, number, number, number]
 export type TextRepl = [string, string]
 

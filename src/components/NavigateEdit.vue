@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { navigate } from '@/data'
 import type { UseProducer } from '@/persis'
+
 import SingleArrayEdit from './SingleArrayEdit.vue'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
-import { navigate } from '@/data'
 
 type T = string | string[] | null
 

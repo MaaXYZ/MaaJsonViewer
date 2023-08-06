@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { NSlider, NInput } from 'naive-ui'
+import { NSlider } from 'naive-ui'
 import { computed } from 'vue'
-import type { Rect } from '@/types'
-import ClearButton from './ClearButton.vue'
-import SingleNavigateEdit from './SingleNavigateEdit.vue'
-import RectEdit from './RectEdit.vue'
-import SingleEdit from './SingleEdit.vue'
+
 import type { UseProducer } from '@/persis'
+import type { Rect } from '@/types'
+
+import SingleEdit from './SingleEdit.vue'
+import SingleNavigateEdit from './SingleNavigateEdit.vue'
+import ClearButton from '@/components/atomic/ClearButton.vue'
+import RectEdit from '@/components/atomic/RectEdit.vue'
 
 type TTarget = 1 | string | Rect | null
 type TTargetOut = true | string | Rect | null

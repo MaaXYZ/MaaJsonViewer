@@ -1,8 +1,8 @@
+import { format } from 'date-fns'
 import express, { json } from 'express'
+import fs from 'fs/promises'
 import multer, { memoryStorage } from 'multer'
 import path from 'path'
-import fs from 'fs/promises'
-import { format } from 'date-fns'
 
 async function main() {
   const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as {

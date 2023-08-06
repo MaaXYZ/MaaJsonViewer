@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { NButton, NCard, NIcon } from 'naive-ui'
-import {
-  NavigateBeforeOutlined,
-  NavigateNextOutlined,
-  FileDownloadOutlined,
-  FileUploadOutlined,
-  UndoOutlined,
-  RedoOutlined
-} from '@vicons/material'
-import { active, navigate, type TaskData } from './data'
-import TaskEdit from '@/components/TaskEdit.vue'
-import TaskTree from '@/components/TaskTree.vue'
+import { active } from './data'
+import { getTask, setTask } from './data/task'
 import { history } from './history'
 import { loadFS, saveFS } from './loader'
-import { getTask, setTask } from './data/task'
+import {
+  FileDownloadOutlined,
+  FileUploadOutlined,
+  NavigateBeforeOutlined,
+  NavigateNextOutlined,
+  RedoOutlined,
+  UndoOutlined
+} from '@vicons/material'
 import { produce } from 'immer'
+import { NButton, NCard, NIcon } from 'naive-ui'
+import { computed, onMounted, ref } from 'vue'
+
 import { fs } from '@/data/fs'
+
+import TaskEdit from '@/components/TaskEdit.vue'
+import TaskTree from '@/components/TaskTree.vue'
 
 const expands = ref<string[]>(['root.'])
 

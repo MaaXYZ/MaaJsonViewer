@@ -1,14 +1,15 @@
-import { type TaskData } from '@/data'
-import {
-  Util,
-  type DirEntry,
-  type FS,
-  type PathSegment,
-  type FileEntry
-} from '@/fs'
-import { Persis } from '@/persis'
 import type { TreeOption } from 'naive-ui'
 import { computed } from 'vue'
+
+import { type TaskData } from '@/data'
+import {
+  type DirEntry,
+  type FS,
+  type FileEntry,
+  type PathSegment,
+  Util
+} from '@/fs'
+import { Persis } from '@/persis'
 
 export const fs = new Persis<FS | null>(null)
 

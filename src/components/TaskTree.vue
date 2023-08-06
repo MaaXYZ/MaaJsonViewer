@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { NInput, NTree, NIcon, type TreeOption } from 'naive-ui'
-import { ref, computed, h } from 'vue'
-import { ChangeCircleOutlined, SearchOutlined } from '@vicons/material'
-import { navigate, active } from '@/data'
-import { fsTree } from '@/data/fs'
 import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
-import { Util } from '@/fs'
+import { SearchOutlined } from '@vicons/material'
+import { NIcon, NInput, NTree } from 'naive-ui'
+import { computed, ref } from 'vue'
+
+import { active, navigate } from '@/data'
+import { fsTree } from '@/data/fs'
 
 const expand = defineModel<string[]>('expand', {
   required: true

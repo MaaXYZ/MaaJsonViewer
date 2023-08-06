@@ -1,10 +1,12 @@
 <script setup lang="ts" generic="T">
-import { NButton, NIcon } from 'naive-ui'
-import { DeleteOutlined, AddOutlined } from '@vicons/material'
-import { computed, ref } from 'vue'
-import SingleArrayButton from './SingleArrayButton.vue'
-import type { UseProducer } from '@/persis'
+import { AddOutlined, DeleteOutlined } from '@vicons/material'
 import { produce } from 'immer'
+import { NButton, NIcon } from 'naive-ui'
+import { computed } from 'vue'
+
+import type { UseProducer } from '@/persis'
+
+import SwitchButton from '@/components/array/SwitchButton.vue'
 
 type U = T | T[] | null
 
@@ -119,10 +121,10 @@ function remove(idx: number) {
 <template>
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
-      <SingleArrayButton
+      <SwitchButton
         v-if="type === 'both'"
         v-model:value="single"
-      ></SingleArrayButton>
+      ></SwitchButton>
       <NButton :disabled="single && value !== null" @click="add">
         <template #icon>
           <NIcon>

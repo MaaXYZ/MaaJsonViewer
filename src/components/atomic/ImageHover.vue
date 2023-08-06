@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { NAvatar, NPopover } from 'naive-ui'
+import { computed } from 'vue'
+
 import { fs } from '@/data/fs'
 import { FS } from '@/fs'
 

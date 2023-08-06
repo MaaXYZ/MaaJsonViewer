@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="T, U">
-import type { UseProducer } from '@/persis'
 import { NButton } from 'naive-ui'
+
+import type { UseProducer } from '@/persis'
 
 withDefaults(
   defineProps<{

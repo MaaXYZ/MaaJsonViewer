@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { NButton, NIcon, NAutoComplete, NPopover } from 'naive-ui'
-import { computed } from 'vue'
 import {
-  MovingOutlined,
-  WavingHandOutlined,
   AdsClickOutlined,
+  MovingOutlined,
   SwipeRightOutlined,
-  TranslateOutlined
+  TranslateOutlined,
+  WavingHandOutlined
 } from '@vicons/material'
-import ImageHover from './ImageHover.vue'
-import type { UseProducer } from '@/persis'
-import { getTask, taskIndex } from '@/data/task'
+import { NAutoComplete, NButton, NIcon, NPopover } from 'naive-ui'
+import { computed } from 'vue'
+
 import { navigate } from '@/data'
+import { getTask, taskIndex } from '@/data/task'
+import type { UseProducer } from '@/persis'
+
+import ImageHover from '@/components/atomic/ImageHover.vue'
 
 type T = string
 

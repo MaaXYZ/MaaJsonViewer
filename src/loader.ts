@@ -1,6 +1,6 @@
-import axios from 'axios'
-import { FS } from './fs'
 import { fs } from './data/fs'
+import { FS } from './fs'
+import axios from 'axios'
 
 async function loadZip() {
   const res: ArrayBuffer = (

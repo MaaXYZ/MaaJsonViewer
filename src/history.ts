@@ -1,5 +1,5 @@
-import { computed, type ComputedRef } from 'vue'
 import { Persis } from './persis'
+import { type ComputedRef, computed } from 'vue'
 
 class History {
   info: Persis<{ active: string | null }>

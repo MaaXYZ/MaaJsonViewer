@@ -1,40 +1,36 @@
 <script setup lang="ts">
-import { computed, ref, type ComputedRef } from 'vue'
 import {
-  NButton,
-  NCollapse,
-  NCollapseItem,
-  NIcon,
-  NModal,
-  NCard,
-  NInput,
-  NSwitch
-} from 'naive-ui'
-import {
-  EditOutlined,
   CheckOutlined,
   CloseOutlined,
   ContentCopyOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  EditOutlined
 } from '@vicons/material'
-import ClearButton from './ClearButton.vue'
-import JsonEdit from './JsonEdit.vue'
+import { produce } from 'immer'
+import {
+  NButton,
+  NCard,
+  NCollapse,
+  NCollapseItem,
+  NIcon,
+  NInput,
+  NModal,
+  NSwitch
+} from 'naive-ui'
+import { computed, ref } from 'vue'
+
+import { commitDelete, commitDuplicate, commitMove, navigate } from '@/data'
+import { taskIndex } from '@/data/task'
+import { Util } from '@/fs'
+import { type UseProducer, applyEditOn } from '@/persis'
+import { type Task } from '@/types'
+
+import ActionEdit from './ActionEdit.vue'
 import NavigateEdit from './NavigateEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
-import ActionEdit from './ActionEdit.vue'
-import { type Task, type Rect, type TextRepl } from '@/types'
-import {
-  commitMove,
-  commitDuplicate,
-  commitDelete,
-  navigate,
-  type TaskData
-} from '@/data'
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
-import { taskIndex } from '@/data/task'
-import { produce } from 'immer'
-import { type UseProducer, applyEditOn } from '@/persis'
-import { Util } from '@/fs'
+import ClearButton from '@/components/atomic/ClearButton.vue'
+import JsonEdit from '@/components/atomic/JsonEdit.vue'
 
 const props = defineProps<{
   name: string

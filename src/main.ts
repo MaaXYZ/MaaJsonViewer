@@ -1,6 +1,6 @@
 import './main.css'
-
 import { createApp } from 'vue'
+
 import Wrapper from './Wrapper.vue'
 
 const meta = document.createElement('meta')
