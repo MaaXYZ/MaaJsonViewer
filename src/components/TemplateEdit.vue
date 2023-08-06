@@ -8,6 +8,7 @@ import SingleArrayButton from './SingleArrayButton.vue'
 import FloatInput from './FloatInput.vue'
 import ImageHover from './ImageHover.vue'
 import { type UseProducer, updateEdit } from '@/persis'
+import SingleTemplateEdit from './SingleTemplateEdit.vue'
 
 type TTemp = string | string[] | null
 type TThre = number | number[] | null
@@ -101,11 +102,7 @@ const fixThre = (v: number) => {
   >
     <template #edit="{ value, edit, index }">
       <div class="flex gap-2">
-        <NInput
-          :value="value"
-          @update:value="v => updateEdit(edit, v)"
-          placeholder="template"
-        ></NInput>
+        <SingleTemplateEdit :value="value" :edit="edit"></SingleTemplateEdit>
         <FloatInput
           v-if="!isThresholdSingle"
           :nullable="false"
