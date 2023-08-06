@@ -22,14 +22,13 @@ import { computed, ref } from 'vue'
 import { commitDelete, commitDuplicate, commitMove, navigate } from '@/data'
 import { taskIndex } from '@/data/task'
 import { Util } from '@/fs'
-import { type UseProducer, applyEditOn } from '@/persis'
-import { type Task } from '@/types'
+import type { UseProducer } from '@/persis'
+import type { Task } from '@/types'
 
 import ActionEdit from './ActionEdit.vue'
+import MiscEdit from './MiscEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
-import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
-import ArrayNavigateEdit from '@/components/task/ArrayNavigateEdit.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 
 const props = defineProps<{
@@ -189,8 +188,11 @@ function tryDelete() {
         </template>
       </NButton>
     </div>
-    <div class="flex flex-col flex-1 overflow-auto">
-      <div class="flex gap-2">
+    <div class="flex flex-1 gap-2 min-h-0">
+      <div
+        class="flex flex-col flex-1 overflow-y-auto min-h-0"
+        style="min-width: 500px"
+      >
         <NCollapse :default-expanded-names="['reco', 'act', 'misc']">
           <NCollapseItem title="识别" name="reco">
             <RecognizerEdit :value="value" :edit="edit"></RecognizerEdit>
@@ -199,33 +201,15 @@ function tryDelete() {
             <ActionEdit :value="value" :edit="edit"></ActionEdit>
           </NCollapseItem>
           <NCollapseItem title="其他" name="misc">
-            <div
-              class="grid items-center"
-              style="
-                grid-template-columns: max-content minmax(0, 1fr);
-                column-gap: 0.5rem;
-                row-gap: 1rem;
-              "
-            >
-              <ClearButton
-                :value="value.next ?? null"
-                :edit="applyEditOn(edit, 'next')"
-              >
-                Next
-              </ClearButton>
-              <ArrayNavigateEdit
-                :value="value.next ?? null"
-                :edit="applyEditOn(edit, 'next')"
-              ></ArrayNavigateEdit>
-            </div>
+            <MiscEdit :value="value" :edit="edit"></MiscEdit>
           </NCollapseItem>
         </NCollapse>
-        <JsonEdit
-          style="min-width: 28rem"
-          :value="value"
-          @update:value="v => edit(() => v)"
-        ></JsonEdit>
       </div>
+      <JsonEdit
+        style="min-width: 350px"
+        :value="value"
+        @update:value="v => edit(() => v)"
+      ></JsonEdit>
     </div>
   </div>
 </template>

@@ -2,6 +2,7 @@
 import {
   AdsClickOutlined,
   MovingOutlined,
+  RepeatOutlined,
   SwipeRightOutlined,
   TranslateOutlined,
   WavingHandOutlined
@@ -49,12 +50,14 @@ const options = computed(() => {
 <template>
   <div class="flex gap-2">
     <NButton
+      v-if="navTask"
       :disabled="!(value in taskIndex)"
       @click="navigate(taskIndex[value])"
     >
       <template #icon>
         <NIcon>
-          <MovingOutlined></MovingOutlined>
+          <RepeatOutlined v-if="navTask.is_sub"></RepeatOutlined>
+          <MovingOutlined v-else></MovingOutlined>
         </NIcon>
       </template>
     </NButton>

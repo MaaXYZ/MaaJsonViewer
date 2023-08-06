@@ -35,13 +35,13 @@ export function applyEditOn<T, K extends keyof T>(
 export function updateEditOn<T, K extends keyof T>(
   edit: UseProducer<T>,
   key: K,
-  val: T[K]
+  val: T[K] | null
 ) {
   edit(draft => {
     if ((val ?? null) === null) {
       delete draft[key]
     } else {
-      draft[key] = val
+      draft[key] = val as T[K]
     }
   })
 }
