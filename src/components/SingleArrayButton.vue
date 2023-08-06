@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NIcon } from 'naive-ui'
-import { MusicNoteOutlined, QueueMusicOutlined } from '@vicons/material'
+import { MusicNoteOutlined, DataArrayOutlined } from '@vicons/material'
 
 defineProps<{
   disabled?: boolean
@@ -19,8 +19,7 @@ const single = defineModel<boolean>('value', {
   >
     <template #icon>
       <NIcon>
-        <MusicNoteOutlined v-if="single"></MusicNoteOutlined>
-        <QueueMusicOutlined v-else></QueueMusicOutlined>
+        <DataArrayOutlined></DataArrayOutlined>
       </NIcon>
     </template>
   </NButton>

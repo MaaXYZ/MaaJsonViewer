@@ -8,6 +8,7 @@ import {
   DataObjectOutlined,
   DeleteOutlined,
   FolderOutlined,
+  ImageOutlined,
   InsertDriveFileOutlined
 } from '@vicons/material'
 import {
@@ -54,6 +55,12 @@ export function renderPrefix({ option }: { option: TreeOption }) {
       return (
         <NIcon>
           <DataObjectOutlined></DataObjectOutlined>
+        </NIcon>
+      )
+    } else if (file.endsWith('.png')) {
+      return (
+        <NIcon>
+          <ImageOutlined></ImageOutlined>
         </NIcon>
       )
     } else {
