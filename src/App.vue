@@ -20,7 +20,7 @@ import { fs } from '@/data/fs'
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
 
-const expands = ref<string[]>(['root.'])
+const expands = ref<string[]>(['/'])
 
 onMounted(async () => {
   await loadFS()

@@ -37,7 +37,7 @@ export function renderLabel({ option }: { option: TreeOption }) {
       }
     }
   } else {
-    return <span>{option.label}</span>
+    return <span>{option.key === '/' ? '[ROOT]' : option.label}</span>
   }
 }
 
