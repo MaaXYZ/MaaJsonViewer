@@ -110,7 +110,7 @@ type Action = {
   end_offset?: Rect
   duration?: number
 
-  key?: string | number | number[]
+  key?: number | number[]
 
   package?: string
 

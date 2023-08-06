@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { NInput, NSelect } from 'naive-ui'
+import { NInput, NInputNumber, NSelect } from 'naive-ui'
 import { computed } from 'vue'
 
 import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
 import type { Task } from '@/types'
 
+import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
@@ -83,8 +84,20 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
       <ClearButton :value="value.key ?? null" :edit="applyEditOn(edit, 'key')">
         按键
       </ClearButton>
-      <!-- TODO -->
-      <span> {{ value.key }} </span>
+      <ArrayEdit
+        :value="value.key ?? null"
+        :edit="applyEditOn(edit, 'key')"
+        :def="() => 0"
+        :is-t="v => typeof v === 'number'"
+      >
+        <template #edit="{ value, edit }">
+          <NInputNumber
+            :value="value"
+            @update:value="v => edit(() => v ?? 0)"
+            :min="0"
+          ></NInputNumber>
+        </template>
+      </ArrayEdit>
     </template>
     <template v-else-if="taskActValue === 'StartApp'">
       <ClearButton

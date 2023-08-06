@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
-import { computed } from 'vue'
+import { NInputNumber, NSwitch } from 'naive-ui'
 
 import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
 import type { Task } from '@/types'
 
-import TargetEdit from './TargetEdit.vue'
 import ArrayNavigateEdit from './task/ArrayNavigateEdit.vue'
-import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
-import IntInput from '@/components/atomic/IntInput.vue'
 import FreezeEdit from '@/components/task/FreezeEdit.vue'
 
-const props = defineProps<{
+defineProps<{
   value: Task
   edit: UseProducer<Task>
 }>()

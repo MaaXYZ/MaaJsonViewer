@@ -51,7 +51,9 @@ const templMethodOptions = [1, 3, 5].map(x => ({
       :options="recoOptions"
       :placeholder="recoOptions[0].label"
     ></NSelect>
-    <template v-if="taskRecoValue !== 'Custom'">
+    <template
+      v-if="taskRecoValue === 'TemplateMatch' || taskRecoValue === 'OCR'"
+    >
       <ClearButton :value="value.roi ?? null" :edit="applyEditOn(edit, 'roi')">
         识别区域
       </ClearButton>
