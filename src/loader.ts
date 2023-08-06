@@ -4,7 +4,7 @@ import { fs } from './data/fs'
 
 async function loadZip() {
   const res: ArrayBuffer = (
-    await axios.post('/api/zip', null, {
+    await axios.post('/api/load', null, {
       responseType: 'arraybuffer'
     })
   ).data

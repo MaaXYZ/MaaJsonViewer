@@ -52,10 +52,17 @@ jobs:
       - name: Build Package
         run: |
           cd server
+
+          echo '{}' > test.json
+          zip res.zip test.json
+
           npx pkg . -t node18-x64-windows
           mkdir -p out/web
-          cp -r web/* out/web/
           mkdir -p out/saves
+          cp config.json out/
+          cp -r web/* out/web/
+          cp -r res.zip out/saves/
+
           cd ..
 
       - uses: actions/upload-artifact@v3

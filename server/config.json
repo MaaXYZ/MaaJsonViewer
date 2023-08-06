@@ -1,0 +1,7 @@
+{
+  "port": 8080,
+  "web": "./web",
+  "date": "yyyyMMdd-HHmmss",
+  "saves": "./saves/{date}.zip",
+  "active": "./saves/res.zip"
+}
