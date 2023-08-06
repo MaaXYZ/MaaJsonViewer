@@ -11,6 +11,7 @@ import {
 import ImageHover from './ImageHover.vue'
 import type { UseProducer } from '@/persis'
 import { getTask, taskIndex } from '@/data/task'
+import { navigate } from '@/data'
 
 type T = string
 
@@ -45,7 +46,10 @@ const options = computed(() => {
 
 <template>
   <div class="flex gap-2">
-    <NButton>
+    <NButton
+      :disabled="!(value in taskIndex)"
+      @click="navigate(taskIndex[value])"
+    >
       <template #icon>
         <NIcon>
           <MovingOutlined></MovingOutlined>
