@@ -219,8 +219,9 @@ function tryDelete() {
               </ClearButton>
               <ArrayNavigateEdit
                 :value="
-                  taskBackwardIndex[hash].sort((a, b) => a.localeCompare(b)) ??
-                  []
+                  (taskBackwardIndex[hash] ?? []).sort((a, b) =>
+                    a.localeCompare(b)
+                  )
                 "
                 :edit="() => {}"
                 array

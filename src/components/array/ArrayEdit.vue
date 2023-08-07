@@ -149,16 +149,19 @@ function remove(idx: number) {
             }) as UseProducer<T>
           "
         ></slot>
-        <NButton
-          :disabled="!nullable && (single || valarr.length === 1)"
-          @click="remove(i)"
-        >
-          <template #icon>
-            <NIcon>
-              <DeleteOutlined></DeleteOutlined>
-            </NIcon>
-          </template>
-        </NButton>
+        <div>
+          <NButton
+            v-if="!readonly"
+            :disabled="!nullable && (single || valarr.length === 1)"
+            @click="remove(i)"
+          >
+            <template #icon>
+              <NIcon>
+                <DeleteOutlined></DeleteOutlined>
+              </NIcon>
+            </template>
+          </NButton>
+        </div>
       </template>
     </div>
   </div>
