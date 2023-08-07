@@ -24,6 +24,7 @@ type T = string
 const props = defineProps<{
   value: T
   edit: UseProducer<T>
+  readonly?: boolean
 }>()
 
 const navTask = computed(() => {
@@ -65,6 +66,7 @@ const options = computed(() => {
       </template>
     </NButton>
     <NAutoComplete
+      :readonly="readonly"
       :value="value"
       @update:value="
         v => {

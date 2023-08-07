@@ -20,7 +20,7 @@ import {
 import { computed, ref } from 'vue'
 
 import { commitDelete, commitDuplicate, commitMove, navigate } from '@/data'
-import { taskIndex } from '@/data/task'
+import { taskBackwardIndex, taskIndex } from '@/data/task'
 import { Util } from '@/fs'
 import type { UseProducer } from '@/persis'
 import type { Task } from '@/types'
@@ -28,7 +28,9 @@ import type { Task } from '@/types'
 import ActionEdit from './ActionEdit.vue'
 import MiscEdit from './MiscEdit.vue'
 import RecognizerEdit from './RecognizerEdit.vue'
+import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
+import ArrayNavigateEdit from '@/components/task/ArrayNavigateEdit.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 
 const props = defineProps<{
@@ -39,14 +41,14 @@ const props = defineProps<{
 
 const hash = computed(() => {
   const [, , hash] = Util.pathdiv(props.name)
-  return hash
+  return hash!
 })
 
 const showRename = ref(false)
 const titleCache = ref('')
 
 function enterRename() {
-  titleCache.value = hash.value!
+  titleCache.value = hash.value
   showRename.value = true
 }
 
@@ -193,7 +195,7 @@ function tryDelete() {
         class="flex flex-col flex-1 overflow-y-auto min-h-0"
         style="min-width: 500px"
       >
-        <NCollapse :default-expanded-names="['reco', 'act', 'misc']">
+        <NCollapse :default-expanded-names="['reco', 'act', 'misc', 'ref']">
           <NCollapseItem title="识别" name="reco">
             <RecognizerEdit :value="value" :edit="edit"></RecognizerEdit>
           </NCollapseItem>
@@ -203,10 +205,33 @@ function tryDelete() {
           <NCollapseItem title="其他" name="misc">
             <MiscEdit :value="value" :edit="edit"></MiscEdit>
           </NCollapseItem>
+          <NCollapseItem title="引用" name="ref">
+            <div
+              class="grid items-center"
+              style="
+                grid-template-columns: max-content minmax(0, 1fr);
+                column-gap: 0.5rem;
+                row-gap: 1rem;
+              "
+            >
+              <ClearButton propkey="<unknown>" :value="null" :edit="() => {}">
+                前序任务
+              </ClearButton>
+              <ArrayNavigateEdit
+                :value="
+                  taskBackwardIndex[hash].sort((a, b) => a.localeCompare(b)) ??
+                  []
+                "
+                :edit="() => {}"
+                array
+                readonly
+              ></ArrayNavigateEdit>
+            </div>
+          </NCollapseItem>
         </NCollapse>
       </div>
       <JsonEdit
-        style="width: 400px"
+        style="width: 450px"
         :value="value"
         @update:value="v => edit(() => v)"
       ></JsonEdit>

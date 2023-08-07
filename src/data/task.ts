@@ -22,6 +22,31 @@ export const taskIndex = computed(() => {
   return res
 })
 
+function wrapNext(v?: string | string[]) {
+  return v ? (typeof v === 'string' ? [v] : v) : []
+}
+
+export const taskBackwardIndex = computed(() => {
+  const res: Record<string, string[]> = {}
+  for (const name in taskIndex.value) {
+    const keys = ['next', 'timeout_next', 'runout_next'] as const
+    const task = getTask(taskIndex.value[name])
+    if (!task) {
+      continue
+    }
+    for (const key of keys) {
+      let arr = wrapNext(task[key])
+      for (const to of arr) {
+        if (!(to in res)) {
+          res[to] = []
+        }
+        res[to].push(name)
+      }
+    }
+  }
+  return res
+})
+
 export function setTask(path: string | null, v: Task) {
   if (!path) {
     return

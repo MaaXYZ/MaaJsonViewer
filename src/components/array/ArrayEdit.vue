@@ -21,12 +21,12 @@ const props = withDefaults(
     def: () => T
     isT: (v: T | T[]) => boolean
     nullable?: boolean
+    readonly?: boolean
     type?: 'both' | 'single' | 'multi'
     onAdd?: () => void
     onDel?: (idx: number) => void
   }>(),
   {
-    nullable: false,
     type: 'both'
   }
 )
@@ -112,7 +112,10 @@ function remove(idx: number) {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex gap-2" v-if="type === 'both' || !single || value === null">
+    <div
+      class="flex gap-2"
+      v-if="!readonly && (type === 'both' || !single || value === null)"
+    >
       <SwitchButton v-if="type === 'both'" v-model:value="single">
         <DataArrayOutlined></DataArrayOutlined>
       </SwitchButton>

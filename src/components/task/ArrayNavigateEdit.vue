@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { navigate } from '@/data'
 import type { UseProducer } from '@/persis'
 
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
@@ -10,6 +9,8 @@ type T = string | string[] | null
 defineProps<{
   value: T
   edit: UseProducer<T>
+  array?: boolean
+  readonly?: boolean
 }>()
 </script>
 
@@ -18,6 +19,8 @@ defineProps<{
     :value="value"
     :edit="edit"
     :nullable="true"
+    :readonly="readonly"
+    :type="array ? 'multi' : 'both'"
     :def="() => ''"
     :is-t="(v: string | string[]) => typeof v === 'string'"
   >
@@ -25,7 +28,7 @@ defineProps<{
       <SingleNavigateEdit
         :value="value"
         :edit="edit"
-        :navigate="navigate"
+        :readonly="readonly"
       ></SingleNavigateEdit>
     </template>
   </ArrayEdit>
