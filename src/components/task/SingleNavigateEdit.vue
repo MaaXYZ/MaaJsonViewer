@@ -10,7 +10,7 @@ import {
   TranslateOutlined,
   WavingHandOutlined
 } from '@vicons/material'
-import { NAutoComplete, NButton, NIcon, NPopover } from 'naive-ui'
+import { NAutoComplete, NButton, NIcon, NInput, NPopover } from 'naive-ui'
 import { computed } from 'vue'
 
 import { navigate } from '@/data'
@@ -65,8 +65,9 @@ const options = computed(() => {
         </NIcon>
       </template>
     </NButton>
+    <NInput v-if="readonly" readonly :value="value"></NInput>
     <NAutoComplete
-      :readonly="readonly"
+      v-else
       :value="value"
       @update:value="
         v => {
