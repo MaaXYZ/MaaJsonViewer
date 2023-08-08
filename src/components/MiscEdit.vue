@@ -48,6 +48,19 @@ defineProps<{
       ></NSwitch>
     </div>
     <ClearButton
+      propkey="inverse"
+      :value="value.inverse ?? null"
+      :edit="applyEditOn(edit, 'inverse')"
+    >
+      识别反转
+    </ClearButton>
+    <div>
+      <NSwitch
+        :value="value.inverse ?? false"
+        @update:value="v => updateEditOn(edit, 'inverse', v)"
+      ></NSwitch>
+    </div>
+    <ClearButton
       propkey="timeout"
       :value="value.timeout ?? null"
       :edit="applyEditOn(edit, 'timeout')"
