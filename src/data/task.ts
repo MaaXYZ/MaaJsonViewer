@@ -1,25 +1,29 @@
 import { computed } from 'vue'
 
-import { fs } from './fs'
-
-import { type TaskData } from '@/data'
-import { Util } from '@/fs'
-import type { Task } from '@/types'
+import { fs, path } from '@/filesystem'
+import type { PathKey } from '@/filesystem'
+import type { Task, TaskData } from '@/types'
 
 export const taskIndex = computed(() => {
-  const res: Record<string, string> = {}
-  fs.now().value?.enumFile((dir, entry) => {
-    if (entry.name.endsWith('.json') && entry.data) {
-      const data: TaskData = JSON.parse(entry.data)
-      for (const name in data) {
-        if (name in res) {
-          console.warn('duplicated task detected', name)
-          continue
+  const res: Record<string, PathKey> = {}
+  fs.tree.travel(
+    fs.tree.root,
+    () => void 0,
+    (dir, name, content) => {
+      if (name.endsWith('.json')) {
+        const data = JSON.parse(content) as TaskData
+        for (const hash in data) {
+          if (hash in res) {
+            console.warn('duplicated task detected', name)
+            continue
+          }
+          res[hash] = path.joinkey(dir, name, hash)
         }
-        res[name] = Util.pathjoin(dir, entry.name, name)
       }
-    }
-  })
+    },
+    () => {},
+    void 0
+  )
   return res
 })
 
@@ -48,90 +52,162 @@ export const taskBackwardIndex = computed(() => {
   return res
 })
 
-export function setTask(path: string | null, v: Task) {
-  if (!path) {
+export function setTask(p: PathKey | null, v: Task) {
+  if (!p) {
     return
   }
-  const [dir, file, hash] = Util.pathdiv(path)
+  const [dir, file, hash] = path.divide(p)
   if (!hash) {
     return
   }
-  fs.change(draft => {
-    if (!draft) {
-      return
-    }
-    const de = draft.trace(dir)
-    if (!de) {
-      return
-    }
-    const json = draft.getFileViaEntry(de, file)?.[1]?.data
-    if (!json) {
-      return
-    }
-    const obj = JSON.parse(json) as TaskData
-    obj[hash] = v
-    draft.addTextFileViaEntry(
-      draft.trace(dir)!,
-      file,
-      JSON.stringify(obj, null, 4),
-      true
-    )
-  })
-}
-
-export function delTask(path: string | null) {
-  if (!path) {
-    return
-  }
-  const [dir, file, hash] = Util.pathdiv(path)
-  if (!hash) {
-    return
-  }
-  fs.change(draft => {
-    if (!draft) {
-      return
-    }
-    const de = draft.trace(dir)
-    if (!de) {
-      return
-    }
-    const json = draft.getFileViaEntry(de, file)?.[1]?.data
-    if (!json) {
-      return
-    }
-    const obj = JSON.parse(json) as TaskData
-    if (hash in obj) {
-      delete obj[hash]
-    }
-    draft.addTextFileViaEntry(
-      draft.trace(dir)!,
-      file,
-      JSON.stringify(obj, null, 4),
-      true
-    )
-  })
-}
-
-export function getTask(path: string | null) {
-  if (!path) {
-    return null
-  }
-  const [dir, file, hash] = Util.pathdiv(path)
-  if (!hash) {
-    return null
-  }
-  const f = fs.now().value
+  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
   if (!f) {
-    return null
+    return
   }
-  const de = f.trace(dir)
-  if (!de) {
-    return null
+  const obj = JSON.parse(f.value) as TaskData
+  obj[hash] = v
+  f.value = JSON.stringify(obj, null, 4)
+}
+
+export function delTask(p: PathKey | null) {
+  if (!p) {
+    return
   }
-  const json = f.getFileViaEntry(de, file)?.[1]?.data
-  if (!json) {
-    return null
+  const [dir, file, hash] = path.divide(p)
+  if (!hash) {
+    return
   }
-  const obj = JSON.parse(json) as TaskData
+  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
+  if (!f) {
+    return
+  }
+  const obj = JSON.parse(f.value) as TaskData
+  if (hash in obj) {
+    delete obj[hash]
+  }
+  f.value = JSON.stringify(obj, null, 4)
+}
+
+export function getTask(p: PathKey | null) {
+  if (!p) {
+    return
+  }
+  const [dir, file, hash] = path.divide(p)
+  if (!hash) {
+    return
+  }
+  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
+  if (!f) {
+    return
+  }
+  const obj = JSON.parse(f.value) as TaskData
   return obj[hash] ?? null
+}
+
+function performRename(
+  task: Record<string, unknown>,
+  key: string,
+  from: string,
+  to: string | null
+) {
+  if (!(key in task)) {
+    return
+  }
+  const val = task[key]
+  if (typeof val === 'string') {
+    if (val === from) {
+      if (to) {
+        task[key] = to
+      } else {
+        delete task[key]
+      }
+      return
+    }
+  } else if (
+    val instanceof Array &&
+    val.length > 0 &&
+    typeof val[0] === 'string'
+  ) {
+    if (to) {
+      task[key] = val.map(x => {
+        if (x === from) {
+          return to
+        } else {
+          return x
+        }
+      })
+    } else {
+      task[key] = val.filter(x => x !== from)
+    }
+  }
+}
+
+export function moveTask(from: PathKey, to: PathKey) {
+  const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
+
+  const [fd, ff, fh] = path.divide(from)
+  const [td, tf, th] = path.divide(to)
+
+  fs.history.pause()
+
+  for (const name in taskIndex.value) {
+    const task = getTask(taskIndex.value[name])
+    if (!task) {
+      continue
+    }
+    for (const key of keys) {
+      performRename(task, key, fh!, th)
+    }
+    if (name === fh) {
+      delTask(from)
+      setTask(to, task)
+    } else {
+      setTask(taskIndex.value[name], task)
+    }
+  }
+
+  fs.history.pause()
+  fs.history.commit()
+}
+
+export function duplicateTask(name: PathKey) {
+  const [dir, file, hash] = path.divide(name)
+  const task = getTask(name)
+  if (!task) {
+    return
+  }
+  for (let i = 1; ; i++) {
+    const name2 = `${hash}${i}`
+    if (!(name2 in taskIndex.value)) {
+      setTask(path.joinkey(dir, file, name2), task)
+      return
+    }
+  }
+}
+
+export function deleteTask(from: PathKey, to: PathKey | null) {
+  const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
+
+  const [fd, ff, fh] = path.divide(from)
+  const th = to ? path.divide(to)[2] : null
+
+  fs.history.pause()
+
+  for (const name in taskIndex.value) {
+    if (name === fh) {
+      delTask(from)
+    } else {
+      const task = getTask(taskIndex.value[name])
+      if (!task) {
+        continue
+      }
+      for (const key of keys) {
+        performRename(task, key, fh!, th)
+      }
+      setTask(taskIndex.value[name], task)
+    }
+  }
+
+  fs.history.pause()
+  fs.history.commit()
 }

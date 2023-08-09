@@ -9,19 +9,17 @@ import {
 } from '@vicons/material'
 import { produce } from 'immer'
 import { NButton, NCard, NIcon } from 'naive-ui'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
-import { active } from './data'
-import { getTask, setTask } from './data/task'
-import { history } from './history'
 import { loadFS, saveFS } from './loader'
 
-import { fs } from '@/data/fs'
+import { active, getTask, history, setTask } from '@/data'
+import { type PathKey, fs } from '@/filesystem'
 
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
 
-const expands = ref<string[]>(['/'])
+const expands = ref<PathKey[]>(['/' as PathKey])
 
 onMounted(async () => {
   await loadFS()
@@ -30,12 +28,12 @@ onMounted(async () => {
       ev.stopPropagation()
       ev.preventDefault()
       if (ev.shiftKey) {
-        if (fs.canRedo()) {
-          fs.redo()
+        if (fs.history.canRedo.value) {
+          fs.history.redo()
         }
       } else {
-        if (fs.canUndo()) {
-          fs.undo()
+        if (fs.history.canUndo.value) {
+          fs.history.undo()
         }
       }
     }
@@ -46,14 +44,14 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NButton :disabled="!fs.canUndo()" @click="() => fs.undo()">
+      <NButton :disabled="!fs.history.canUndo.value" @click="fs.history.undo">
         <template #icon>
           <NIcon>
             <UndoOutlined></UndoOutlined>
           </NIcon>
         </template>
       </NButton>
-      <NButton :disabled="!fs.canRedo()" @click="() => fs.redo()">
+      <NButton :disabled="!fs.history.canRedo.value" @click="fs.history.redo">
         <template #icon>
           <NIcon>
             <RedoOutlined></RedoOutlined>
@@ -61,8 +59,8 @@ onMounted(async () => {
         </template>
       </NButton>
       <NButton
-        :disabled="!history.info.canUndo()"
-        @click="() => history.info.undo()"
+        :disabled="!history.info.canUndo.value"
+        @click="history.info.undo()"
       >
         <template #icon>
           <NIcon>
@@ -71,8 +69,8 @@ onMounted(async () => {
         </template>
       </NButton>
       <NButton
-        :disabled="!history.info.canRedo()"
-        @click="() => history.info.redo()"
+        :disabled="!history.info.canRedo.value"
+        @click="history.info.redo()"
       >
         <template #icon>
           <NIcon>
@@ -108,9 +106,9 @@ onMounted(async () => {
           <TaskEdit
             :name="active"
             :value="getTask(active)!"
-            :edit="
-              prod => {
-                setTask(active!, produce(getTask(active)!, prod))
+            @update:value="
+              task => {
+                setTask(active!, task)
               }
             "
           ></TaskEdit>
@@ -119,3 +117,4 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+./data/history

@@ -17,16 +17,14 @@ import {
 } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import { commitDelete } from '@/data'
-import { fs } from '@/data/fs'
-import { setTask, taskIndex } from '@/data/task'
-import { Util } from '@/fs'
+import { deleteTask, setTask, taskIndex } from '@/data'
+import { type PathKey, fs, path } from '@/filesystem'
 
 export function renderLabel({ option }: { option: TreeOption }) {
-  const key = option.key as string
+  const key = option.key as PathKey
 
-  if (!key.endsWith('/')) {
-    const [dir, file, hash] = Util.pathdiv(key)
+  if (!path.key_is_dir(key)) {
+    const [dir, file, hash] = path.divide(key)
     if (hash) {
       return <span>{hash}</span>
     } else {
@@ -42,7 +40,7 @@ export function renderLabel({ option }: { option: TreeOption }) {
 }
 
 export function renderPrefix({ option }: { option: TreeOption }) {
-  const key = option.key as string
+  const key = option.key as PathKey
 
   if (key.endsWith('/')) {
     return (
@@ -51,7 +49,7 @@ export function renderPrefix({ option }: { option: TreeOption }) {
       </NIcon>
     )
   } else {
-    const [dir, file, hash] = Util.pathdiv(key)
+    const [dir, file, hash] = path.divide(key)
     if (hash) {
       return (
         <NIcon>
@@ -77,8 +75,8 @@ export function renderPrefix({ option }: { option: TreeOption }) {
 export function renderSuffix({ option }: { option: TreeOption }) {
   const dialog = useDialog()
 
-  const key = option.key as string
-  if (key.endsWith('/')) {
+  const key = option.key as PathKey
+  if (path.key_is_dir(key)) {
     return (
       <div class="flex gap-2 mr-2">
         <NButton
@@ -90,9 +88,9 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             const nameWithSfx = computed(() =>
               name.value.endsWith('.json') ? name.value : `${name.value}.json`
             )
-            const path = computed(() => Util.pathjoin(key, nameWithSfx.value))
+            const dir = fs.tree.traceDir(fs.tree.root, key)
             const pathExists = computed(() => {
-              return !!fs.now().value?.getFile(path.value)
+              return !!fs.tree.traceFile(dir, nameWithSfx.value)
             })
             const dlg = dialog.create({
               title: '创建json',
@@ -108,13 +106,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   disabled={!name.value || pathExists.value}
                   onClick={() => {
                     if (!pathExists.value) {
-                      fs.change(draft => {
-                        draft?.addTextFileViaEntry(
-                          draft.trace(key)!,
-                          nameWithSfx.value,
-                          '{}'
-                        )
-                      })
+                      fs.tree.traceFile(dir, nameWithSfx.value, '{}')
                       dlg.destroy()
                     }
                   }}
@@ -139,10 +131,11 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             e.stopPropagation()
 
             const name = ref<string>('')
-            const path = computed(() => Util.pathjoin(key, name.value))
+            const p = computed(() => path.join(key, name.value))
             const pathExists = computed(() => {
-              return !!fs.now().value?.trace(path.value)
+              return !!fs.tree.traceDir(fs.tree.root, p.value)
             })
+
             const dlg = dialog.create({
               title: '创建目录',
               content: () => (
@@ -157,9 +150,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   disabled={pathExists.value}
                   onClick={() => {
                     if (!pathExists.value) {
-                      fs.change(draft => {
-                        draft?.trace(path.value, true)
-                      })
+                      fs.tree.traceDir(fs.tree.root, p.value, true)
                       dlg.destroy()
                     }
                   }}
@@ -181,7 +172,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
       </div>
     )
   } else {
-    const [dir, file, hash] = Util.pathdiv(key)
+    const [dir, file, hash] = path.divide(key)
     if (!hash) {
       const isJson = file.endsWith('.json')
       return (
@@ -197,7 +188,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   if (name in taskIndex.value) {
                     continue
                   }
-                  setTask(Util.pathjoin(dir, file, name), {})
+                  setTask(path.joinkey(dir, file, name), {})
                   break
                 }
               }}
@@ -245,21 +236,22 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                 },
                 positiveText: '是',
                 onPositiveClick: () => {
-                  const path = Util.pathjoin(dir, file)
+                  const p = path.joinkey(dir, file)
 
-                  fs.enterBlock()
+                  fs.history.pause()
 
+                  const d = fs.tree.traceDir(fs.tree.root, dir)
                   const obj = JSON.parse(
-                    fs.now().value?.getFile(path)?.data ?? '{}'
+                    fs.tree.traceFile(d, file)?.value ?? '{}'
                   )
                   for (const name in obj) {
-                    commitDelete(taskIndex.value[name], null)
+                    deleteTask(taskIndex.value[name], null)
                   }
-                  fs.change(draft => {
-                    draft!.removeFile(path)
-                  })
 
-                  fs.leaveBlock()
+                  fs.tree.delFile(d, file)
+
+                  fs.history.resume()
+                  fs.history.commit()
                 }
               })
             }}

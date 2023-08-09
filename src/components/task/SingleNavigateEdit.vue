@@ -10,12 +10,11 @@ import {
   TranslateOutlined,
   WavingHandOutlined
 } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { NAutoComplete, NButton, NIcon, NInput, NPopover } from 'naive-ui'
 import { computed } from 'vue'
 
-import { navigate } from '@/data'
-import { getTask, taskIndex } from '@/data/task'
-import type { UseProducer } from '@/persis'
+import { getTask, navigate, taskIndex } from '@/data'
 
 import ImageHover from '@/components/atomic/ImageHover.vue'
 
@@ -23,16 +22,21 @@ type T = string
 
 const props = defineProps<{
   value: T
-  edit: UseProducer<T>
   readonly?: boolean
 }>()
 
+const emits = defineEmits<{
+  'update:value': [T]
+}>()
+
+const value = useVModel(props, 'value', emits)
+
 const navTask = computed(() => {
-  return getTask(taskIndex.value[props.value] ?? null)
+  return getTask(taskIndex.value[value.value] ?? null)
 })
 
 const options = computed(() => {
-  const lowerSearch = props.value.toLowerCase()
+  const lowerSearch = value.value.toLowerCase()
   return Object.keys(taskIndex.value)
     .map(name => ({
       name,
@@ -68,12 +72,7 @@ const options = computed(() => {
     <NInput v-if="readonly" readonly :value="value"></NInput>
     <NAutoComplete
       v-else
-      :value="value"
-      @update:value="
-        v => {
-          edit(() => v)
-        }
-      "
+      v-model:value="value"
       :input-props="{
         autocomplete: 'disabled'
       }"

@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NInput } from 'naive-ui'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
+  value: number
   idx: number
 }>()
+
 const emits = defineEmits<{
+  'update:value': [number]
   overflowInput: [string]
 }>()
-const val = defineModel<number>('value', {
-  required: true
-})
+
+const value = useVModel(props, 'value', emits)
 
 const strVal = computed({
   set(v: string | null) {
@@ -25,12 +28,12 @@ const strVal = computed({
       if (m[2]) {
         emits('overflowInput', v)
       } else {
-        val.value = parseInt(m[1])
+        value.value = parseInt(m[1])
       }
     }
   },
   get() {
-    return `${val.value}`
+    return `${value.value}`
   }
 })
 

@@ -1,35 +1,41 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NInput } from 'naive-ui'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
+  value: number | null
   nullable: boolean
   def: number
   alter: (v: number) => number
 }>()
 
-const val = defineModel<number | null>('value', {
-  required: true
-})
+const emits = defineEmits<{
+  'update:value': [number | null]
+}>()
+
+const value = useVModel(props, 'value', emits)
 
 function nullVal() {
   return props.nullable ? null : props.def
 }
 
-const cacheStr = ref<string | null>(val.value === null ? null : `${val.value}`)
+const cacheStr = ref<string | null>(
+  value.value === null ? null : `${value.value}`
+)
 
 const strVal = computed<string | null>({
   set(v: string | null) {
     cacheStr.value = v
     if (!v || v === '') {
-      val.value = nullVal()
+      value.value = nullVal()
     } else {
       const nv = parseFloat(v)
       if (isNaN(nv)) {
-        val.value = nullVal()
+        value.value = nullVal()
       } else {
         const anv = props.alter(nv)
-        val.value = anv
+        value.value = anv
         if (anv !== nv) {
           cacheStr.value = `${anv}`
         }
@@ -37,7 +43,7 @@ const strVal = computed<string | null>({
     }
   },
   get() {
-    return val.value === null ? null : cacheStr.value
+    return value.value === null ? null : cacheStr.value
   }
 })
 </script>

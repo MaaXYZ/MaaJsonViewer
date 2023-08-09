@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NInputNumber, NSwitch } from 'naive-ui'
 
-import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
+import { wrapProp, wrapPropEx } from '@/misc'
 import type { Task } from '@/types'
 
 import ArrayNavigateEdit from './task/ArrayNavigateEdit.vue'
@@ -9,157 +10,115 @@ import ClearButton from '@/components/atomic/ClearButton.vue'
 import FreezeEdit from '@/components/task/FreezeEdit.vue'
 import FormLayout from '@/layout/FormLayout.vue'
 
-defineProps<{
+const props = defineProps<{
   value: Task
-  edit: UseProducer<Task>
 }>()
+
+const emits = defineEmits<{
+  'update:value': [Task]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
+
+const tNext = wrapProp(value, 'next')
+const tSub = wrapProp(value, 'is_sub')
+const tInv = wrapProp(value, 'inverse')
+const tTimeout = wrapProp(value, 'timeout')
+const tTimeoutNext = wrapProp(value, 'timeout_next')
+const tTimes = wrapProp(value, 'times_limit')
+const tRunoutNext = wrapProp(value, 'runout_next')
+const tPreDelay = wrapProp(value, 'pre_delay')
+const tPostDelay = wrapProp(value, 'post_delay')
+const tPreWf = wrapProp(value, 'pre_wait_freezes')
+const tPostWf = wrapProp(value, 'post_wait_freezes')
+const tNotify = wrapProp(value, 'notify')
 </script>
 
 <template>
   <FormLayout>
-    <ClearButton
-      propkey="next"
-      :value="value.next ?? null"
-      :edit="applyEditOn(edit, 'next')"
-    >
-      正常后续
-    </ClearButton>
-    <ArrayNavigateEdit
-      :value="value.next ?? null"
-      :edit="applyEditOn(edit, 'next')"
-    ></ArrayNavigateEdit>
-    <ClearButton
-      propkey="is_sub"
-      :value="value.is_sub ?? null"
-      :edit="applyEditOn(edit, 'is_sub')"
-    >
-      子任务
-    </ClearButton>
+    <ClearButton propkey="next" v-model:value="tNext"> 正常后续 </ClearButton>
+    <ArrayNavigateEdit v-model:value="tNext"></ArrayNavigateEdit>
+    <ClearButton propkey="is_sub" v-model:value="tSub"> 子任务 </ClearButton>
     <div>
       <NSwitch
-        :value="value.is_sub ?? false"
-        @update:value="v => updateEditOn(edit, 'is_sub', v)"
+        :value="tSub ?? false"
+        @update:value="
+          v => {
+            tSub = v
+          }
+        "
       ></NSwitch>
     </div>
-    <ClearButton
-      propkey="inverse"
-      :value="value.inverse ?? null"
-      :edit="applyEditOn(edit, 'inverse')"
-    >
-      识别反转
-    </ClearButton>
+    <ClearButton propkey="inverse" v-model:value="tInv"> 识别反转 </ClearButton>
     <div>
       <NSwitch
-        :value="value.inverse ?? false"
-        @update:value="v => updateEditOn(edit, 'inverse', v)"
+        :value="tInv ?? false"
+        @update:value="
+          v => {
+            tInv = v
+          }
+        "
       ></NSwitch>
     </div>
-    <ClearButton
-      propkey="timeout"
-      :value="value.timeout ?? null"
-      :edit="applyEditOn(edit, 'timeout')"
-    >
-      超时
-    </ClearButton>
-    <NInputNumber
-      :value="value.timeout ?? null"
-      @update:value="v => updateEditOn(edit, 'timeout', v)"
-      placeholder="20000"
-      :min="0"
-    >
+    <ClearButton propkey="timeout" v-model:value="tTimeout"> 超时 </ClearButton>
+    <NInputNumber v-model:value="tTimeout" placeholder="20000" :min="0">
       <template #suffix>ms</template></NInputNumber
     >
-    <ClearButton
-      propkey="timeout_next"
-      :value="value.timeout_next ?? null"
-      :edit="applyEditOn(edit, 'timeout_next')"
-    >
+    <ClearButton propkey="timeout_next" v-model:value="tTimeoutNext">
       超时后续
     </ClearButton>
-    <ArrayNavigateEdit
-      :value="value.timeout_next ?? null"
-      :edit="applyEditOn(edit, 'timeout_next')"
-    ></ArrayNavigateEdit>
-    <ClearButton
-      propkey="times_limit"
-      :value="value.times_limit ?? null"
-      :edit="applyEditOn(edit, 'times_limit')"
-    >
+    <ArrayNavigateEdit v-model:value="tTimeoutNext"></ArrayNavigateEdit>
+    <ClearButton propkey="times_limit" v-model:value="tTimes">
       次数
     </ClearButton>
     <NInputNumber
-      :value="value.times_limit ?? null"
-      @update:value="v => updateEditOn(edit, 'times_limit', v)"
+      v-model:value="tTimes"
       placeholder="<UINT_MAX>"
       :min="0"
     ></NInputNumber>
-    <ClearButton
-      propkey="runout_next"
-      :value="value.runout_next ?? null"
-      :edit="applyEditOn(edit, 'runout_next')"
-    >
+    <ClearButton propkey="runout_next" v-model:value="tRunoutNext">
       超次数后续
     </ClearButton>
-    <ArrayNavigateEdit
-      :value="value.runout_next ?? null"
-      :edit="applyEditOn(edit, 'runout_next')"
-    ></ArrayNavigateEdit>
-    <ClearButton
-      propkey="pre_delay"
-      :value="value.pre_delay ?? null"
-      :edit="applyEditOn(edit, 'pre_delay')"
-    >
+    <ArrayNavigateEdit v-model:value="tRunoutNext"></ArrayNavigateEdit>
+    <ClearButton propkey="pre_delay" v-model:value="tPreDelay">
       前延时
     </ClearButton>
-    <NInputNumber
-      :value="value.pre_delay ?? null"
-      @update:value="v => updateEditOn(edit, 'pre_delay', v)"
-      placeholder="200"
-      :min="0"
-    >
+    <NInputNumber v-model:value="tPreDelay" placeholder="200" :min="0">
       <template #suffix>ms</template></NInputNumber
     >
-    <ClearButton
-      propkey="post_delay"
-      :value="value.post_delay ?? null"
-      :edit="applyEditOn(edit, 'post_delay')"
-    >
+    <ClearButton propkey="post_delay" v-model:value="tPostDelay">
       后延时
     </ClearButton>
-    <NInputNumber
-      :value="value.post_delay ?? null"
-      @update:value="v => updateEditOn(edit, 'post_delay', v)"
-      placeholder="500"
-      :min="0"
-    >
+    <NInputNumber v-model:value="tPostDelay" placeholder="500" :min="0">
       <template #suffix>ms</template>
     </NInputNumber>
     <FreezeEdit
       propkey="pre_wait_freezes"
       key="pre_wait_freezes"
-      :value="value.pre_wait_freezes ?? null"
-      :edit="applyEditOn(edit, 'pre_wait_freezes')"
+      v-model:value="tPreWf"
     >
       前静止等待
     </FreezeEdit>
     <FreezeEdit
       propkey="post_wait_freezes"
       key="post_wait_freezes"
-      :value="value.post_wait_freezes ?? null"
-      :edit="applyEditOn(edit, 'post_wait_freezes')"
+      v-model:value="tPostWf"
       >后静止等待
     </FreezeEdit>
-    <ClearButton
-      propkey="notify"
-      :value="value.notify ?? null"
-      :edit="applyEditOn(edit, 'notify')"
-    >
+    <ClearButton propkey="notify" v-model:value="tNotify">
       触发回调
     </ClearButton>
     <div>
       <NSwitch
-        :value="value.notify ?? false"
-        @update:value="v => updateEditOn(edit, 'notify', v)"
+        :value="tNotify ?? false"
+        @update:value="
+          v => {
+            tNotify = v
+          }
+        "
       ></NSwitch>
     </div>
   </FormLayout>

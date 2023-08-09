@@ -5,14 +5,7 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue({
-      script: {
-        defineModel: true
-      }
-    }),
-    vueJsx()
-  ],
+  plugins: [vue(), vueJsx()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

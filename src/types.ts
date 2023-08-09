@@ -152,3 +152,7 @@ export type Task = Recognition &
     post_wait_freezes?: number | WaitFreezes
     notify?: boolean
   }
+
+export interface TaskData {
+  [task: string]: Task
+}

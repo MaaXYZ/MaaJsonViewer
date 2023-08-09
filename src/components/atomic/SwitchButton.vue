@@ -1,20 +1,24 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NButton, NIcon } from 'naive-ui'
 
-defineProps<{
+const props = defineProps<{
+  value: boolean
   disabled?: boolean
 }>()
 
-const single = defineModel<boolean>('value', {
-  required: true
-})
+const emits = defineEmits<{
+  'update:value': [boolean]
+}>()
+
+const value = useVModel(props, 'value', emits)
 </script>
 
 <template>
   <NButton
-    :type="single ? 'default' : 'primary'"
+    :type="value ? 'default' : 'primary'"
     :disabled="disabled"
-    @click="single = !single"
+    @click="value = !value"
   >
     <template #icon>
       <NIcon>

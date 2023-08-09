@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NSlider } from 'naive-ui'
 import { computed } from 'vue'
 
-import type { UseProducer } from '@/persis'
 import type { Rect } from '@/types'
 
 import SingleEdit from '@/components/array/SingleEdit.vue'
@@ -11,39 +11,51 @@ import RectEdit from '@/components/atomic/RectEdit.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 
 type TTarget = 1 | string | Rect | null
-type TTargetOut = true | string | Rect | null
 type TOffset = Rect | null
 
 const props = defineProps<{
+  target: TTarget
+  offset: TOffset
   propkey: string
   name: string
-  target: TTarget
-  editTarget: UseProducer<TTargetOut>
-  offset: TOffset
-  editOffset: UseProducer<TOffset>
   required?: boolean
 }>()
+
+const emits = defineEmits<{
+  'update:target': [TTarget]
+  'update:offset': [TOffset]
+}>()
+
+const target = useVModel(props, 'target', emits, {
+  passive: true,
+  deep: true
+})
+
+const offset = useVModel(props, 'offset', emits, {
+  passive: true,
+  deep: true
+})
 
 const state = computed<number>({
   set(v) {
     switch (v) {
       case 1:
-        props.editTarget(() => true)
+        target.value = 1
         break
       case 2:
-        props.editTarget(() => '')
+        target.value = ''
         break
       case 3:
-        props.editTarget(() => [0, 0, 0, 0])
+        target.value = [0, 0, 0, 0]
         break
     }
   },
   get() {
-    if (props.target === 1 || props.target === null) {
+    if (target.value === 1 || target.value === null) {
       return 1
-    } else if (typeof props.target === 'string') {
+    } else if (typeof target.value === 'string') {
       return 2
-    } else if (props.target instanceof Array) {
+    } else if (target.value instanceof Array) {
       return 3
     } else {
       return 0
@@ -59,12 +71,7 @@ const marks = {
 </script>
 
 <template>
-  <ClearButton
-    :propkey="propkey"
-    :value="target"
-    :edit="editTarget"
-    :invalid="required"
-  >
+  <ClearButton :propkey="propkey" v-model:value="target" :invalid="required">
     {{ name }}
   </ClearButton>
   <div class="flex flex-col">
@@ -83,32 +90,22 @@ const marks = {
     </div>
     <SingleNavigateEdit
       v-if="state === 2"
-      :value="target as string"
-      :edit="editTarget as UseProducer<string>"
+      v-model:value="target as string"
     ></SingleNavigateEdit>
-    <RectEdit
-      v-if="state === 3"
-      :value="target as Rect"
-      :edit="editTarget as UseProducer<Rect>"
-    ></RectEdit>
+    <RectEdit v-if="state === 3" v-model:value="target as Rect"></RectEdit>
   </div>
-  <ClearButton
-    :propkey="`${propkey}_offset`"
-    :value="offset"
-    :edit="editOffset"
-  >
+  <ClearButton :propkey="`${propkey}_offset`" v-model:value="offset">
     {{ name }}偏移
   </ClearButton>
   <SingleEdit
-    :value="offset"
-    :edit="editOffset"
+    v-model:value="offset"
     :def="() => [0, 0, 0, 0] as Rect"
     :is-t="
       v => v instanceof Array && v.length === 4 && typeof v[0] === 'number'
     "
   >
-    <template #edit="{ value, edit }">
-      <RectEdit :value="value" :edit="edit"></RectEdit>
+    <template #edit="{ value, update }">
+      <RectEdit :value="value" @value:update="update"></RectEdit>
     </template>
   </SingleEdit>
 </template>

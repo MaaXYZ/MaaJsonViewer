@@ -1,15 +1,25 @@
 <script setup lang="ts">
 import { SearchOutlined } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { NIcon, NInput, NTree } from 'naive-ui'
 import { computed, ref } from 'vue'
 
 import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
 
-import { active, navigate } from '@/data'
-import { fsTree } from '@/data/fs'
+import { active, filesystemTree, navigate } from '@/data'
+import { type PathKey, path } from '@/filesystem'
 
-const expand = defineModel<string[]>('expand', {
-  required: true
+const props = defineProps<{
+  expand: PathKey[]
+}>()
+
+const emits = defineEmits<{
+  'update:expand': [PathKey[]]
+}>()
+
+const expand = useVModel(props, 'expand', emits, {
+  passive: true,
+  deep: true
 })
 
 const searchText = ref('')
@@ -23,8 +33,8 @@ const selectedKeysFilter = computed({
     if (v.length === 0) {
       return
     } else {
-      const s = v[0]
-      if (s.endsWith('/')) {
+      const s = v[0] as PathKey
+      if (path.key_is_dir(s)) {
         return
       }
       navigate(s)
@@ -52,11 +62,10 @@ const treeHeight = computed(() => {
     </NInput>
     <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
       <NTree
-        v-if="fsTree"
         :style="{
           height: treeHeight
         }"
-        :data="[fsTree]"
+        :data="[filesystemTree]"
         v-model:expanded-keys="expand"
         v-model:selected-keys="selectedKeysFilter"
         block-line

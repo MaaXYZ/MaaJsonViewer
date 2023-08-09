@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { DataArrayOutlined } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { computed, watch } from 'vue'
-
-import { type UseProducer, updateEdit } from '@/persis'
 
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
@@ -16,19 +15,31 @@ type TThre = number | number[] | null
 
 const props = defineProps<{
   template: TTemp
-  editTemplate: UseProducer<TTemp>
   threshold: TThre
-  editThreshold: UseProducer<TThre>
 }>()
+
+const emits = defineEmits<{
+  'update:template': [TTemp]
+  'update:threshold': [TThre]
+}>()
+
+const template = useVModel(props, 'template', emits, {
+  passive: true,
+  deep: true
+})
+const threshold = useVModel(props, 'threshold', emits, {
+  passive: true,
+  deep: true
+})
 
 const templDef = ''
 const threDef = 0.7
 
-const isTemplateSingle = computed(() => !(props.template instanceof Array))
-const isThresholdSingle = computed(() => !(props.threshold instanceof Array))
+const isTemplateSingle = computed(() => !(template.value instanceof Array))
+const isThresholdSingle = computed(() => !(threshold.value instanceof Array))
 
 watch(
-  () => props.template,
+  () => template.value,
   nv => {
     if (typeof nv === 'string' && !isThresholdSingle.value) {
       thresholdSingle.value = true
@@ -42,24 +53,20 @@ const thresholdSingle = computed<boolean>({
       return
     }
     if (v) {
-      props.editThreshold(() => {
-        return (props.threshold as number[])[0]
-      })
+      threshold.value = (threshold.value as number[])[0]
     } else {
       if (isTemplateSingle.value) {
         return
       } else {
         const v =
-          props.threshold === null ? threDef : (props.threshold as number)
+          threshold.value === null ? threDef : (threshold.value as number)
 
-        props.editThreshold(() => {
-          return Array.from(
-            {
-              length: (props.template as string[]).length
-            },
-            () => v
-          )
-        })
+        threshold.value = Array.from(
+          {
+            length: (template.value as string[]).length
+          },
+          () => v
+        )
       }
     }
   },
@@ -74,41 +81,34 @@ const fixThre = (v: number) => {
 </script>
 
 <template>
-  <ClearButton
-    :propkey="`template`"
-    :value="template"
-    :edit="editTemplate"
-    invalid
-  >
+  <ClearButton :propkey="`template`" v-model:value="template" invalid>
     模板路径
   </ClearButton>
   <ArrayEdit
-    :value="template"
-    :edit="editTemplate"
+    v-model:value="template"
     :def="() => templDef"
     :is-t="(v: string | string[]) => typeof v === 'string'"
     :on-add="
       () => {
         if (!isThresholdSingle) {
-          editThreshold(draft => {
-            ;(draft as number[]).push(threDef)
-          })
+          ;(threshold as number[]).push(threDef)
         }
       }
     "
     :on-del="
       idx => {
         if (!isThresholdSingle) {
-          editThreshold(draft => {
-            ;(draft as number[]).splice(idx, 1)
-          })
+          ;(threshold as number[]).splice(idx, 1)
         }
       }
     "
   >
-    <template #edit="{ value, edit, index }">
+    <template #edit="{ value, update, index }">
       <div class="flex gap-2">
-        <SingleTemplateEdit :value="value" :edit="edit"></SingleTemplateEdit>
+        <SingleTemplateEdit
+          :value="value"
+          @update:value="update"
+        ></SingleTemplateEdit>
         <FloatInput
           v-if="!isThresholdSingle"
           :nullable="false"
@@ -116,9 +116,7 @@ const fixThre = (v: number) => {
           :value="(threshold as number[])[index]"
           @update:value="
             v => {
-              editThreshold(draft => {
-                ;(draft as number[])[index] = v
-              })
+              ;(threshold as number[])[index] = v!
             }
           "
           :alter="fixThre"
@@ -127,7 +125,7 @@ const fixThre = (v: number) => {
       </div>
     </template>
   </ArrayEdit>
-  <ClearButton :propkey="`threshold`" :value="threshold" :edit="editThreshold">
+  <ClearButton :propkey="`threshold`" v-model:value="threshold">
     模板阈值
   </ClearButton>
   <div class="flex flex-col gap-2">
@@ -143,8 +141,7 @@ const fixThre = (v: number) => {
       v-if="isThresholdSingle"
       :nullable="true"
       :def="threDef"
-      :value="threshold as number"
-      @update:value="v => updateEdit(editThreshold, v)"
+      v-model:value="threshold as number"
       :alter="fixThre"
     ></FloatInput>
   </div>

@@ -1,30 +1,42 @@
 <script setup lang="ts" generic="T">
-import type { UseProducer } from '@/persis'
+import { useVModel } from '@vueuse/core'
 
 import ArrayEdit from './ArrayEdit.vue'
 
 type U = T | T[] | null
 type V = T | null
 
-defineProps<{
+const props = defineProps<{
   value: V
-  edit: UseProducer<V>
   def: () => T
   isT: (v: T | T[]) => boolean
 }>()
+
+const emits = defineEmits<{
+  'update:value': [V]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
+
+function update(val: U) {
+  ;(value.value as V) = val as V
+}
 </script>
 
 <template>
   <ArrayEdit
     :value="value as U"
-    :edit="edit as UseProducer<U>"
+    @update:value="update"
     type="single"
     :nullable="true"
     :def="def"
     :is-t="isT"
   >
-    <template #edit="{ value, edit }">
-      <slot name="edit" :value="value" :edit="edit"></slot>
+    <template #edit="{ value, update }">
+      <slot name="edit" :value="value" :update="update"></slot>
     </template>
   </ArrayEdit>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NInput, NSelect, NSwitch } from 'naive-ui'
 import { computed } from 'vue'
 
-import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
+import { wrapProp } from '@/misc'
 import type { Rect, Task, TextRepl } from '@/types'
 
 import TemplateEdit from './TemplateEdit.vue'
@@ -15,120 +16,107 @@ import FormLayout from '@/layout/FormLayout.vue'
 
 const props = defineProps<{
   value: Task
-  edit: UseProducer<Task>
 }>()
+
+const emits = defineEmits<{
+  'update:value': [Task]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
 
 const recoOptions = ['DirectHit', 'TemplateMatch', 'OCR', 'Custom'].map(x => ({
   label: x,
   value: x
 }))
 
-const taskRecoValue = computed(() => props.value.recognition ?? 'DirectHit')
-
 const templMethodOptions = [1, 3, 5].map(x => ({
   label: `${x}`,
   value: x
 }))
+
+const tReco = wrapProp(value, 'recognition')
+const tRecoValue = computed(() => tReco.value ?? 'DirectHit')
+const tRoi = wrapProp(value, 'roi')
+const tTempl = wrapProp(value, 'template')
+const tThre = wrapProp(value, 'threshold')
+const tMethod = wrapProp(value, 'method')
+const tGM = wrapProp(value, 'green_mask')
+const tText = wrapProp(value, 'text')
+const tRepl = wrapProp(value, 'replace')
+const tOR = wrapProp(value, 'only_rec')
+const tCust = wrapProp(value, 'custom_recognizer')
+const tCustParam = wrapProp(value, 'custom_recognizer_param')
 </script>
 
 <template>
   <FormLayout>
-    <ClearButton
-      propkey="recognition"
-      :value="value.recognition ?? null"
-      :edit="applyEditOn(edit, 'recognition')"
-    >
+    <ClearButton propkey="recognition" v-model:value="tReco">
       识别
     </ClearButton>
     <NSelect
-      :value="value.recognition ?? null"
-      @update:value="v => updateEditOn(edit, 'recognition', v)"
+      v-model:value="tReco"
       :options="recoOptions"
       :placeholder="recoOptions[0].label"
     ></NSelect>
-    <template
-      v-if="taskRecoValue === 'TemplateMatch' || taskRecoValue === 'OCR'"
-    >
-      <ClearButton
-        propkey="roi"
-        :value="value.roi ?? null"
-        :edit="applyEditOn(edit, 'roi')"
-      >
-        识别区域
-      </ClearButton>
+    <template v-if="tRecoValue === 'TemplateMatch' || tRecoValue === 'OCR'">
+      <ClearButton propkey="roi" v-model:value="tRoi"> 识别区域 </ClearButton>
       <ArrayEdit
-        :value="value.roi ?? null"
-        :edit="applyEditOn(edit, 'roi')"
+        v-model:value="tRoi"
         :nullable="true"
         :def="() => [0, 0, 0, 0] as Rect"
         :is-t="
           v => v instanceof Array && v.length === 4 && typeof v[0] === 'number'
         "
       >
-        <template #edit="{ value, edit }">
-          <RectEdit :value="value" :edit="edit"></RectEdit>
+        <template #edit="{ value, update }">
+          <RectEdit :value="value" @update:value="update"></RectEdit>
         </template>
       </ArrayEdit>
     </template>
-    <template v-if="taskRecoValue === 'TemplateMatch'">
+    <template v-if="tRecoValue === 'TemplateMatch'">
       <TemplateEdit
-        :template="value.template ?? null"
-        :edit-template="applyEditOn(edit, 'template')"
-        :threshold="value.threshold ?? null"
-        :edit-threshold="applyEditOn(edit, 'threshold')"
+        v-model:template="tTempl"
+        v-model:threshold="tThre"
       ></TemplateEdit>
-      <ClearButton
-        propkey="method"
-        :value="value.method ?? null"
-        :edit="applyEditOn(edit, 'method')"
-      >
+      <ClearButton propkey="method" v-model:value="tMethod">
         匹配算法
       </ClearButton>
       <NSelect
         :options="templMethodOptions"
-        :value="value.method ?? null"
-        @update:value="v => updateEditOn(edit, 'method', v)"
+        v-model:value="tMethod"
         placeholder="5"
       ></NSelect>
-      <ClearButton
-        propkey="green_mask"
-        :value="value.green_mask ?? null"
-        :edit="applyEditOn(edit, 'green_mask')"
-      >
+      <ClearButton propkey="green_mask" v-model:value="tGM">
         绿色掩码
       </ClearButton>
       <div>
         <NSwitch
-          :value="value.green_mask ?? false"
-          @update:value="v => updateEditOn(edit, 'green_mask', v)"
+          :value="tGM ?? false"
+          @update:value="
+            v => {
+              tGM = v
+            }
+          "
         ></NSwitch>
       </div>
     </template>
-    <template v-if="taskRecoValue === 'OCR'">
-      <ClearButton
-        propkey="text"
-        :value="value.text ?? null"
-        :edit="applyEditOn(edit, 'text')"
-        invalid
-      >
+    <template v-if="tRecoValue === 'OCR'">
+      <ClearButton propkey="text" v-model:value="tText" invalid>
         文本
       </ClearButton>
       <ArrayStringEdit
-        :value="value.text ?? null"
-        :edit="applyEditOn(edit, 'text')"
+        v-model:value="tText"
         :def="''"
         placeholder="text"
       ></ArrayStringEdit>
-      <ClearButton
-        propkey="replace"
-        :value="value.replace ?? null"
-        :edit="applyEditOn(edit, 'replace')"
-      >
+      <ClearButton propkey="replace" v-model:value="tRepl">
         文本替换
       </ClearButton>
       <ArrayEdit
-        :value="value.replace ?? null"
-        :edit="applyEditOn(edit, 'replace')"
+        v-model:value="tRepl"
         :nullable="true"
         :def="() => ['', ''] as TextRepl"
         :is-t="
@@ -136,15 +124,13 @@ const templMethodOptions = [1, 3, 5].map(x => ({
             v.length === 2 && typeof v[0] === 'string'
         "
       >
-        <template #edit="{ value, edit }">
+        <template #edit="{ value, update }">
           <div class="flex gap-2">
             <NInput
               :value="value[0]"
               @update:value="
                 v => {
-                  edit(draft => {
-                    draft[0] = v
-                  })
+                  update([v, value[1]])
                 }
               "
               placeholder="替换"
@@ -154,9 +140,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
               :value="value[1]"
               @update:value="
                 v => {
-                  edit(draft => {
-                    draft[1] = v
-                  })
+                  update([value[0], v])
                 }
               "
               placeholder="为"
@@ -165,45 +149,27 @@ const templMethodOptions = [1, 3, 5].map(x => ({
           </div>
         </template>
       </ArrayEdit>
-      <ClearButton
-        propkey="only_rec"
-        :value="value.only_rec ?? null"
-        :edit="applyEditOn(edit, 'only_rec')"
-      >
-        仅识别
-      </ClearButton>
+      <ClearButton propkey="only_rec" v-model:value="tOR"> 仅识别 </ClearButton>
       <div>
         <NSwitch
-          :value="value.only_rec ?? false"
-          @update:value="v => updateEditOn(edit, 'only_rec', v)"
+          :value="tOR ?? false"
+          @update:value="
+            v => {
+              tOR = v
+            }
+          "
         ></NSwitch>
       </div>
     </template>
-    <template v-if="taskRecoValue === 'Custom'">
-      <ClearButton
-        propkey="custom_recognizer"
-        :value="value.custom_recognizer ?? null"
-        :edit="applyEditOn(edit, 'custom_recognizer')"
-        invalid
-      >
+    <template v-if="tRecoValue === 'Custom'">
+      <ClearButton propkey="custom_recognizer" v-model:value="tCust" invalid>
         识别器
       </ClearButton>
-      <NInput
-        :value="value.custom_recognizer ?? null"
-        @update:value="v => updateEditOn(edit, 'custom_recognizer', v)"
-        placeholder="recognizer"
-      ></NInput>
-      <ClearButton
-        propkey="custom_recognizer_param"
-        :value="value.custom_recognizer_param ?? null"
-        :edit="applyEditOn(edit, 'custom_recognizer_param')"
-      >
+      <NInput v-model:value="tCust" placeholder="recognizer"></NInput>
+      <ClearButton propkey="custom_recognizer_param" v-model:value="tCustParam">
         识别参数
       </ClearButton>
-      <JsonEdit
-        :value="value.custom_recognizer_param ?? null"
-        @update:value="v => updateEditOn(edit, 'custom_recognizer_param', v)"
-      ></JsonEdit>
+      <JsonEdit v-model:value="tCustParam"></JsonEdit>
     </template>
   </FormLayout>
 </template>

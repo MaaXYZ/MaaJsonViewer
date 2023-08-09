@@ -1,33 +1,40 @@
 <script setup lang="ts">
-import type { UseProducer } from '@/persis'
+import { useVModel } from '@vueuse/core'
 
 import SingleNavigateEdit from './SingleNavigateEdit.vue'
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 
 type T = string | string[] | null
 
-defineProps<{
+const props = defineProps<{
   value: T
-  edit: UseProducer<T>
   array?: boolean
   readonly?: boolean
 }>()
+
+const emits = defineEmits<{
+  'update:value': [T]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
 </script>
 
 <template>
   <ArrayEdit
-    :value="value"
-    :edit="edit"
+    v-model:value="value"
     :nullable="true"
     :readonly="readonly"
     :type="array ? 'multi' : 'both'"
     :def="() => ''"
     :is-t="(v: string | string[]) => typeof v === 'string'"
   >
-    <template #edit="{ value, edit }">
+    <template #edit="{ value, update }">
       <SingleNavigateEdit
         :value="value"
-        :edit="edit"
+        @value:update="update"
         :readonly="readonly"
       ></SingleNavigateEdit>
     </template>

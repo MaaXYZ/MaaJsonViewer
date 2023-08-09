@@ -6,6 +6,7 @@ import {
   DeleteOutlined,
   EditOutlined
 } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { produce } from 'immer'
 import {
   NButton,
@@ -19,10 +20,15 @@ import {
 } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import { commitDelete, commitDuplicate, commitMove, navigate } from '@/data'
-import { taskBackwardIndex, taskIndex } from '@/data/task'
-import { Util } from '@/fs'
-import type { UseProducer } from '@/persis'
+import {
+  deleteTask,
+  duplicateTask,
+  moveTask,
+  navigate,
+  taskBackwardIndex,
+  taskIndex
+} from '@/data'
+import { type PathKey, path } from '@/filesystem'
 import type { Task } from '@/types'
 
 import ActionEdit from './ActionEdit.vue'
@@ -35,13 +41,21 @@ import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 import FormLayout from '@/layout/FormLayout.vue'
 
 const props = defineProps<{
-  name: string
+  name: PathKey
   value: Task
-  edit: UseProducer<Task>
 }>()
 
+const emits = defineEmits<{
+  'update:value': [Task]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
+
 const hash = computed(() => {
-  const [, , hash] = Util.pathdiv(props.name)
+  const [, , hash] = path.divide(props.name)
   return hash!
 })
 
@@ -58,14 +72,14 @@ function tryRename() {
     return
   }
   showRename.value = false
-  const [dir, file] = Util.pathdiv(props.name)
-  const into = Util.pathjoin(dir, file, titleCache.value)
-  commitMove(props.name, into)
+  const [dir, file] = path.divide(props.name)
+  const into = path.joinkey(dir, file, titleCache.value)
+  moveTask(props.name, into)
   navigate(into)
 }
 
 function tryDuplicate() {
-  commitDuplicate(props.name)
+  duplicateTask(props.name)
 }
 
 const showDelete = ref(false)
@@ -84,7 +98,7 @@ function tryDelete() {
     return
   }
   showDelete.value = false
-  commitDelete(
+  deleteTask(
     props.name,
     doTransfer.value ? taskIndex.value[transferTo.value] : null
   )
@@ -134,12 +148,7 @@ function tryDelete() {
       </div>
       <SingleNavigateEdit
         v-show="doTransfer"
-        :value="transferTo"
-        :edit="
-          p => {
-            transferTo = produce(transferTo, p)
-          }
-        "
+        v-model:value="transferTo"
       ></SingleNavigateEdit>
       <div class="flex gap-2 justify-end">
         <NButton
@@ -198,17 +207,17 @@ function tryDelete() {
       >
         <NCollapse :default-expanded-names="['reco', 'act', 'misc', 'ref']">
           <NCollapseItem title="识别" name="reco">
-            <RecognizerEdit :value="value" :edit="edit"></RecognizerEdit>
+            <RecognizerEdit v-model:value="value"></RecognizerEdit>
           </NCollapseItem>
           <NCollapseItem title="动作" name="act">
-            <ActionEdit :value="value" :edit="edit"></ActionEdit>
+            <ActionEdit v-model:value="value"></ActionEdit>
           </NCollapseItem>
           <NCollapseItem title="其他" name="misc">
-            <MiscEdit :value="value" :edit="edit"></MiscEdit>
+            <MiscEdit v-model:value="value"></MiscEdit>
           </NCollapseItem>
           <NCollapseItem title="引用" name="ref">
             <FormLayout>
-              <ClearButton propkey="<unknown>" :value="null" :edit="() => {}">
+              <ClearButton propkey="<unknown>" :value="null">
                 前序任务
               </ClearButton>
               <ArrayNavigateEdit
@@ -225,11 +234,7 @@ function tryDelete() {
           </NCollapseItem>
         </NCollapse>
       </div>
-      <JsonEdit
-        style="width: 450px"
-        :value="value"
-        @update:value="v => edit(() => v)"
-      ></JsonEdit>
+      <JsonEdit style="width: 450px" v-model:value="value"></JsonEdit>
     </div>
   </div>
 </template>

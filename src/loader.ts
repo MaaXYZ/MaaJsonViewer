@@ -1,28 +1,12 @@
-import axios from 'axios'
-
-import { fs } from './data/fs'
-import { FS } from './fs'
-
-async function loadZip() {
-  const res: ArrayBuffer = (
-    await axios.post('/api/load', null, {
-      responseType: 'arraybuffer'
-    })
-  ).data
-  return FS.fromZip(res)
-}
+import * as api from '@/api'
+import { fs } from '@/filesystem'
 
 export async function loadFS() {
-  const newFs = await loadZip()
-  fs.change(() => newFs)
+  const zip = await api.load()
+  await fs.loadZip(zip)
 }
 
 export async function saveFS() {
-  const form = new FormData()
-  form.append('file', await fs.now().value!.zip())
-  await axios.post('/api/save', form, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
+  const zip = await fs.saveZip()
+  await api.save(zip)
 }

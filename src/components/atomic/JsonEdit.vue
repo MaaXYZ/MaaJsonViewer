@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { CheckOutlined, CloseOutlined, EditOutlined } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { NButton, NCode, NIcon, NInput } from 'naive-ui'
 import babel from 'prettier/plugins/babel'
 import estree from 'prettier/plugins/estree'
 import * as prettier from 'prettier/standalone'
 import { ref, watch } from 'vue'
 
-const val = defineModel<unknown>('value', {
-  required: true
+const props = defineProps<{
+  value: unknown
+}>()
+
+const emits = defineEmits<{
+  'update:value': [unknown]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
 })
 
 async function stringify(v: unknown) {
@@ -24,7 +34,7 @@ let counter = 0
 let version = 0
 
 watch(
-  val,
+  value,
   nv => {
     let id = ++counter
     stringify(nv).then(src => {
@@ -43,13 +53,13 @@ watch(
 const editing = ref(false)
 
 async function enterEdit() {
-  cache.value = await stringify(val.value)
+  cache.value = await stringify(value.value)
   editing.value = true
 }
 
 function trySave() {
   try {
-    val.value = JSON.parse(cache.value)
+    value.value = JSON.parse(cache.value)
     editing.value = false
   } catch (_err) {}
 }

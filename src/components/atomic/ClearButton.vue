@@ -1,19 +1,32 @@
-<script setup lang="ts" generic="T, U">
+<script setup lang="ts" generic="T">
+import { useVModel } from '@vueuse/core'
 import { NButton, NPopover } from 'naive-ui'
 
-import type { UseProducer } from '@/persis'
-
-withDefaults(
+const props = withDefaults(
   defineProps<{
-    propkey: string
     value: T | null
-    edit: UseProducer<U | null>
+    propkey: string
     invalid?: boolean
   }>(),
   {
     invalid: false
   }
 )
+
+const emits = defineEmits<{
+  'update:value': [T | null]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
+
+function clean() {
+  if (!props.invalid) {
+    ;(value.value as T | null) = null
+  }
+}
 </script>
 
 <template>
@@ -21,13 +34,7 @@ withDefaults(
     <template #trigger>
       <NButton
         secondary
-        @click="
-          () => {
-            if (!invalid) {
-              edit(() => null)
-            }
-          }
-        "
+        @click="clean"
         :type="value === null ? (invalid ? 'error' : 'default') : 'primary'"
         :style="{
           cursor: invalid ? 'not-allowed' : 'pointer'

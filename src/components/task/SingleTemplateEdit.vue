@@ -1,21 +1,29 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import { NAutoComplete } from 'naive-ui'
 import { computed } from 'vue'
 
-import { imgIndex } from '@/data/image'
-import type { UseProducer } from '@/persis'
+import { imageIndex } from '@/data'
 
 const props = defineProps<{
   value: string
-  edit: UseProducer<string>
 }>()
 
+const emits = defineEmits<{
+  'update:value': [string]
+}>()
+
+const value = useVModel(props, 'value', emits)
+
 const options = computed(() => {
-  const lowerSearch = props.value.toLowerCase().split(/ +/)
+  const lowerSearch = value.value
+    .toLowerCase()
+    .split(/[ /]+/)
+    .filter(x => x)
   if (lowerSearch.length === 0) {
     return []
   }
-  return imgIndex.value
+  return Object.keys(imageIndex.value)
     .map(name => ({
       name,
       type: lowerSearch
@@ -33,12 +41,7 @@ const options = computed(() => {
 
 <template>
   <NAutoComplete
-    :value="value"
-    @update:value="
-      (v: string) => {
-        edit(() => v)
-      }
-    "
+    v-model:value="value"
     :input-props="{
       autocomplete: 'disabled'
     }"

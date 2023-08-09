@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { DataObjectOutlined } from '@vicons/material'
+import { useVModel } from '@vueuse/core'
 import { NInputNumber, NSelect } from 'naive-ui'
-import { computed } from 'vue'
+import { type Ref, computed } from 'vue'
 
-import { type UseProducer, applyEditOn, updateEditOn } from '@/persis'
+import { wrapProp, wrapPropEx } from '@/misc'
 import type { WaitFreezes } from '@/types'
 
 import ClearButton from '@/components/atomic/ClearButton.vue'
@@ -15,35 +16,32 @@ import FormLayout from '@/layout/FormLayout.vue'
 type T = null | number | WaitFreezes
 
 const props = defineProps<{
-  propkey: string
   value: T
-  edit: UseProducer<T>
+  propkey: string
 }>()
+
+const emits = defineEmits<{
+  'update:value': [T]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
 
 const notObject = computed({
   set(nv: boolean) {
     if (nv) {
-      props.edit(() => {
-        return (props.value as WaitFreezes).time ?? 1
-      })
+      value.value = (value.value as WaitFreezes).time ?? 1
     } else {
-      props.edit(() => {
-        return {
-          time: (props.value as number | null) ?? 0
-        } satisfies WaitFreezes
-      })
+      value.value = {
+        time: (value.value as number | null) ?? 0
+      } satisfies WaitFreezes
     }
   },
   get() {
-    return props.value === null || typeof props.value === 'number'
+    return value.value === null || typeof value.value === 'number'
   }
-})
-
-const wfv = computed(() => {
-  return props.value as WaitFreezes
-})
-const wfe = computed(() => {
-  return props.edit as UseProducer<WaitFreezes>
 })
 
 const fixThre = (v: number) => {
@@ -54,10 +52,21 @@ const templMethodOptions = [1, 3, 5].map(x => ({
   label: `${x}`,
   value: x
 }))
+
+const wfTime = wrapProp(value as Ref<WaitFreezes>, 'time')
+const wfTarget = wrapPropEx(
+  value as Ref<WaitFreezes>,
+  'target',
+  v => (v === true ? 1 : v),
+  v => (v === 1 ? true : v)
+)
+const wfOffset = wrapProp(value as Ref<WaitFreezes>, 'target_offset')
+const wfThreshold = wrapProp(value as Ref<WaitFreezes>, 'threshold')
+const wfMethod = wrapProp(value as Ref<WaitFreezes>, 'method')
 </script>
 
 <template>
-  <ClearButton :propkey="propkey" :value="value" :edit="edit">
+  <ClearButton :propkey="propkey" v-model:value="value">
     <slot></slot>
   </ClearButton>
   <div class="flex flex-col gap-2">
@@ -68,64 +77,43 @@ const templMethodOptions = [1, 3, 5].map(x => ({
     </div>
     <FormLayout>
       <template v-if="notObject">
-        <NInputNumber
-          :value="value as number | null"
-          @update:value="v => edit(() => v)"
-          placeholder="0"
-        >
+        <NInputNumber v-model:value="value as number | null" placeholder="0">
           <template #suffix> ms </template>
         </NInputNumber>
       </template>
       <template v-else>
-        <ClearButton
-          :propkey="`${propkey}.time`"
-          :value="wfv.time ?? null"
-          :edit="applyEditOn(wfe, 'time')"
-        >
+        <ClearButton :propkey="`${propkey}.time`" v-model:value="wfTime">
           延时
         </ClearButton>
-        <NInputNumber
-          :value="wfv.time ?? null"
-          @update:value="v => updateEditOn(wfe, 'time', v)"
-          placeholder="1"
-        >
+        <NInputNumber v-model:value="wfTime" placeholder="1">
           <template #suffix> ms </template>
         </NInputNumber>
         <TargetEdit
           propkey="target"
           name="目标"
-          :target="wfv.target === true ? 1 : wfv.target ?? null"
-          :edit-target="applyEditOn(wfe, 'target')"
-          :offset="wfv.target_offset ?? null"
-          :edit-offset="applyEditOn(wfe, 'target_offset')"
+          v-model:target="wfTarget"
+          v-model:offset="wfOffset"
         >
         </TargetEdit>
         <ClearButton
           :propkey="`${propkey}.threshold`"
-          :value="wfv.threshold ?? null"
-          :edit="applyEditOn(wfe, 'threshold')"
+          v-model:value="wfThreshold"
         >
           阈值
         </ClearButton>
         <FloatInput
-          :value="wfv.threshold ?? null"
-          @update:value="v => updateEditOn(wfe, 'threshold', v)"
+          v-model:value="wfThreshold"
           nullable
           :def="0.95"
           :alter="fixThre"
         >
         </FloatInput>
-        <ClearButton
-          :propkey="`${propkey}.method`"
-          :value="wfv.method ?? null"
-          :edit="applyEditOn(wfe, 'method')"
-        >
+        <ClearButton :propkey="`${propkey}.method`" v-model:value="wfMethod">
           匹配算法
         </ClearButton>
         <NSelect
           :options="templMethodOptions"
-          :value="wfv.method ?? null"
-          @update:value="(v: 1 | 3 | 5) => updateEditOn(wfe, 'method', v)"
+          v-model:value="wfMethod"
           placeholder="5"
         ></NSelect>
       </template>

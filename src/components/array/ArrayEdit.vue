@@ -4,11 +4,9 @@ import {
   DataArrayOutlined,
   DeleteOutlined
 } from '@vicons/material'
-import { produce } from 'immer'
+import { useVModel } from '@vueuse/core'
 import { NButton, NIcon } from 'naive-ui'
 import { computed } from 'vue'
-
-import type { UseProducer } from '@/persis'
 
 import SwitchButton from '@/components/atomic/SwitchButton.vue'
 
@@ -17,7 +15,6 @@ type U = T | T[] | null
 const props = withDefaults(
   defineProps<{
     value: U
-    edit: UseProducer<U>
     def: () => T
     isT: (v: T | T[]) => boolean
     nullable?: boolean
@@ -31,23 +28,32 @@ const props = withDefaults(
   }
 )
 
+const emits = defineEmits<{
+  'update:value': [U]
+}>()
+
+const value = useVModel(props, 'value', emits, {
+  passive: true,
+  deep: true
+})
+
 function nullVal(): null | T {
   return props.nullable ? null : props.def()
 }
 
 const isSingle = computed(() => {
-  const v = props.value
+  const v = value.value as U
   return v === null || props.isT(v)
 })
 
 const valarr = computed(() => {
   return isSingle.value
-    ? props.value !== null
-      ? [props.value as T]
+    ? value.value !== null
+      ? [value.value as T]
       : props.nullable
       ? []
       : [props.def()]
-    : (props.value as T[])
+    : (value.value as T[])
 })
 
 const single = computed({
@@ -55,16 +61,12 @@ const single = computed({
     if (nv === isSingle.value) {
       return
     }
-    const v = props.value
+    const v = value.value as U
     if (nv) {
       const varr = v as T[]
-      props.edit(() => {
-        return varr.length === 0 ? nullVal() : varr[0]
-      })
+      ;(value.value as U) = varr.length === 0 ? nullVal() : varr[0]
     } else {
-      props.edit(() => {
-        return v ? [v as T] : props.nullable ? [] : [props.def()]
-      })
+      ;(value.value as U) = v ? [v as T] : props.nullable ? [] : [props.def()]
     }
   },
   get() {
@@ -74,37 +76,35 @@ const single = computed({
 
 function add() {
   if (isSingle.value) {
-    if (props.nullable && props.value === null) {
+    if (props.nullable && (value.value as U) === null) {
       if (props.type === 'multi') {
-        props.edit(() => {
-          return [props.def()]
-        })
+        ;(value.value as U) = [props.def()]
       } else {
-        props.edit(() => {
-          return props.def()
-        })
+        ;(value.value as U) = props.def()
       }
     }
   } else {
-    props.edit(draft => {
-      ;(draft as T[]).push(props.def())
-    })
+    ;(value.value as T[]).push(props.def())
     props.onAdd?.()
+  }
+}
+
+function set(idx: number, val: T) {
+  if (isSingle.value) {
+    ;(value.value as U) = val
+  } else {
+    ;(value.value as T[])[idx] = val
   }
 }
 
 function remove(idx: number) {
   if (isSingle.value) {
     if (props.nullable) {
-      props.edit(() => {
-        return null
-      })
+      ;(value.value as U) = null
       props.onDel?.(idx)
     }
   } else {
-    props.edit(draft => {
-      ;(draft as T[]).splice(idx, 1)
-    })
+    ;(value.value as T[]).splice(idx, 1)
     props.onDel?.(idx)
   }
 }
@@ -137,17 +137,7 @@ function remove(idx: number) {
           name="edit"
           :index="i"
           :value="v"
-          :edit="
-            (p => {
-              edit(draft => {
-                if (isSingle) {
-                  return produce(v, p)
-                } else {
-                  ;(draft as T[])[i] = produce(v, p)
-                }
-              })
-            }) as UseProducer<T>
-          "
+          :update="(v: T) => set(i, v)"
         ></slot>
         <div>
           <NButton
