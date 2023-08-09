@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { active } from './data'
-import { getTask, setTask } from './data/task'
-import { history } from './history'
-import { loadFS, saveFS } from './loader'
 import {
   FileDownloadOutlined,
   FileUploadOutlined,
@@ -14,6 +10,11 @@ import {
 import { produce } from 'immer'
 import { NButton, NCard, NIcon } from 'naive-ui'
 import { computed, onMounted, ref } from 'vue'
+
+import { active } from './data'
+import { getTask, setTask } from './data/task'
+import { history } from './history'
+import { loadFS, saveFS } from './loader'
 
 import { fs } from '@/data/fs'
 

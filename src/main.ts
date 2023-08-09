@@ -1,5 +1,6 @@
-import './main.css'
 import { createApp } from 'vue'
+
+import './main.css'
 
 import Wrapper from './Wrapper.vue'
 

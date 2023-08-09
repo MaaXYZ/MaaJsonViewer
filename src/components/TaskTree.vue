@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
 import { SearchOutlined } from '@vicons/material'
 import { NIcon, NInput, NTree } from 'naive-ui'
 import { computed, ref } from 'vue'
+
+import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
 
 import { active, navigate } from '@/data'
 import { fsTree } from '@/data/fs'

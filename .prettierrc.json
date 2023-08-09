@@ -4,7 +4,13 @@
   "arrowParens": "avoid",
   "trailingComma": "none",
 
-  "importOrder": ["^(?!@/).*(?<!\\.vue)$", "(?<!\\.vue)$", ""],
+  "importOrder": [
+    "^(?!@/|\\.).*(?<!\\.vue)$",
+    "^(?!@/).*(?<!\\.vue)$",
+    "^(?!\\.).*(?<!\\.vue)$",
+    "(?<!\\.vue)$",
+    ""
+  ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
 
