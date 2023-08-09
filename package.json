@@ -1,6 +1,6 @@
 {
   "name": "maa-json-viewer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -12,9 +12,6 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
     "backend": "cd server && npm run run",
     "build-all": "npm run build && cd server && npm run build"
-  },
-  "dependencies": {
-    "vue": "^3.3.4"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
@@ -37,6 +34,7 @@
     "tailwindcss": "^3.3.3",
     "typescript": "~5.1.6",
     "vite": "^4.4.6",
+    "vue": "^3.3.4",
     "vue-tsc": "^1.8.6",
     "zipson": "^0.2.12"
   }
