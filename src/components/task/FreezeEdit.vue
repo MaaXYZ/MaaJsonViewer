@@ -77,7 +77,15 @@ const wfMethod = wrapProp(value as Ref<WaitFreezes>, 'method')
     </div>
     <FormLayout>
       <template v-if="notObject">
-        <NInputNumber v-model:value="value as number | null" placeholder="0">
+        <NInputNumber
+          :value="value as number | null"
+          @update:value="
+            v => {
+              value = v
+            }
+          "
+          placeholder="0"
+        >
           <template #suffix> ms </template>
         </NInputNumber>
       </template>

@@ -6,12 +6,12 @@ import { computed } from 'vue'
 import { wrapProp } from '@/misc'
 import type { Rect, Task, TextRepl } from '@/types'
 
-import TemplateEdit from './TemplateEdit.vue'
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import ArrayStringEdit from '@/components/array/ArrayStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
 import RectEdit from '@/components/atomic/RectEdit.vue'
+import TemplateEdit from '@/components/task/TemplateEdit.vue'
 import FormLayout from '@/layout/FormLayout.vue'
 
 const props = defineProps<{

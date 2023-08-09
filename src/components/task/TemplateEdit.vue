@@ -141,7 +141,12 @@ const fixThre = (v: number) => {
       v-if="isThresholdSingle"
       :nullable="true"
       :def="threDef"
-      v-model:value="threshold as number"
+      :value="threshold as number"
+      @update:value="
+        v => {
+          threshold = v
+        }
+      "
       :alter="fixThre"
     ></FloatInput>
   </div>

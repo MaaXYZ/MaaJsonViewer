@@ -90,9 +90,22 @@ const marks = {
     </div>
     <SingleNavigateEdit
       v-if="state === 2"
-      v-model:value="target as string"
+      value="(target as string)"
+      @update:value="
+        v => {
+          target = v
+        }
+      "
     ></SingleNavigateEdit>
-    <RectEdit v-if="state === 3" v-model:value="target as Rect"></RectEdit>
+    <RectEdit
+      v-if="state === 3"
+      :value="target as Rect"
+      @update:value="
+        v => {
+          target = v
+        }
+      "
+    ></RectEdit>
   </div>
   <ClearButton :propkey="`${propkey}_offset`" v-model:value="offset">
     {{ name }}偏移
