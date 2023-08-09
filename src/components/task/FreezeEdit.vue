@@ -10,6 +10,7 @@ import ClearButton from '@/components/atomic/ClearButton.vue'
 import FloatInput from '@/components/atomic/FloatInput.vue'
 import SwitchButton from '@/components/atomic/SwitchButton.vue'
 import TargetEdit from '@/components/task/TargetEdit.vue'
+import FormLayout from '@/layout/FormLayout.vue'
 
 type T = null | number | WaitFreezes
 
@@ -65,14 +66,7 @@ const templMethodOptions = [1, 3, 5].map(x => ({
         <DataObjectOutlined></DataObjectOutlined>
       </SwitchButton>
     </div>
-    <div
-      class="grid items-center"
-      style="
-        grid-template-columns: max-content minmax(0, 1fr);
-        column-gap: 0.5rem;
-        row-gap: 1rem;
-      "
-    >
+    <FormLayout>
       <template v-if="notObject">
         <NInputNumber
           :value="value as number | null"
@@ -135,6 +129,6 @@ const templMethodOptions = [1, 3, 5].map(x => ({
           placeholder="5"
         ></NSelect>
       </template>
-    </div>
+    </FormLayout>
   </div>
 </template>

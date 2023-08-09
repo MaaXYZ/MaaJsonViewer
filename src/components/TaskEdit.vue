@@ -32,6 +32,7 @@ import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
 import ArrayNavigateEdit from '@/components/task/ArrayNavigateEdit.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
+import FormLayout from '@/layout/FormLayout.vue'
 
 const props = defineProps<{
   name: string
@@ -206,14 +207,7 @@ function tryDelete() {
             <MiscEdit :value="value" :edit="edit"></MiscEdit>
           </NCollapseItem>
           <NCollapseItem title="引用" name="ref">
-            <div
-              class="grid items-center"
-              style="
-                grid-template-columns: max-content minmax(0, 1fr);
-                column-gap: 0.5rem;
-                row-gap: 1rem;
-              "
-            >
+            <FormLayout>
               <ClearButton propkey="<unknown>" :value="null" :edit="() => {}">
                 前序任务
               </ClearButton>
@@ -227,7 +221,7 @@ function tryDelete() {
                 array
                 readonly
               ></ArrayNavigateEdit>
-            </div>
+            </FormLayout>
           </NCollapseItem>
         </NCollapse>
       </div>

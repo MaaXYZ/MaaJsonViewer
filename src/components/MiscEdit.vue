@@ -7,6 +7,7 @@ import type { Task } from '@/types'
 import ArrayNavigateEdit from './task/ArrayNavigateEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import FreezeEdit from '@/components/task/FreezeEdit.vue'
+import FormLayout from '@/layout/FormLayout.vue'
 
 defineProps<{
   value: Task
@@ -15,14 +16,7 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    class="grid items-center"
-    style="
-      grid-template-columns: max-content minmax(0, 1fr);
-      column-gap: 0.5rem;
-      row-gap: 1rem;
-    "
-  >
+  <FormLayout>
     <ClearButton
       propkey="next"
       :value="value.next ?? null"
@@ -168,5 +162,5 @@ defineProps<{
         @update:value="v => updateEditOn(edit, 'notify', v)"
       ></NSwitch>
     </div>
-  </div>
+  </FormLayout>
 </template>

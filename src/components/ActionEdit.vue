@@ -10,6 +10,7 @@ import SingleStringEdit from '@/components/array/SingleStringEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import JsonEdit from '@/components/atomic/JsonEdit.vue'
 import TargetEdit from '@/components/task/TargetEdit.vue'
+import FormLayout from '@/layout/FormLayout.vue'
 
 const props = defineProps<{
   value: Task
@@ -34,14 +35,7 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
 </script>
 
 <template>
-  <div
-    class="grid items-center"
-    style="
-      grid-template-columns: max-content minmax(0, 1fr);
-      column-gap: 0.5rem;
-      row-gap: 1rem;
-    "
-  >
+  <FormLayout>
     <ClearButton
       propkey="action"
       :value="value.action ?? null"
@@ -167,5 +161,5 @@ const taskActValue = computed(() => props.value.action ?? 'DoNothing')
         @update:value="v => updateEditOn(edit, 'custom_action_param', v)"
       ></JsonEdit>
     </template>
-  </div>
+  </FormLayout>
 </template>
