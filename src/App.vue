@@ -7,7 +7,6 @@ import {
   RedoOutlined,
   UndoOutlined
 } from '@vicons/material'
-import { produce } from 'immer'
 import { NButton, NCard, NIcon } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 
