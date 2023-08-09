@@ -27,6 +27,6 @@ coverage
 *.sln
 *.sw?
 
-res
+saves
 out
 *.zip
