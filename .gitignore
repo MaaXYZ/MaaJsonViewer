@@ -27,6 +27,7 @@ coverage
 *.sln
 *.sw?
 
+library
 saves
 out
 *.zip

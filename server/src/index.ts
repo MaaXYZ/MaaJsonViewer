@@ -4,6 +4,14 @@ import fs from 'fs/promises'
 import multer, { memoryStorage } from 'multer'
 import path from 'path'
 
+import {
+  MaaController,
+  MaaFrameworkLoader,
+  MaaInstance,
+  MaaResource
+} from '../MaaJSLoader'
+import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
+
 async function main() {
   const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as {
     port: number
@@ -54,4 +62,48 @@ async function main() {
   })
 }
 
+async function testLoader() {
+  const loader = new MaaFrameworkLoader()
+  loader.load('./library/maaframework/bin')
+
+  loader.setLogging('./debug')
+
+  const res = new MaaResource(loader)
+  console.log(
+    'resource load:',
+    await res.load('./library/maaframework/share/resource')
+  )
+
+  const ctrl = new MaaController(
+    loader,
+    'adb.exe',
+    '127.0.0.1:16384',
+    MaaAdbControllerTypeEnum.Input_Preset_Adb |
+      MaaAdbControllerTypeEnum.Screencap_RawWithGzip,
+    await fs.readFile(
+      './library/maaframework/share/controller_config.json',
+      'utf-8'
+    ),
+    (msg, detail) => {
+      console.log(msg, detail)
+    }
+  )
+  console.log('controller connect:', await ctrl.connect())
+  await ctrl.screencap()
+  const buf = ctrl.image()
+  if (buf) {
+    await fs.writeFile('test.png', buf)
+  }
+
+  const inst = new MaaInstance(loader, (msg, detail) => {
+    console.log(msg, detail)
+  })
+
+  inst.bindResource(res)
+  inst.bindController(ctrl)
+
+  console.log('instance inited:', inst.inited())
+}
+
+testLoader()
 main()
