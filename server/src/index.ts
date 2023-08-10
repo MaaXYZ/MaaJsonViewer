@@ -3,6 +3,7 @@ import express, { json } from 'express'
 import fs from 'fs/promises'
 import multer, { memoryStorage } from 'multer'
 import path from 'path'
+import sms from 'source-map-support'
 
 import {
   MaaController,
@@ -11,6 +12,8 @@ import {
   MaaResource
 } from '../MaaJSLoader'
 import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
+
+sms.install()
 
 async function main() {
   const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as {
