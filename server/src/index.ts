@@ -1,16 +1,14 @@
 import { format } from 'date-fns'
 import express, { json } from 'express'
+import expressWs from 'express-ws'
+import extract from 'extract-zip'
 import fs from 'fs/promises'
 import multer, { memoryStorage } from 'multer'
+import os from 'os'
 import path from 'path'
 import sms from 'source-map-support'
 
-import {
-  MaaController,
-  MaaFrameworkLoader,
-  MaaInstance,
-  MaaResource
-} from '../MaaJSLoader'
+import { MaaController, MaaFrameworkLoader, MaaResource } from '../MaaJSLoader'
 import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
 
 interface Config {
@@ -20,6 +18,7 @@ interface Config {
   saves: string
   active: string
   maaframework: {
+    emulator: boolean
     adb: string
     address: string
     root: string
@@ -28,14 +27,16 @@ interface Config {
   }
 }
 
+let config: Config
+let loader: MaaFrameworkLoader
+let controller: MaaController
+
 sms.install()
 
 async function main() {
-  const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as Config
+  config = JSON.parse(await fs.readFile('config.json', 'utf-8'))
 
-  testLoader(config)
-
-  const app = express()
+  const app = expressWs(express()).app
 
   app.use(express.static(config.web))
   app.use(json())
@@ -71,32 +72,101 @@ async function main() {
     }
   })
 
+  app.ws('/api/controller', async (ws, req) => {
+    ws.on('message', async data => {
+      const action = JSON.parse(data.toString('utf-8')) as {
+        action: 'click'
+        x: number
+        y: number
+      }
+      // console.log(action)
+      if (controller) {
+        switch (action.action) {
+          case 'click': {
+            controller.click(action.x, action.y)
+          }
+        }
+      }
+    })
+    const timer = setInterval(async () => {
+      if (controller) {
+        if (await controller.screencap()) {
+          const buffer = controller.image()
+          if (buffer) {
+            ws.send(buffer)
+          }
+        }
+      }
+    }, 5000)
+    ws.on('close', () => {
+      clearInterval(timer)
+    })
+  })
+
   app.listen(config.port, () => {
     console.log(`server started: http://localhost:${config.port}/`)
   })
-}
 
-async function testLoader(config: Config) {
-  const loader = new MaaFrameworkLoader()
+  loader = new MaaFrameworkLoader()
   loader.load(path.join(config.maaframework.root, 'bin'))
 
   loader.setLogging(config.maaframework.log)
   loader.setDebugMode(config.maaframework.debug)
 
-  const res = new MaaResource(loader)
-  console.log(
-    'resource load:',
-    await res.load(path.join(config.maaframework.root, 'share/resource'))
-  )
+  if (config.maaframework.emulator) {
+    const ctrl = await prepareController()
+    if (ctrl) {
+      controller = ctrl
+    }
+  }
+}
 
+async function prepareResource() {
+  const tempResourceDir = path.join(os.tmpdir(), 'MaaJsonViewer', 'resource')
+  await fs.rm(tempResourceDir, {
+    force: true,
+    recursive: true
+  })
+  await fs.mkdir(path.join(tempResourceDir, 'model'), {
+    recursive: true
+  })
+  await extract(config.active, {
+    dir: path.join(tempResourceDir, 'pipeline')
+  })
+  await fs.cp(
+    path.join(config.maaframework.root, 'model'),
+    path.join(tempResourceDir, 'model'),
+    {
+      recursive: true
+    }
+  )
+  await fs.writeFile(
+    path.join(tempResourceDir, 'properties.json'),
+    JSON.stringify({ is_base: true })
+  )
+  console.log('resource prepared at', tempResourceDir)
+
+  const res = new MaaResource(loader)
+  const loaded = await res.load(tempResourceDir)
+  console.log('resource load:', loaded)
+
+  if (!loaded) {
+    res.destroy()
+    return null
+  }
+
+  return res
+}
+
+async function prepareController() {
   const ctrl = new MaaController(
     loader,
     config.maaframework.adb,
     config.maaframework.address,
-    MaaAdbControllerTypeEnum.Input_Preset_Adb |
-      MaaAdbControllerTypeEnum.Screencap_RawWithGzip,
+    MaaAdbControllerTypeEnum.Input_Preset_Minitouch |
+      MaaAdbControllerTypeEnum.Screencap_Encode,
     await fs.readFile(
-      path.join(config.maaframework.root, 'share/controller_config.json'),
+      path.join(config.maaframework.root, 'controller_config.json'),
       'utf-8'
     ),
     (msg, detail) => {
@@ -104,23 +174,17 @@ async function testLoader(config: Config) {
     }
   )
 
-  console.log('controller connect:', await ctrl.connect())
+  ctrl.setWidth(1280 / 2)
 
-  if (await ctrl.screencap()) {
-    const buf = ctrl.image()
-    if (buf) {
-      await fs.writeFile('test.png', buf)
-    }
+  const connected = await ctrl.connect()
+  console.log('controller connect:', connected)
+
+  if (!connected) {
+    ctrl.destroy()
+    return null
   }
 
-  const inst = new MaaInstance(loader, (msg, detail) => {
-    console.log(msg, detail)
-  })
-
-  inst.bindResource(res)
-  inst.bindController(ctrl)
-
-  console.log('instance inited:', inst.inited())
+  return ctrl
 }
 
 main()

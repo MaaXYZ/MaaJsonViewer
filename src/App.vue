@@ -17,6 +17,7 @@ import { type PathKey, fs } from '@/filesystem'
 
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
+import MonitorView from '@/components/framework/MonitorView.vue'
 
 const expands = ref<PathKey[]>(['/' as PathKey])
 
@@ -42,6 +43,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
+    <MonitorView></MonitorView>
     <div class="flex gap-2">
       <NButton :disabled="!fs.history.canUndo.value" @click="fs.history.undo">
         <template #icon>

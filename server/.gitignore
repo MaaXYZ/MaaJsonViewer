@@ -2,6 +2,7 @@
 library
 saves
 out
+MaaAgentBinary
 *.zip
 config.json
 

@@ -17,3 +17,12 @@ export async function save(blob: Blob) {
     }
   })
 }
+
+export async function controller() {
+  return new Promise<WebSocket>(resolve => {
+    const ws = new WebSocket('ws://' + window.location.host + '/api/controller')
+    ws.onopen = () => {
+      resolve(ws)
+    }
+  })
+}

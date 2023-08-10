@@ -5,6 +5,7 @@
   "saves": "./saves/{date}.zip",
   "active": "./saves/res.zip",
   "maaframework": {
+    "emulator": true,
     "adb": "adb",
     "address": "127.0.0.1:5555",
     "root": "./library/maaframework",
