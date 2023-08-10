@@ -1,0 +1,8 @@
+
+library
+saves
+out
+*.zip
+config.json
+
+!assets/config.json

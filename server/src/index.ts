@@ -13,16 +13,27 @@ import {
 } from '../MaaJSLoader'
 import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
 
+interface Config {
+  port: number
+  web: string
+  date: string
+  saves: string
+  active: string
+  maaframework: {
+    adb: string
+    address: string
+    root: string
+    log: string
+    debug: boolean
+  }
+}
+
 sms.install()
 
 async function main() {
-  const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as {
-    port: number
-    web: string
-    date: string
-    saves: string
-    active: string
-  }
+  const config = JSON.parse(await fs.readFile('config.json', 'utf-8')) as Config
+
+  testLoader(config)
 
   const app = express()
 
@@ -65,37 +76,41 @@ async function main() {
   })
 }
 
-async function testLoader() {
+async function testLoader(config: Config) {
   const loader = new MaaFrameworkLoader()
-  loader.load('./library/maaframework/bin')
+  loader.load(path.join(config.maaframework.root, 'bin'))
 
-  loader.setLogging('./debug')
+  loader.setLogging(config.maaframework.log)
+  loader.setDebugMode(config.maaframework.debug)
 
   const res = new MaaResource(loader)
   console.log(
     'resource load:',
-    await res.load('./library/maaframework/share/resource')
+    await res.load(path.join(config.maaframework.root, 'share/resource'))
   )
 
   const ctrl = new MaaController(
     loader,
-    'adb.exe',
-    '127.0.0.1:16384',
+    config.maaframework.adb,
+    config.maaframework.address,
     MaaAdbControllerTypeEnum.Input_Preset_Adb |
       MaaAdbControllerTypeEnum.Screencap_RawWithGzip,
     await fs.readFile(
-      './library/maaframework/share/controller_config.json',
+      path.join(config.maaframework.root, 'share/controller_config.json'),
       'utf-8'
     ),
     (msg, detail) => {
       console.log(msg, detail)
     }
   )
+
   console.log('controller connect:', await ctrl.connect())
-  await ctrl.screencap()
-  const buf = ctrl.image()
-  if (buf) {
-    await fs.writeFile('test.png', buf)
+
+  if (await ctrl.screencap()) {
+    const buf = ctrl.image()
+    if (buf) {
+      await fs.writeFile('test.png', buf)
+    }
   }
 
   const inst = new MaaInstance(loader, (msg, detail) => {
@@ -108,5 +123,4 @@ async function testLoader() {
   console.log('instance inited:', inst.inited())
 }
 
-testLoader()
 main()

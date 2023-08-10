@@ -26,8 +26,3 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
-library
-saves
-out
-*.zip
