@@ -32,6 +32,13 @@ jobs:
           submodules: true # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
 
+      - uses: actions/checkout@v3
+        with:
+          repository: MaaAssistantArknights/MAA1999
+          path: ./MAA1999
+          submodules: true # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -69,8 +76,7 @@ jobs:
       - name: Prepare Model
         run: |
           cd server
-          git clone https://github.com/MaaAssistantArknights/MAA1999 --depth=1
-          cp -r MAA1999/assets/resource/model framework/
+          cp -r ../MAA1999/assets/resource/model framework/
           cd ..
 
       - name: Build Package
