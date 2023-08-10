@@ -9,7 +9,12 @@ import os from 'os'
 import path from 'path'
 import sms from 'source-map-support'
 
-import { MaaController, MaaFrameworkLoader, MaaResource } from '../MaaJSLoader'
+import {
+  MaaController,
+  MaaFrameworkLoader,
+  MaaInstance,
+  MaaResource
+} from '../MaaJSLoader'
 import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
 
 interface Config {
@@ -105,17 +110,84 @@ async function main() {
     })
   })
 
+  app.ws('/api/instance', async (ws, req) => {
+    if (!controller) {
+      ws.close()
+      return
+    }
+
+    const resource = await prepareResource()
+    if (!resource) {
+      ws.close()
+      return
+    }
+
+    const instance = new MaaInstance(loader, (msg, detail) => {
+      ws.send(
+        JSON.stringify({
+          type: 'callback',
+          msg,
+          detail
+        })
+      )
+    })
+
+    instance.bindController(controller)
+    instance.bindResource(resource)
+
+    if (!instance.inited()) {
+      ws.close()
+      resource.destroy()
+      return
+    }
+
+    ws.on('close', () => {
+      // instance.destroy()
+      resource.destroy()
+    })
+
+    ws.send(
+      JSON.stringify({
+        type: 'inited'
+      })
+    )
+
+    ws.on('message', async data => {
+      const action = JSON.parse(data.toString('utf-8')) as {
+        action: 'start'
+        task: string[]
+      }
+      if (controller) {
+        switch (action.action) {
+          case 'start': {
+            for (const task of action.task) {
+              instance.post(task, {}, status => {
+                ws.send(
+                  JSON.stringify({
+                    type: 'status',
+                    task,
+                    status
+                  })
+                )
+              })
+            }
+          }
+        }
+      }
+    })
+  })
+
   app.listen(config.port, () => {
     console.log(`server started: http://localhost:${config.port}/`)
   })
 
-  loader = new MaaFrameworkLoader()
-  loader.load(path.join(config.maaframework.root, 'bin'))
-
-  loader.setLogging(config.maaframework.log)
-  loader.setDebugMode(config.maaframework.debug)
-
   if (config.maaframework.emulator) {
+    loader = new MaaFrameworkLoader()
+    loader.load(path.join(config.maaframework.root, 'bin'))
+
+    loader.setLogging(config.maaframework.log)
+    loader.setDebugMode(config.maaframework.debug)
+
     const ctrl = await prepareController()
     if (ctrl) {
       controller = ctrl

@@ -156,3 +156,18 @@ export type Task = Recognition &
 export interface TaskData {
   [task: string]: Task
 }
+
+export interface TaskRunInfo {
+  task: string
+  enable: boolean
+  status: 'skipped' | 'pending' | 'running' | 'success' | 'error'
+}
+
+export const enum DispatcherStatus {
+  Invalid,
+  Pending,
+  Started,
+  Completed,
+  Failed,
+  Stopped
+}

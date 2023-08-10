@@ -26,3 +26,12 @@ export async function controller() {
     }
   })
 }
+
+export async function instance() {
+  return new Promise<WebSocket>(resolve => {
+    const ws = new WebSocket('ws://' + window.location.host + '/api/instance')
+    ws.onopen = () => {
+      resolve(ws)
+    }
+  })
+}

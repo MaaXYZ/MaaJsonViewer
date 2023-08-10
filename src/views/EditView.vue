@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  BuildOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
   NavigateBeforeOutlined,
@@ -8,7 +9,8 @@ import {
   UndoOutlined
 } from '@vicons/material'
 import { NButton, NCard, NIcon } from 'naive-ui'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { active, getTask, history, setTask } from '@/data'
 import { type PathKey, fs } from '@/filesystem'
@@ -16,32 +18,23 @@ import { loadFS, saveFS } from '@/loader'
 
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
+import MainLayout from '@/layout/MainLayout.vue'
+
+const router = useRouter()
 
 const expands = ref<PathKey[]>(['/' as PathKey])
-
-onMounted(async () => {
-  await loadFS()
-  window.onkeydown = ev => {
-    if (ev.ctrlKey && (ev.key === 'z' || ev.key === 'Z')) {
-      ev.stopPropagation()
-      ev.preventDefault()
-      if (ev.shiftKey) {
-        if (fs.history.canRedo.value) {
-          fs.history.redo()
-        }
-      } else {
-        if (fs.history.canUndo.value) {
-          fs.history.undo()
-        }
-      }
-    }
-  }
-})
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 flex-1 min-h-0">
-    <div class="flex gap-2">
+  <MainLayout>
+    <template #action>
+      <NButton @click="router.push('/eval')">
+        <template #icon>
+          <NIcon>
+            <BuildOutlined></BuildOutlined>
+          </NIcon>
+        </template>
+      </NButton>
       <NButton :disabled="!fs.history.canUndo.value" @click="fs.history.undo">
         <template #icon>
           <NIcon>
@@ -90,28 +83,26 @@ onMounted(async () => {
           </NIcon>
         </template>
       </NButton>
-    </div>
-    <div class="flex gap-2 flex-1 min-h-0">
-      <NCard
-        class="min-h-0"
-        style="max-width: 400px"
-        content-style="max-height: 100%; display: flex; flex-direction: column"
-      >
-        <TaskTree v-model:expand="expands"></TaskTree>
-      </NCard>
-      <NCard class="min-h-0" content-style="max-height: 100%">
-        <template v-if="active && getTask(active)">
-          <TaskEdit
-            :name="active"
-            :value="getTask(active)!"
-            @update:value="
-              task => {
-                setTask(active!, task)
-              }
-            "
-          ></TaskEdit>
-        </template>
-      </NCard>
-    </div>
-  </div>
+    </template>
+    <NCard
+      class="min-h-0"
+      style="max-width: 400px"
+      content-style="max-height: 100%; display: flex; flex-direction: column"
+    >
+      <TaskTree v-model:expand="expands"></TaskTree>
+    </NCard>
+    <NCard class="min-h-0" content-style="max-height: 100%">
+      <template v-if="active && getTask(active)">
+        <TaskEdit
+          :name="active"
+          :value="getTask(active)!"
+          @update:value="
+            task => {
+              setTask(active!, task)
+            }
+          "
+        ></TaskEdit>
+      </template>
+    </NCard>
+  </MainLayout>
 </template>

@@ -58,7 +58,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <div class="flex gap-2">
+  <div class="flex gap-2 w-full">
     <NButton
       :disabled="!(value in taskIndex)"
       @click="navigate(taskIndex[value])"

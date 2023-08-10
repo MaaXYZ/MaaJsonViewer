@@ -30,7 +30,7 @@ function clean() {
 </script>
 
 <template>
-  <NPopover trigger="hover">
+  <NPopover trigger="hover" :disabled="!propkey">
     <template #trigger>
       <NButton
         secondary
