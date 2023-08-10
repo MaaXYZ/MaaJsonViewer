@@ -6,4 +6,4 @@ MaaAgentBinary
 *.zip
 config.json
 
-!assets/config.json
+!assets/*.json

@@ -52,6 +52,27 @@ jobs:
           npm run build
           cd ..
 
+      - name: Prepare MaaFramework
+        run: |
+          cd server
+          wget https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v0.3.5/MAA-win-x86_64-v0.3.5.zip -O maa.zip
+          mkdir maaframework
+          cd maaframework
+          unzip ../maa.zip
+          rm -r docs
+          rm -r include
+          rm -r lib
+          mv share/MaaAgentBinary .
+          rm -r share
+          cd ../..
+
+      - name: Prepare Model
+        run: |
+          cd server
+          git clone https://github.com/MaaAssistantArknights/MAA1999 --depth=1
+          cp -r MAA1999/assets/resource/model framework/
+          cd ..
+
       - name: Build Package
         run: |
           cd server
@@ -60,9 +81,12 @@ jobs:
           zip res.zip test.json
 
           npx pkg . -t node18-x64-windows
-          mkdir -p out/web
+          mkdir -p out/library
           mkdir -p out/saves
+          mkdir -p out/web
           cp assets/config.json out/
+          mv maaframework out/library/
+          cp assets/controller_config.json out/library/maaframework/
           cp -r web/* out/web/
           cp -r res.zip out/saves/
 
