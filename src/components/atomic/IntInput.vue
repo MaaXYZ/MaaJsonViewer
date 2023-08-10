@@ -13,7 +13,9 @@ const emits = defineEmits<{
   overflowInput: [string]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 
 const strVal = computed({
   set(v: string | null) {

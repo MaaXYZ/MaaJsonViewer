@@ -13,7 +13,9 @@ const emits = defineEmits<{
   'update:value': [string]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 
 const options = computed(() => {
   const lowerSearch = value.value

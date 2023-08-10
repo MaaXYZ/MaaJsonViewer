@@ -14,7 +14,9 @@ const emits = defineEmits<{
   'update:value': [number | null]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 
 function nullVal() {
   return props.nullable ? null : props.def

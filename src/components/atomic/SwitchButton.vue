@@ -13,7 +13,9 @@ const emits = defineEmits<{
   'update:value': [boolean]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 
 const realValue = computed(() => {
   return props.inverse ? props.value : !props.value

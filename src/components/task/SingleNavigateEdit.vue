@@ -29,7 +29,9 @@ const emits = defineEmits<{
   'update:value': [T]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 
 const navTask = computed(() => {
   return getTask(taskIndex.value[value.value] ?? null)

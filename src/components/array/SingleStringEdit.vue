@@ -16,7 +16,9 @@ const emits = defineEmits<{
   'update:value': [T]
 }>()
 
-const value = useVModel(props, 'value', emits)
+const value = useVModel(props, 'value', emits, {
+  passive: true
+})
 </script>
 
 <template>
