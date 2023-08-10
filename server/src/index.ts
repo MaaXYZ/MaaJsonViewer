@@ -1,3 +1,4 @@
+import history from 'connect-history-api-fallback'
 import { format } from 'date-fns'
 import express, { json } from 'express'
 import expressWs from 'express-ws'
@@ -38,6 +39,7 @@ async function main() {
 
   const app = expressWs(express()).app
 
+  app.use(history())
   app.use(express.static(config.web))
   app.use(json())
 
