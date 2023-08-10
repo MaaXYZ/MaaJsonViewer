@@ -69,15 +69,13 @@ jobs:
       - name: Prepare Model
         run: |
           cd server
-          mkdir -p framework/model
+          mkdir -p maaframework/model
           wget https://github.com/MaaAssistantArknights/MAA1999/releases/download/v0.3.2/MAA1999-win-x64-v0.3.2.zip -O maa1999.zip
           mkdir 1999
           cd 1999
           unzip ../maa1999.zip
           cd ..
-          cp -r ./1999/resource/model/* framework/model/
-          ls framework
-          ls framework/model
+          cp -r ./1999/resource/model/* maaframework/model/
           cd ..
 
       - name: Build Package
