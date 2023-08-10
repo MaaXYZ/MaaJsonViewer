@@ -32,13 +32,6 @@ jobs:
           submodules: true # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
 
-      - uses: actions/checkout@v3
-        with:
-          repository: MaaAssistantArknights/MAA1999
-          path: ./MAA1999
-          submodules: true # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
-
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -76,7 +69,12 @@ jobs:
       - name: Prepare Model
         run: |
           cd server
-          cp -r ../MAA1999/assets/resource/model framework/
+          wget https://github.com/MaaAssistantArknights/MAA1999/releases/download/v0.3.2/MAA1999-win-x64-v0.3.2.zip -O maa1999.zip
+          mkdir 1999
+          cd 1999
+          unzip ../maa1999.zip
+          cd ..
+          cp -r ./1999/resource/model framework/
           cd ..
 
       - name: Build Package
