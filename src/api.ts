@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+import type { Config } from './types'
+
 export async function load() {
   return (
     await axios.post('/api/load', null, {
@@ -16,6 +18,23 @@ export async function save(blob: Blob) {
       'Content-Type': 'multipart/form-data'
     }
   })
+}
+
+export async function loadConfig() {
+  return (
+    (
+      await axios.post('/api/config/load', null, {
+        responseType: 'json'
+      })
+    ).data as {
+      success: boolean
+      config: Config
+    }
+  ).config
+}
+
+export async function saveConfig(cfg: Config) {
+  return await axios.post('/api/config/save', cfg)
 }
 
 export async function controller() {

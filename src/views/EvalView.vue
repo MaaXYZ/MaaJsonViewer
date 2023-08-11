@@ -8,13 +8,14 @@ import {
   PlayArrowOutlined
 } from '@vicons/material'
 import { NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import * as api from '@/api'
-import { taskIndex } from '@/data'
+import { config, taskIndex } from '@/data'
 import { DispatcherStatus, type TaskRunInfo } from '@/types'
 
+import ConfigEdit from '@/components/ConfigEdit.vue'
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
@@ -25,7 +26,36 @@ const router = useRouter()
 const runInfo = ref<TaskRunInfo[]>([])
 
 let instance: WebSocket
-let inited = false
+const inited = ref(false)
+
+onMounted(async () => {
+  inited.value = false
+  instance = await api.instance()
+  instance.onmessage = ev => {
+    const obj = JSON.parse(ev.data) as {
+      type: 'inited' | 'callback' | 'status'
+      msg: string
+      detail: string
+      task: string
+      status: DispatcherStatus
+    }
+    switch (obj.type) {
+      case 'inited':
+        inited.value = true
+        break
+      case 'callback':
+        console.log(obj.msg, JSON.parse(obj.detail))
+        break
+      case 'status': {
+        const idx = runInfo.value.findIndex(x => x.task === obj.task)
+        if (idx !== -1) {
+          runInfo.value[idx].status = translateStatus(obj.status)
+        }
+        break
+      }
+    }
+  }
+})
 
 function translateStatus(status: DispatcherStatus) {
   switch (status) {
@@ -44,34 +74,13 @@ function translateStatus(status: DispatcherStatus) {
   }
 }
 
-async function tryStart() {
-  if (!instance) {
-    instance = await api.instance()
-    instance.onmessage = ev => {
-      const obj = JSON.parse(ev.data) as {
-        type: 'inited' | 'callback' | 'status'
-        msg: string
-        detail: string
-        task: string
-        status: DispatcherStatus
-      }
-      switch (obj.type) {
-        case 'inited':
-          inited = true
-          break
-        case 'callback':
-          console.log(obj.msg, JSON.parse(obj.detail))
-          break
-        case 'status': {
-          const idx = runInfo.value.findIndex(x => x.task === obj.task)
-          if (idx !== -1) {
-            runInfo.value[idx].status = translateStatus(obj.status)
-          }
-          break
-        }
-      }
-    }
+onUnmounted(() => {
+  if (instance) {
+    instance.close()
   }
+})
+
+async function tryStart() {
   if (inited) {
     instance.send(
       JSON.stringify({
@@ -95,7 +104,7 @@ async function tryStart() {
           </NIcon>
         </template>
       </NButton>
-      <NButton @click="tryStart">
+      <NButton @click="tryStart" :disabled="!inited">
         <template #icon>
           <NIcon>
             <PlayArrowOutlined></PlayArrowOutlined>
@@ -105,7 +114,8 @@ async function tryStart() {
     </template>
 
     <NCard>
-      <div class="flex items-start">
+      <div class="flex flex-col gap-2 items-start">
+        <ConfigEdit v-if="config" v-model:value="config"></ConfigEdit>
         <FormLayout>
           <ClearButton propkey="" :value="null"> 任务列表 </ClearButton>
           <ArrayEdit

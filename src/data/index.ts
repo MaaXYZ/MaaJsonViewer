@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { history } from '@/data'
 import type { PathKey } from '@/filesystem'
 
+export * from './config'
 export * from './filesystem'
 export * from './history'
 export * from './image'

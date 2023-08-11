@@ -1,12 +1,27 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import { onMounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
 
+import { config } from '@/data'
 import { fs } from '@/filesystem'
-import { loadFS } from '@/loader'
+import { loadCfg, loadFS, saveCfg } from '@/loader'
 
 onMounted(async () => {
   await loadFS()
+  await loadCfg()
+  const doSave = useDebounceFn(() => {
+    saveCfg()
+  }, 500)
+  watch(
+    config,
+    v => {
+      doSave()
+    },
+    {
+      deep: true
+    }
+  )
   window.onkeydown = ev => {
     if (ev.ctrlKey && (ev.key === 'z' || ev.key === 'Z')) {
       ev.stopPropagation()

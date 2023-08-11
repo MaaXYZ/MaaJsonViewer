@@ -1,8 +1,14 @@
-import { type Ref, computed } from 'vue'
+import { type Ref, type WritableComputedRef, computed } from 'vue'
 
-export function wrapProp<T extends {}, K extends keyof T>(obj: Ref<T>, key: K) {
+export function wrapProp<T extends {}, K extends keyof T>(
+  obj: Ref<T> | WritableComputedRef<T | null>,
+  key: K
+) {
   return computed<NonNullable<T[K]> | null>({
     set(v) {
+      if (obj.value === null) {
+        return
+      }
       if (v === null) {
         if (key in obj.value) {
           delete obj.value[key]
@@ -12,7 +18,7 @@ export function wrapProp<T extends {}, K extends keyof T>(obj: Ref<T>, key: K) {
       }
     },
     get() {
-      return obj.value[key] ?? null
+      return obj.value?.[key] ?? null
     }
   })
 }

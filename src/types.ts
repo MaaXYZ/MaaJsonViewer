@@ -171,3 +171,19 @@ export const enum DispatcherStatus {
   Failed,
   Stopped
 }
+
+export interface Config {
+  port: number
+  web: string
+  date: string
+  saves: string
+  active: string
+  maaframework: {
+    emulator: boolean
+    adb: string
+    address: string
+    root: string
+    log: string
+    debug: boolean
+  }
+}

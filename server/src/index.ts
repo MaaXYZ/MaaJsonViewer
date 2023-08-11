@@ -36,6 +36,9 @@ interface Config {
 let config: Config
 let loader: MaaFrameworkLoader
 let controller: MaaController
+let resource: MaaResource
+let instance: MaaInstance
+const instanceListener: ((msg: string, detail: unknown) => void)[] = []
 
 sms.install()
 
@@ -79,6 +82,21 @@ async function main() {
     }
   })
 
+  app.post('/api/config/load', (req, res) => {
+    res.send({
+      success: true,
+      config
+    })
+  })
+
+  app.post('/api/config/save', (req, res) => {
+    config = req.body
+    fs.writeFile('config.json', JSON.stringify(config, null, 2))
+    res.send({
+      success: true
+    })
+  })
+
   app.ws('/api/controller', async (ws, req) => {
     ws.on('message', async data => {
       const action = JSON.parse(data.toString('utf-8')) as {
@@ -116,34 +134,19 @@ async function main() {
       return
     }
 
-    const resource = await prepareResource()
-    if (!resource) {
+    const loaded = await prepareResource()
+    if (!loaded) {
       ws.close()
       return
     }
 
-    const instance = new MaaInstance(loader, (msg, detail) => {
-      ws.send(
-        JSON.stringify({
-          type: 'callback',
-          msg,
-          detail
-        })
-      )
-    })
-
-    instance.bindController(controller)
-    instance.bindResource(resource)
-
     if (!instance.inited()) {
       ws.close()
-      resource.destroy()
       return
     }
 
     ws.on('close', () => {
-      // instance.destroy()
-      resource.destroy()
+      instance.stop()
     })
 
     ws.send(
@@ -189,9 +192,21 @@ async function main() {
     loader.setDebugMode(config.maaframework.debug)
 
     const ctrl = await prepareController()
-    if (ctrl) {
-      controller = ctrl
+    if (!ctrl) {
+      return
     }
+
+    controller = ctrl
+    resource = new MaaResource(loader)
+    instance = new MaaInstance(loader, (msg, detail) => {
+      detail = JSON.parse(detail)
+      for (const cb of instanceListener) {
+        cb(msg, detail)
+      }
+    })
+
+    instance.bindController(controller)
+    instance.bindResource(resource)
   }
 }
 
@@ -220,16 +235,10 @@ async function prepareResource() {
   )
   console.log('resource prepared at', tempResourceDir)
 
-  const res = new MaaResource(loader)
-  const loaded = await res.load(tempResourceDir)
+  const loaded = await resource.load(tempResourceDir)
   console.log('resource load:', loaded)
 
-  if (!loaded) {
-    res.destroy()
-    return null
-  }
-
-  return res
+  return loaded
 }
 
 async function prepareController() {
@@ -237,7 +246,7 @@ async function prepareController() {
     loader,
     config.maaframework.adb,
     config.maaframework.address,
-    MaaAdbControllerTypeEnum.Input_Preset_Minitouch |
+    MaaAdbControllerTypeEnum.Input_Preset_Adb |
       MaaAdbControllerTypeEnum.Screencap_Encode,
     await fs.readFile(
       path.join(config.maaframework.root, 'controller_config.json'),
