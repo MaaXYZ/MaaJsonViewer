@@ -1,6 +1,6 @@
 {
   "name": "maa-json-viewer-server",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "build": "esbuild --bundle src/index.ts --outfile=dist/index.js --sourcemap --platform=node --loader:.node=copy",
     "run": "npm run build && node dist/index.js"
