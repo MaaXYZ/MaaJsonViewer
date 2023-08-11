@@ -38,6 +38,7 @@ let loader: MaaFrameworkLoader
 let controller: MaaController
 let resource: MaaResource
 let instance: MaaInstance
+let loaded = false
 const instanceListener: ((msg: string, detail: unknown) => void)[] = []
 
 sms.install()
@@ -75,6 +76,7 @@ async function main() {
       res.send({
         success: true
       })
+      loaded = await prepareResource()
     } else {
       res.send({
         success: false
@@ -120,6 +122,7 @@ async function main() {
     })
 
     let pending = false
+    let quit = false
 
     const timer = setInterval(async () => {
       if (controller) {
@@ -129,7 +132,10 @@ async function main() {
           return
         }
         pending = true
-        if (await controller.screencap()) {
+        if (!quit && (await controller.screencap())) {
+          if (quit) {
+            return
+          }
           console.log(`/api/controller ${id} get image`)
           const buffer = controller.image()
           pending = false
@@ -141,24 +147,14 @@ async function main() {
       }
     }, 1000)
     ws.on('close', () => {
+      quit = true
       console.log(`/api/controller ${id} closed`)
       clearInterval(timer)
     })
   })
 
   app.ws('/api/instance', async (ws, req) => {
-    if (!controller) {
-      ws.close()
-      return
-    }
-
-    const loaded = await prepareResource()
-    if (!loaded) {
-      ws.close()
-      return
-    }
-
-    if (!instance.inited()) {
+    if (!loaded || !instance.inited()) {
       ws.close()
       return
     }
@@ -216,6 +212,7 @@ async function main() {
 
     controller = ctrl
     resource = new MaaResource(loader)
+    loaded = await prepareResource()
     instance = new MaaInstance(loader, (msg, detail) => {
       detail = JSON.parse(detail)
       for (const cb of instanceListener) {

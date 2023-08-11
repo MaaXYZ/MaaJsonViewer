@@ -18,7 +18,7 @@ const value = useVModel(props, 'value', emits, {
 })
 
 const realValue = computed(() => {
-  return props.inverse ? props.value : !props.value
+  return props.inverse ? !props.value : props.value
 })
 </script>
 

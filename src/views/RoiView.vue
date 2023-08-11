@@ -5,10 +5,17 @@ import {
   SaveAltRound,
   SyncOutlined
 } from '@vicons/material'
-import { useMouse, useMousePressed } from '@vueuse/core'
 import { Buffer } from 'buffer'
 import { NButton, NCard, NIcon, NInput, NModal } from 'naive-ui'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  ref,
+  watch
+} from 'vue'
 import { useRouter } from 'vue-router'
 
 import { type FileContentRef, type PathKey, fs, pool } from '@/filesystem'
@@ -16,36 +23,62 @@ import { type FileContentRef, type PathKey, fs, pool } from '@/filesystem'
 import ChooseDir from '@/components/filesystem/ChooseDir.vue'
 import MonitorView from '@/components/framework/MonitorView.vue'
 
+const alive = ref(false)
+
+onActivated(() => {
+  alive.value = true
+})
+
+onDeactivated(() => {
+  alive.value = false
+})
+
 const router = useRouter()
 
 const monitor = ref<InstanceType<typeof MonitorView> | null>(null)
 const targetEl = ref<HTMLCanvasElement | null>(null)
 const cropEl = ref<HTMLCanvasElement | null>(null)
-const { x, y } = useMouse({
-  type: event =>
-    event instanceof Touch ? null : [event.offsetX, event.offsetY],
-  target: targetEl
-})
+const curPos = ref<[number, number]>([0, 0])
 const oldPos = ref<[number, number] | null>(null)
 const newPos = ref<[number, number] | null>(null)
 
 watch(targetEl, el => {
   if (el) {
-    el.onmousedown = () => {
-      oldPos.value = [x.value, y.value]
+    const fix = (x: number, s: number) => {
+      x = Math.round(x)
+      if (x < 0) {
+        x = 0
+      }
+      if (x > s) {
+        x = s
+      }
+      return x
+    }
+    el.onpointermove = ev => {
+      curPos.value = [fix(ev.offsetX, 1280), fix(ev.offsetY, 720)]
+      render()
+    }
+    el.onpointerdown = ev => {
+      el.setPointerCapture(ev.pointerId)
+      oldPos.value = [...curPos.value]
       newPos.value = null
       render()
     }
-    el.onmouseup = () => {
-      newPos.value = [x.value, y.value]
+    el.onpointerup = ev => {
+      if (!oldPos.value) {
+        return
+      }
+      el.releasePointerCapture(ev.pointerId)
+      if (
+        curPos.value[0] === oldPos.value?.[0] &&
+        curPos.value[1] === oldPos.value[1]
+      ) {
+        oldPos.value = null
+      } else {
+        newPos.value = [...curPos.value]
+      }
       render()
     }
-  }
-})
-
-watch([x, y], () => {
-  if (targetEl.value) {
-    render()
   }
 })
 
@@ -55,7 +88,7 @@ const rect = computed(() => {
   if (!oldPos.value) {
     return null
   }
-  const np = newPos.value ? newPos.value : [x.value, y.value]
+  const np = newPos.value ? newPos.value : curPos.value
   const l = Math.min(oldPos.value[0], np[0])
   const r = Math.max(oldPos.value[0], np[0])
   const t = Math.min(oldPos.value[1], np[1])
@@ -184,7 +217,13 @@ function doSave() {
         </template>
       </NButton>
     </div>
-    <MonitorView v-show="!imageURL" ref="monitor"></MonitorView>
+    <MonitorView
+      v-if="alive"
+      v-show="!imageURL"
+      ref="monitor"
+      :width="1280"
+      :height="720"
+    ></MonitorView>
     <canvas
       v-if="imageURL"
       ref="targetEl"

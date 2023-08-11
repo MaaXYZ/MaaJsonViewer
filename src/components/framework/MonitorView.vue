@@ -4,6 +4,11 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 import * as api from '@/api'
 
+defineProps<{
+  width: number
+  height: number
+}>()
+
 const imageData = ref<ArrayBuffer | null>(null)
 const imageURL = ref<string | null>(null)
 
@@ -59,12 +64,19 @@ function handleClick(ev: MouseEvent) {
 <template>
   <div>
     <img
+      id="monitor"
       v-if="imageURL"
+      :width="width"
+      :height="height"
       :src="imageURL"
-      width="1280"
-      height="720"
       @click="handleClick"
     />
     <span v-else> no data </span>
   </div>
 </template>
+
+<style scoped>
+#monitor {
+  max-width: inherit;
+}
+</style>

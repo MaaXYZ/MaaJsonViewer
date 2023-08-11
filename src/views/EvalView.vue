@@ -18,6 +18,7 @@ import { DispatcherStatus, type TaskRunInfo } from '@/types'
 import ConfigEdit from '@/components/ConfigEdit.vue'
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
+import MonitorView from '@/components/framework/MonitorView.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 import FormLayout from '@/layout/FormLayout.vue'
 import MainLayout from '@/layout/MainLayout.vue'
@@ -113,69 +114,73 @@ async function tryStart() {
       </NButton>
     </template>
 
-    <NCard>
-      <div class="flex flex-col gap-2 items-start">
-        <ConfigEdit v-if="config" v-model:value="config"></ConfigEdit>
-        <FormLayout>
-          <ClearButton propkey="" :value="null"> 任务列表 </ClearButton>
-          <ArrayEdit
-            v-model:value="runInfo"
-            type="multi"
-            :nullable="true"
-            :def="() => ({ task: '', enable: true, status: 'skipped' })"
-            :is-t="v => !(v instanceof Array)"
-          >
-            <template #edit="{ value, update }">
-              <div class="flex gap-2 items-center">
-                <NCheckbox
-                  :checked="value.enable"
-                  @update:checked="
-                    v => {
-                      update({
-                        ...value,
-                        enable: v
-                      })
-                    }
-                  "
-                ></NCheckbox>
-                <NButton :disabled="value.status === 'skipped'" text>
-                  <!-- 'skipped' | 'pending' | 'running' | 'success' | 'error' -->
-                  <template #icon>
-                    <NIcon>
-                      <PendingOutlined
-                        v-if="
-                          value.status === 'skipped' ||
-                          value.status === 'pending'
-                        "
-                      ></PendingOutlined>
-                      <ChangeCircleOutlined
-                        v-else-if="value.status === 'running'"
-                      ></ChangeCircleOutlined>
-                      <CheckOutlined
-                        v-else-if="value.status === 'success'"
-                      ></CheckOutlined>
-                      <CloseOutlined
-                        v-else-if="value.status === 'error'"
-                      ></CloseOutlined>
-                    </NIcon>
-                  </template>
-                </NButton>
-                <SingleNavigateEdit
-                  :value="value.task"
-                  @update:value="
-                    v => {
-                      update({
-                        ...value,
-                        task: v
-                      })
-                    }
-                  "
-                ></SingleNavigateEdit>
-              </div>
-            </template>
-          </ArrayEdit>
-        </FormLayout>
-      </div>
-    </NCard>
+    <div class="flex gap-2">
+      <NCard>
+        <div class="flex flex-col gap-2 items-start">
+          <ConfigEdit v-if="config" v-model:value="config"></ConfigEdit>
+          <FormLayout>
+            <ClearButton propkey="" :value="null"> 任务列表 </ClearButton>
+            <ArrayEdit
+              v-model:value="runInfo"
+              type="multi"
+              :nullable="true"
+              :def="() => ({ task: '', enable: true, status: 'skipped' })"
+              :is-t="v => !(v instanceof Array)"
+            >
+              <template #edit="{ value, update }">
+                <div class="flex gap-2 items-center">
+                  <NCheckbox
+                    :checked="value.enable"
+                    @update:checked="
+                      v => {
+                        update({
+                          ...value,
+                          enable: v
+                        })
+                      }
+                    "
+                  ></NCheckbox>
+                  <NButton :disabled="value.status === 'skipped'" text>
+                    <!-- 'skipped' | 'pending' | 'running' | 'success' | 'error' -->
+                    <template #icon>
+                      <NIcon>
+                        <PendingOutlined
+                          v-if="
+                            value.status === 'skipped' ||
+                            value.status === 'pending'
+                          "
+                        ></PendingOutlined>
+                        <ChangeCircleOutlined
+                          v-else-if="value.status === 'running'"
+                        ></ChangeCircleOutlined>
+                        <CheckOutlined
+                          v-else-if="value.status === 'success'"
+                        ></CheckOutlined>
+                        <CloseOutlined
+                          v-else-if="value.status === 'error'"
+                        ></CloseOutlined>
+                      </NIcon>
+                    </template>
+                  </NButton>
+                  <SingleNavigateEdit
+                    :value="value.task"
+                    @update:value="
+                      v => {
+                        update({
+                          ...value,
+                          task: v
+                        })
+                      }
+                    "
+                  ></SingleNavigateEdit>
+                </div>
+              </template>
+            </ArrayEdit>
+          </FormLayout>
+        </div>
+      </NCard>
+
+      <MonitorView :width="640" :height="360"></MonitorView>
+    </div>
   </MainLayout>
 </template>

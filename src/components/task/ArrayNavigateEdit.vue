@@ -34,7 +34,7 @@ const value = useVModel(props, 'value', emits, {
     <template #edit="{ value, update }">
       <SingleNavigateEdit
         :value="value"
-        @value:update="update"
+        @update:value="update"
         :readonly="readonly"
       ></SingleNavigateEdit>
     </template>

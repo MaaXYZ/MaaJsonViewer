@@ -26,7 +26,7 @@ function handleOverflow(s: string, i: number) {
     .split(/[^\d]+/)
     .filter(x => x)
     .map(x => parseInt(x))
-  while (i < 3 && ns.length > 0) {
+  while (i < 4 && ns.length > 0) {
     value.value[i] = ns.shift()!
     i += 1
   }

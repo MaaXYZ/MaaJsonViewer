@@ -24,7 +24,6 @@ const config = useVModel(props, 'value', emits, {
 const fw = wrapProp(config, 'maaframework')
 const adb = wrapProp(fw, 'adb')
 const address = wrapProp(fw, 'address')
-console.log(adb)
 </script>
 
 <template>
