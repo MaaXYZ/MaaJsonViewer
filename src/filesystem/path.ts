@@ -9,7 +9,7 @@ export function seg_to_path(seg: PathSegments): Path {
 }
 
 export function dir_to_key(path: Path): PathKey {
-  return path.replace(/\/+/, '/') as PathKey
+  return (path.replace(/\/+/, '/') + '/') as PathKey
 }
 
 export function file_to_key(path: Path, hash?: string): PathKey {

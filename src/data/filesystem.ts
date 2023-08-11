@@ -15,7 +15,7 @@ export const filesystemTree = computed<TreeOption>(() => {
     fs.tree.root,
     (dir, name, param) => {
       const opt: TreeOption = {
-        key: path.seg_to_path([...dir, name] as PathSegments),
+        key: path.dir_to_key(path.seg_to_path([...dir, name] as PathSegments)),
         label: name,
         children: []
       }

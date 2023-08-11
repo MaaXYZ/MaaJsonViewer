@@ -1,5 +1,6 @@
 import {
   AddOutlined,
+  AddPhotoAlternateOutlined,
   CreateNewFolderOutlined,
   DataObjectOutlined,
   DeleteOutlined,
@@ -12,13 +13,18 @@ import {
   NIcon,
   NInput,
   NSwitch,
+  NUpload,
+  NUploadDragger,
   type TreeOption,
+  type UploadCustomRequestOptions,
+  type UploadFileInfo,
   useDialog
 } from 'naive-ui'
+import type { FileInfo } from 'naive-ui/es/upload/src/interface'
 import { computed, ref } from 'vue'
 
 import { deleteTask, setTask, taskIndex } from '@/data'
-import { type PathKey, fs, path } from '@/filesystem'
+import { type FileContentRef, type PathKey, fs, path, pool } from '@/filesystem'
 
 export function renderLabel({ option }: { option: TreeOption }) {
   const key = option.key as PathKey
@@ -79,6 +85,89 @@ export function renderSuffix({ option }: { option: TreeOption }) {
   if (path.key_is_dir(key)) {
     return (
       <div class="flex gap-2 mr-2">
+        <NButton
+          text
+          onClick={e => {
+            e.stopPropagation()
+
+            const fl = ref<UploadFileInfo[]>([])
+            const result: Record<string, ArrayBuffer> = {}
+            const fakeRequest = async ({
+              file,
+              data,
+              headers,
+              withCredentials,
+              action,
+              onFinish,
+              onError,
+              onProgress
+            }: UploadCustomRequestOptions) => {
+              if (file.name in result) {
+                onError()
+                return
+              }
+              if (file.file) {
+                const buf = await file.file.arrayBuffer()
+                result[file.name] = buf
+                onFinish()
+              } else {
+                onError()
+              }
+            }
+            const dlg = dialog.create({
+              title: '添加文件',
+              content: () => (
+                <NUpload
+                  accept="image/png"
+                  listType="image-card"
+                  fileList={fl.value}
+                  onUpdateFileList={data => {
+                    fl.value = data
+                  }}
+                  customRequest={fakeRequest}
+                >
+                  <NUploadDragger>上传</NUploadDragger>
+                </NUpload>
+              ),
+              action: () => (
+                <NButton
+                  onClick={() => {
+                    fs.history.pause()
+
+                    const de = fs.tree.traceDir(fs.tree.root, key)
+                    if (de) {
+                      for (const name in result) {
+                        const fe = fs.tree.traceBinary(
+                          de,
+                          name,
+                          '' as FileContentRef
+                        )
+                        if (fe) {
+                          fe.value = pool.put(result[name])
+                        }
+                      }
+                    }
+
+                    fs.history.resume()
+                    fs.history.commit()
+
+                    dlg.destroy()
+                  }}
+                >
+                  添加
+                </NButton>
+              )
+            })
+          }}
+        >
+          {{
+            default: () => (
+              <NIcon>
+                <AddPhotoAlternateOutlined></AddPhotoAlternateOutlined>
+              </NIcon>
+            )
+          }}
+        </NButton>
         <NButton
           text
           onClick={e => {
