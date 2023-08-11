@@ -1,4 +1,4 @@
-import type { TreeOption } from 'naive-ui'
+import type { TreeOption, TreeSelectOption } from 'naive-ui'
 import { computed } from 'vue'
 
 import { type PathSegments, fs, path } from '@/filesystem'
@@ -49,6 +49,32 @@ export const filesystemTree = computed<TreeOption>(() => {
         label: name
       })
     },
+    rootOption
+  )
+
+  return rootOption
+})
+
+export const filesystemDirectoryTree = computed<TreeSelectOption>(() => {
+  const rootOption: TreeSelectOption = {
+    key: '/',
+    label: '[ROOT]',
+    children: []
+  }
+
+  fs.tree.travel<TreeSelectOption>(
+    fs.tree.root,
+    (dir, name, param) => {
+      const opt: TreeSelectOption = {
+        key: path.dir_to_key(path.seg_to_path([...dir, name] as PathSegments)),
+        label: name,
+        children: []
+      }
+      param.children?.push(opt)
+      return opt
+    },
+    (dir, name, content, param) => {},
+    (dir, name, content, param) => {},
     rootOption
   )
 

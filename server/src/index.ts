@@ -98,6 +98,7 @@ async function main() {
   })
 
   app.ws('/api/controller', async (ws, req) => {
+    console.log('/api/controller connected')
     ws.on('message', async data => {
       const action = JSON.parse(data.toString('utf-8')) as {
         action: 'click'
@@ -115,15 +116,19 @@ async function main() {
     })
     const timer = setInterval(async () => {
       if (controller) {
+        console.log('/api/controller start push')
         if (await controller.screencap()) {
+          console.log('/api/controller get image')
           const buffer = controller.image()
           if (buffer) {
+            console.log('/api/controller push image')
             ws.send(buffer)
           }
         }
       }
-    }, 5000)
+    }, 1000)
     ws.on('close', () => {
+      console.log('/api/controller closed')
       clearInterval(timer)
     })
   })
@@ -257,7 +262,7 @@ async function prepareController() {
     }
   )
 
-  ctrl.setWidth(1280 / 2)
+  ctrl.setWidth(1280)
 
   const connected = await ctrl.connect()
   console.log('controller connect:', connected)

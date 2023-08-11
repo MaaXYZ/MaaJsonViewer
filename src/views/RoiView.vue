@@ -1,0 +1,198 @@
+<script setup lang="ts">
+import {
+  CropFreeOutlined,
+  EditOutlined,
+  SaveAltRound,
+  SyncOutlined
+} from '@vicons/material'
+import { useMouse, useMousePressed } from '@vueuse/core'
+import { Buffer } from 'buffer'
+import { NButton, NCard, NIcon, NInput, NModal } from 'naive-ui'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { type FileContentRef, type PathKey, fs, pool } from '@/filesystem'
+
+import ChooseDir from '@/components/filesystem/ChooseDir.vue'
+import MonitorView from '@/components/framework/MonitorView.vue'
+
+const router = useRouter()
+
+const monitor = ref<InstanceType<typeof MonitorView> | null>(null)
+const targetEl = ref<HTMLCanvasElement | null>(null)
+const cropEl = ref<HTMLCanvasElement | null>(null)
+const { x, y } = useMouse({
+  type: event =>
+    event instanceof Touch ? null : [event.offsetX, event.offsetY],
+  target: targetEl
+})
+const oldPos = ref<[number, number] | null>(null)
+const newPos = ref<[number, number] | null>(null)
+
+watch(targetEl, el => {
+  if (el) {
+    el.onmousedown = () => {
+      oldPos.value = [x.value, y.value]
+      newPos.value = null
+      render()
+    }
+    el.onmouseup = () => {
+      newPos.value = [x.value, y.value]
+      render()
+    }
+  }
+})
+
+watch([x, y], () => {
+  if (targetEl.value) {
+    render()
+  }
+})
+
+const imageURL = ref<string>('')
+const image = ref<HTMLImageElement | null>(null)
+const rect = computed(() => {
+  if (!oldPos.value) {
+    return null
+  }
+  const np = newPos.value ? newPos.value : [x.value, y.value]
+  const l = Math.min(oldPos.value[0], np[0])
+  const r = Math.max(oldPos.value[0], np[0])
+  const t = Math.min(oldPos.value[1], np[1])
+  const b = Math.max(oldPos.value[1], np[1])
+  return [l, t, r - l, b - t]
+})
+
+function render() {
+  const cvs = targetEl.value
+  if (!cvs) {
+    return
+  }
+  const ctx = cvs.getContext('2d')!
+  ctx.clearRect(0, 0, 1280, 720)
+  if (image.value) {
+    ctx.drawImage(image.value, 0, 0)
+    if (oldPos.value) {
+      const [l, t, w, h] = rect.value!
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'
+      ctx.fillRect(l, t, w, h)
+
+      nextTick(() => {
+        const crop = cropEl.value
+        if (!crop) {
+          return
+        }
+        crop.width = w
+        crop.height = h
+        crop.setAttribute('style', `width:${w}px;height:${h}px`)
+        const ctx = crop.getContext('2d')
+        ctx?.drawImage(image.value!, l, t, w, h, 0, 0, w, h)
+      })
+    }
+  }
+}
+
+function takeImage() {
+  const url = monitor.value?.imageURL
+  if (url) {
+    imageURL.value = url
+    image.value = new Image()
+    image.value.src = imageURL.value
+    image.value.onload = () => {
+      const cvs = targetEl.value!
+      cvs.width = 1280
+      cvs.height = 720
+      render()
+    }
+  }
+}
+
+const showSave = ref(false)
+const targetDir = ref('/')
+const targetFile = ref('test')
+const isExists = computed(() => {
+  return !!fs.tree.traceBinary(
+    fs.tree.traceDir(fs.tree.root, targetDir.value as PathKey),
+    `${targetFile.value}.png`
+  )
+})
+
+function requireSave() {
+  showSave.value = true
+}
+
+function doSave() {
+  const data = Buffer.from(
+    cropEl.value!.toDataURL().replace('data:image/png;base64,', ''),
+    'base64'
+  )
+  fs.tree.traceBinary(
+    fs.tree.traceDir(fs.tree.root, targetDir.value as PathKey),
+    `${targetFile.value}.png`,
+    '' as FileContentRef
+  )!.value = pool.put(data.buffer)
+  showSave.value = false
+}
+</script>
+
+<template>
+  <NModal v-model:show="showSave">
+    <NCard
+      style="width: 60vw"
+      content-style="display:flex;flex-direction:column;gap:0.5rem"
+    >
+      <ChooseDir v-model:value="targetDir"></ChooseDir>
+      <NInput v-model:value="targetFile">
+        <template #suffix> .png </template>
+      </NInput>
+      <span v-if="isExists"> {{ targetDir }}{{ targetFile }}.png 已存在 </span>
+
+      <template #action>
+        <NButton @click="doSave"> 保存 </NButton>
+      </template>
+    </NCard>
+  </NModal>
+
+  <div class="flex flex-col gap-2">
+    <div class="flex gap-2">
+      <NButton @click="router.push('/edit')">
+        <template #icon>
+          <NIcon>
+            <EditOutlined></EditOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="takeImage" :disabled="!monitor?.imageURL">
+        <template #icon>
+          <NIcon>
+            <CropFreeOutlined></CropFreeOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="imageURL = ''" :disabled="imageURL === ''">
+        <template #icon>
+          <NIcon>
+            <SyncOutlined></SyncOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="requireSave" :disabled="!imageURL || !rect">
+        <template #icon>
+          <NIcon>
+            <SaveAltRound></SaveAltRound>
+          </NIcon>
+        </template>
+      </NButton>
+    </div>
+    <MonitorView v-show="!imageURL" ref="monitor"></MonitorView>
+    <canvas
+      v-if="imageURL"
+      ref="targetEl"
+      style="width: 1280px; height: 720px"
+    ></canvas>
+    <canvas v-if="rect" ref="cropEl"></canvas>
+    <span v-if="rect">
+      {{ rect.join(',') }}
+    </span>
+  </div>
+</template>

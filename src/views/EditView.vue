@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
   BuildOutlined,
+  CropOutlined,
+  EditOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
   NavigateBeforeOutlined,
@@ -8,13 +10,14 @@ import {
   RedoOutlined,
   UndoOutlined
 } from '@vicons/material'
+import '@vueuse/core'
 import { NButton, NCard, NIcon } from 'naive-ui'
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { active, getTask, history, setTask } from '@/data'
 import { type PathKey, fs } from '@/filesystem'
-import { loadFS, saveFS } from '@/loader'
+import { loadFS, saveCfg, saveFS } from '@/loader'
 
 import TaskEdit from '@/components/TaskEdit.vue'
 import TaskTree from '@/components/TaskTree.vue'
@@ -23,6 +26,35 @@ import MainLayout from '@/layout/MainLayout.vue'
 const router = useRouter()
 
 const expands = ref<PathKey[]>(['/' as PathKey])
+
+function handleKey(ev: KeyboardEvent) {
+  if (ev.ctrlKey) {
+    if (ev.key === 'z' || ev.key === 'Z') {
+      ev.stopPropagation()
+      ev.preventDefault()
+      if (ev.shiftKey) {
+        if (fs.history.canRedo.value) {
+          fs.history.redo()
+        }
+      } else {
+        if (fs.history.canUndo.value) {
+          fs.history.undo()
+        }
+      }
+    } else if (ev.key === 's' || ev.key === 'S') {
+      saveFS()
+      saveCfg()
+    }
+  }
+}
+
+onMounted(() => {
+  window.onkeydown = handleKey
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKey)
+})
 </script>
 
 <template>
@@ -32,6 +64,13 @@ const expands = ref<PathKey[]>(['/' as PathKey])
         <template #icon>
           <NIcon>
             <BuildOutlined></BuildOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="router.push('/roi')">
+        <template #icon>
+          <NIcon>
+            <CropOutlined></CropOutlined>
           </NIcon>
         </template>
       </NButton>

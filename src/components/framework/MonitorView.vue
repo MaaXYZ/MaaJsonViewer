@@ -4,8 +4,12 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 import * as api from '@/api'
 
-const abData = ref<ArrayBuffer | null>(null)
-const abURL = ref<string | null>(null)
+const imageData = ref<ArrayBuffer | null>(null)
+const imageURL = ref<string | null>(null)
+
+defineExpose({
+  imageURL
+})
 
 let socket: WebSocket | null
 
@@ -15,9 +19,9 @@ async function tryConnect() {
     socket = null
   }
   socket.onmessage = async ev => {
-    abData.value = await (ev.data as Blob).arrayBuffer()
-    abURL.value =
-      'data:image/png;base64,' + Buffer.from(abData.value).toString('base64')
+    imageData.value = await (ev.data as Blob).arrayBuffer()
+    imageURL.value =
+      'data:image/png;base64,' + Buffer.from(imageData.value).toString('base64')
   }
 }
 
@@ -55,10 +59,10 @@ function handleClick(ev: MouseEvent) {
 <template>
   <div>
     <img
-      v-if="abURL"
-      :src="abURL"
-      width="640"
-      height="360"
+      v-if="imageURL"
+      :src="imageURL"
+      width="1280"
+      height="720"
       @click="handleClick"
     />
     <span v-else> no data </span>

@@ -4,7 +4,6 @@ import { onMounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
 
 import { config } from '@/data'
-import { fs } from '@/filesystem'
 import { loadCfg, loadFS, saveCfg } from '@/loader'
 
 onMounted(async () => {
@@ -22,21 +21,6 @@ onMounted(async () => {
       deep: true
     }
   )
-  window.onkeydown = ev => {
-    if (ev.ctrlKey && (ev.key === 'z' || ev.key === 'Z')) {
-      ev.stopPropagation()
-      ev.preventDefault()
-      if (ev.shiftKey) {
-        if (fs.history.canRedo.value) {
-          fs.history.redo()
-        }
-      } else {
-        if (fs.history.canUndo.value) {
-          fs.history.undo()
-        }
-      }
-    }
-  }
 })
 </script>
 
