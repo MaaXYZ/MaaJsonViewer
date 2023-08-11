@@ -97,8 +97,12 @@ async function main() {
     })
   })
 
+  let wsId = 0
+
   app.ws('/api/controller', async (ws, req) => {
-    console.log('/api/controller connected')
+    const id = wsId
+    wsId += 1
+    console.log(`/api/controller ${id} connected`)
     ws.on('message', async data => {
       const action = JSON.parse(data.toString('utf-8')) as {
         action: 'click'
@@ -114,21 +118,30 @@ async function main() {
         }
       }
     })
+
+    let pending = false
+
     const timer = setInterval(async () => {
       if (controller) {
-        console.log('/api/controller start push')
+        console.log(`/api/controller ${id} start push`)
+        if (pending) {
+          console.log(`/api/controller ${id} skipped`)
+          return
+        }
+        pending = true
         if (await controller.screencap()) {
-          console.log('/api/controller get image')
+          console.log(`/api/controller ${id} get image`)
           const buffer = controller.image()
+          pending = false
           if (buffer) {
-            console.log('/api/controller push image')
+            console.log(`/api/controller ${id} push image`)
             ws.send(buffer)
           }
         }
       }
     }, 1000)
     ws.on('close', () => {
-      console.log('/api/controller closed')
+      console.log(`/api/controller ${id} closed`)
       clearInterval(timer)
     })
   })
