@@ -134,7 +134,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   onClick={() => {
                     fs.history.pause()
 
-                    const de = fs.tree.traceDir(fs.tree.root, key)
+                    const de = fs.tree.traceDir(key)
                     if (de) {
                       for (const name in result) {
                         const fe = fs.tree.traceBinary(
@@ -177,7 +177,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             const nameWithSfx = computed(() =>
               name.value.endsWith('.json') ? name.value : `${name.value}.json`
             )
-            const dir = fs.tree.traceDir(fs.tree.root, key)
+            const dir = fs.tree.traceDir(key)
             const pathExists = computed(() => {
               return !!fs.tree.traceFile(dir, nameWithSfx.value)
             })
@@ -222,7 +222,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             const name = ref<string>('')
             const p = computed(() => path.join(key, name.value))
             const pathExists = computed(() => {
-              return !!fs.tree.traceDir(fs.tree.root, p.value)
+              return !!fs.tree.traceDir(p.value)
             })
 
             const dlg = dialog.create({
@@ -239,7 +239,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   disabled={pathExists.value}
                   onClick={() => {
                     if (!pathExists.value) {
-                      fs.tree.traceDir(fs.tree.root, p.value, true)
+                      fs.tree.traceDir(p.value, true)
                       dlg.destroy()
                     }
                   }}
@@ -329,7 +329,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
 
                   fs.history.pause()
 
-                  const d = fs.tree.traceDir(fs.tree.root, dir)
+                  const d = fs.tree.traceDir(dir)
                   const obj = JSON.parse(
                     fs.tree.traceFile(d, file)?.value ?? '{}'
                   )

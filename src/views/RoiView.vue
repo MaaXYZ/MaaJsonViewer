@@ -145,7 +145,7 @@ const targetDir = ref('/')
 const targetFile = ref('test')
 const isExists = computed(() => {
   return !!fs.tree.traceBinary(
-    fs.tree.traceDir(fs.tree.root, targetDir.value as PathKey),
+    fs.tree.traceDir(targetDir.value as PathKey),
     `${targetFile.value}.png`
   )
 })
@@ -160,7 +160,7 @@ function doSave() {
     'base64'
   )
   fs.tree.traceBinary(
-    fs.tree.traceDir(fs.tree.root, targetDir.value as PathKey),
+    fs.tree.traceDir(targetDir.value as PathKey),
     `${targetFile.value}.png`,
     '' as FileContentRef
   )!.value = pool.put(data.buffer)

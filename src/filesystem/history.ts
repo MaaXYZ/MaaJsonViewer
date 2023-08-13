@@ -26,13 +26,13 @@ export function initFilesystem() {
       pros.push(
         (async () => {
           if (entry.dir) {
-            tree.traceDir(tree.root, zip_to_path(path), true)
+            tree.traceDir(zip_to_path(path), true)
           } else {
             const [dir, file] = divide(zip_to_path(path))
-            let de = tree.traceDir(tree.root, dir)
+            let de = tree.traceDir(dir)
             if (!de) {
               console.warn('found file', p, 'but dir not created before')
-              de = tree.traceDir(tree.root, dir, true)!
+              de = tree.traceDir(dir, true)!
             }
             if (file.endsWith('.json')) {
               tree.traceFile(de, file, await entry.async('string'))

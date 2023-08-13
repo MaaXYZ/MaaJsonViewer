@@ -60,7 +60,7 @@ export function setTask(p: PathKey | null, v: Task) {
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
+  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
   if (!f) {
     return
   }
@@ -77,7 +77,7 @@ export function delTask(p: PathKey | null) {
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
+  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
   if (!f) {
     return
   }
@@ -96,7 +96,7 @@ export function getTask(p: PathKey | null) {
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(fs.tree.root, dir), file)
+  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
   if (!f) {
     return
   }

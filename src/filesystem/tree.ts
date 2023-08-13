@@ -24,11 +24,7 @@ export function useTree() {
     }
   }
 
-  function traceDir(
-    root: Ref<DirEntry>,
-    dir: PathSegments | Path | PathKey,
-    create = false
-  ) {
+  function traceDir(dir: PathSegments | Path | PathKey, create = false) {
     const segs = dir instanceof Array ? dir : path.to_seg(dir)
 
     let now: Ref<DirEntry> = root
@@ -86,8 +82,8 @@ export function useTree() {
     return toRef(entry.value.bin, name)
   }
 
-  function delDir(root: Ref<DirEntry>, dir: Path, name: string) {
-    const entry = traceDir(root, dir)
+  function delDir(dir: Path, name: string) {
+    const entry = traceDir(dir)
     if (!entry) {
       return false
     }

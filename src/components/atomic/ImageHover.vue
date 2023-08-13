@@ -13,8 +13,7 @@ function makeUrl(v: string | null) {
   if (v && v.endsWith('.png')) {
     // TODO: maybe check?
     const [dir, file] = path.divide(v as Path)
-    const hash = fs.tree.traceBinary(fs.tree.traceDir(fs.tree.root, dir), file)
-      ?.value
+    const hash = fs.tree.traceBinary(fs.tree.traceDir(dir), file)?.value
     if (hash) {
       const url = pool.query(hash)
       if (url) {
