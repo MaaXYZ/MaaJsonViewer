@@ -2,9 +2,10 @@ import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
 import { parse, stringify } from 'zipson'
 
-import { type PathZip, pool } from '.'
 import { divide, zip_to_path } from './path'
+import * as pool from './pool'
 import { useTree } from './tree'
+import { type PathZip } from './types'
 
 export function initFilesystem() {
   const tree = useTree()

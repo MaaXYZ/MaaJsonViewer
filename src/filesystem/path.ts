@@ -36,7 +36,7 @@ export function zip_to_path(zip: PathZip): Path {
 // cannot perform on root
 export function divide(
   path: Path | PathKey | PathZip
-): [PathSegments, string, string | null] {
+): [dir: PathSegments, file: string, hash: string | null] {
   const seg = to_seg(path)
   const file = seg.pop()!
   const filehash = file.split('#')
@@ -48,7 +48,7 @@ export function divide(
 }
 
 export function join(
-  dir: PathSegments | Path | PathKey,
+  dir: PathSegments | Path | PathKey | PathZip,
   file: string | null
 ): PathSegments {
   if (typeof dir === 'string') {
