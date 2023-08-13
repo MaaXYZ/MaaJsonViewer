@@ -8,7 +8,7 @@ import {
   PlayArrowOutlined
 } from '@vicons/material'
 import { NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onActivated, onDeactivated, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import * as api from '@/api'
@@ -22,6 +22,16 @@ import MonitorView from '@/components/framework/MonitorView.vue'
 import SingleNavigateEdit from '@/components/task/SingleNavigateEdit.vue'
 import FormLayout from '@/layout/FormLayout.vue'
 import MainLayout from '@/layout/MainLayout.vue'
+
+const alive = ref(false)
+
+onActivated(() => {
+  alive.value = true
+})
+
+onDeactivated(() => {
+  alive.value = false
+})
 
 const router = useRouter()
 const runInfo = ref<TaskRunInfo[]>([])
@@ -180,7 +190,7 @@ async function tryStart() {
         </div>
       </NCard>
 
-      <MonitorView :width="640" :height="360"></MonitorView>
+      <MonitorView v-if="alive" :width="640" :height="360"></MonitorView>
     </div>
   </MainLayout>
 </template>

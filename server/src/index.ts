@@ -132,7 +132,10 @@ async function main() {
           return
         }
         pending = true
-        if (!quit && (await controller.screencap())) {
+        if (quit) {
+          return
+        }
+        if (await controller.screencap()) {
           if (quit) {
             return
           }
@@ -143,6 +146,9 @@ async function main() {
             console.log(`/api/controller ${id} push image`)
             ws.send(buffer)
           }
+        } else {
+          console.log(`/api/controller ${id} screencap failed`)
+          pending = false
         }
       }
     }, 1000)
