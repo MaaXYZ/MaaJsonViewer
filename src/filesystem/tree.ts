@@ -223,6 +223,32 @@ export function useTree() {
     return true
   }
 
+  function existsDir(file: Path | PathKey | PathZip) {
+    return !!traceDir(file)
+  }
+
+  function existsFile(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    return !!traceFile(traceDir(fp[0]), fp[1])
+  }
+
+  function existsBinary(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    return !!traceBinary(traceDir(fp[0]), fp[1])
+  }
+
+  function openFile(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    const de = traceDir(fp[0])
+    return traceFile(de, fp[1], '')!
+  }
+
+  function openBinary(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    const de = traceDir(fp[0])
+    return traceBinary(de, fp[1], '' as FileContentRef)!
+  }
+
   function readDir(
     path: Path | PathKey | PathZip
   ): null | [string[], string[], string[]] {
@@ -249,6 +275,21 @@ export function useTree() {
     const de = traceDir(fp[0])
     const fe = traceBinary(de, fp[1])
     return fe?.value ?? null
+  }
+
+  function removeDir(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    return delDir(fp[0], fp[1])
+  }
+
+  function removeFile(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    return delFile(traceDir(fp[0]), fp[1])
+  }
+
+  function removeBinary(file: Path | PathKey | PathZip) {
+    const fp = path.divide(file)
+    return delBinary(traceDir(fp[0]), fp[1])
   }
 
   function renameDir(
@@ -301,19 +342,18 @@ export function useTree() {
     return true
   }
 
-  function removeDir(file: Path | PathKey | PathZip) {
-    const fp = path.divide(file)
-    return delDir(fp[0], fp[1])
+  function touchDir(file: Path | PathKey | PathZip) {
+    traceDir(file, true)
   }
 
-  function removeFile(file: Path | PathKey | PathZip) {
+  function touchFile(file: Path | PathKey | PathZip) {
     const fp = path.divide(file)
-    return delFile(traceDir(fp[0]), fp[1])
+    traceFile(traceDir(fp[0]), fp[1], '')
   }
 
-  function removeBinary(file: Path | PathKey | PathZip) {
+  function touchBinary(file: Path | PathKey | PathZip) {
     const fp = path.divide(file)
-    return delBinary(traceDir(fp[0]), fp[1])
+    traceBinary(traceDir(fp[0]), fp[1], '' as FileContentRef)
   }
 
   function writeFile(file: Path | PathKey | PathZip, content: string) {
@@ -353,15 +393,23 @@ export function useTree() {
     copyDir,
     copyFile,
     copyBinary,
+    existsDir,
+    existsFile,
+    existsBinary,
+    openFile,
+    openBinary,
     readDir,
     readFile,
     readBinary,
-    renameDir,
-    renameFile,
-    renameBinary,
     removeDir,
     removeFile,
     removeBinary,
+    renameDir,
+    renameFile,
+    renameBinary,
+    touchDir,
+    touchFile,
+    touchBinary,
     writeFile,
     writeBinary
   }

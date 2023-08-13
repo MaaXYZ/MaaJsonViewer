@@ -56,36 +56,30 @@ export function setTask(p: PathKey | null, v: Task) {
   if (!p) {
     return
   }
-  const [dir, file, hash] = path.divide(p)
+  const [, , hash] = path.divide(p)
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
-  if (!f) {
-    return
-  }
-  const obj = JSON.parse(f.value) as TaskData
+  const fd = fs.tree.openFile(p)
+  const obj = JSON.parse(fd.value) as TaskData
   obj[hash] = v
-  f.value = JSON.stringify(obj, null, 4)
+  fd.value = JSON.stringify(obj, null, 4)
 }
 
 export function delTask(p: PathKey | null) {
   if (!p) {
     return
   }
-  const [dir, file, hash] = path.divide(p)
+  const [, , hash] = path.divide(p)
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
-  if (!f) {
-    return
-  }
-  const obj = JSON.parse(f.value) as TaskData
+  const fd = fs.tree.openFile(p)
+  const obj = JSON.parse(fd.value) as TaskData
   if (hash in obj) {
     delete obj[hash]
+    fd.value = JSON.stringify(obj, null, 4)
   }
-  f.value = JSON.stringify(obj, null, 4)
 }
 
 export function getTask(p: PathKey | null) {
@@ -96,11 +90,11 @@ export function getTask(p: PathKey | null) {
   if (!hash) {
     return
   }
-  const f = fs.tree.traceFile(fs.tree.traceDir(dir), file)
+  const f = fs.tree.readFile(path.joinkey(dir, file))
   if (!f) {
     return
   }
-  const obj = JSON.parse(f.value) as TaskData
+  const obj = JSON.parse(f) as TaskData
   return obj[hash] ?? null
 }
 

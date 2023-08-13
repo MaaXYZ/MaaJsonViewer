@@ -7,18 +7,10 @@ import {
 } from '@vicons/material'
 import { Buffer } from 'buffer'
 import { NButton, NCard, NIcon, NInput, NModal } from 'naive-ui'
-import {
-  computed,
-  nextTick,
-  onActivated,
-  onDeactivated,
-  onMounted,
-  ref,
-  watch
-} from 'vue'
+import { computed, nextTick, onActivated, onDeactivated, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type FileContentRef, type PathKey, fs, pool } from '@/filesystem'
+import { type FileContentRef, type PathKey, fs, path, pool } from '@/filesystem'
 
 import ChooseDir from '@/components/filesystem/ChooseDir.vue'
 import MonitorView from '@/components/framework/MonitorView.vue'
@@ -144,9 +136,8 @@ const showSave = ref(false)
 const targetDir = ref('/')
 const targetFile = ref('test')
 const isExists = computed(() => {
-  return !!fs.tree.traceBinary(
-    fs.tree.traceDir(targetDir.value as PathKey),
-    `${targetFile.value}.png`
+  return fs.tree.existsBinary(
+    path.joinkey(targetDir.value as PathKey, targetFile.value + '.png')
   )
 })
 
@@ -159,11 +150,10 @@ function doSave() {
     cropEl.value!.toDataURL().replace('data:image/png;base64,', ''),
     'base64'
   )
-  fs.tree.traceBinary(
-    fs.tree.traceDir(targetDir.value as PathKey),
-    `${targetFile.value}.png`,
-    '' as FileContentRef
-  )!.value = pool.put(data.buffer)
+  fs.tree.writeBinary(
+    path.joinkey(targetDir.value as PathKey, targetFile.value + '.png'),
+    pool.put(data.buffer)
+  )
   showSave.value = false
 }
 </script>

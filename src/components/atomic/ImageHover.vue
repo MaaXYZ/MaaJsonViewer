@@ -2,7 +2,7 @@
 import { NAvatar, NPopover } from 'naive-ui'
 import { computed } from 'vue'
 
-import { type Path, fs, path, pool } from '@/filesystem'
+import { type Path, fs, pool } from '@/filesystem'
 
 const props = defineProps<{
   url: string | string[]
@@ -12,8 +12,7 @@ function makeUrl(v: string | null) {
   const fallback = '/favicon-32x32.png'
   if (v && v.endsWith('.png')) {
     // TODO: maybe check?
-    const [dir, file] = path.divide(v as Path)
-    const hash = fs.tree.traceBinary(fs.tree.traceDir(dir), file)?.value
+    const hash = fs.tree.readBinary(v as Path)
     if (hash) {
       const url = pool.query(hash)
       if (url) {

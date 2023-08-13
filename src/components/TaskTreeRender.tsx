@@ -20,11 +20,10 @@ import {
   type UploadFileInfo,
   useDialog
 } from 'naive-ui'
-import type { FileInfo } from 'naive-ui/es/upload/src/interface'
 import { computed, ref } from 'vue'
 
 import { deleteTask, setTask, taskIndex } from '@/data'
-import { type FileContentRef, type PathKey, fs, path, pool } from '@/filesystem'
+import { type PathKey, fs, path, pool } from '@/filesystem'
 
 export function renderLabel({ option }: { option: TreeOption }) {
   const key = option.key as PathKey
@@ -134,18 +133,11 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   onClick={() => {
                     fs.history.pause()
 
-                    const de = fs.tree.traceDir(key)
-                    if (de) {
-                      for (const name in result) {
-                        const fe = fs.tree.traceBinary(
-                          de,
-                          name,
-                          '' as FileContentRef
-                        )
-                        if (fe) {
-                          fe.value = pool.put(result[name])
-                        }
-                      }
+                    for (const name in result) {
+                      fs.tree.writeBinary(
+                        path.joinkey(key, name),
+                        pool.put(result[name])
+                      )
                     }
 
                     fs.history.resume()
@@ -177,9 +169,9 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             const nameWithSfx = computed(() =>
               name.value.endsWith('.json') ? name.value : `${name.value}.json`
             )
-            const dir = fs.tree.traceDir(key)
+            const to = computed(() => path.joinkey(key, nameWithSfx.value))
             const pathExists = computed(() => {
-              return !!fs.tree.traceFile(dir, nameWithSfx.value)
+              return fs.tree.existsFile(to.value)
             })
             const dlg = dialog.create({
               title: '创建json',
@@ -195,7 +187,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   disabled={!name.value || pathExists.value}
                   onClick={() => {
                     if (!pathExists.value) {
-                      fs.tree.traceFile(dir, nameWithSfx.value, '{}')
+                      fs.tree.writeFile(to.value, '{}')
                       dlg.destroy()
                     }
                   }}
@@ -220,9 +212,9 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             e.stopPropagation()
 
             const name = ref<string>('')
-            const p = computed(() => path.join(key, name.value))
+            const p = computed(() => path.joinkey(key, name.value))
             const pathExists = computed(() => {
-              return !!fs.tree.traceDir(p.value)
+              return !!fs.tree.existsDir(p.value)
             })
 
             const dlg = dialog.create({
@@ -239,7 +231,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
                   disabled={pathExists.value}
                   onClick={() => {
                     if (!pathExists.value) {
-                      fs.tree.traceDir(p.value, true)
+                      fs.tree.touchDir(p.value)
                       dlg.destroy()
                     }
                   }}
@@ -329,15 +321,11 @@ export function renderSuffix({ option }: { option: TreeOption }) {
 
                   fs.history.pause()
 
-                  const d = fs.tree.traceDir(dir)
-                  const obj = JSON.parse(
-                    fs.tree.traceFile(d, file)?.value ?? '{}'
-                  )
+                  const obj = JSON.parse(fs.tree.readFile(p) ?? '{}')
                   for (const name in obj) {
                     deleteTask(taskIndex.value[name], null)
                   }
-
-                  fs.tree.delFile(d, file)
+                  fs.tree.removeFile(p)
 
                   fs.history.resume()
                   fs.history.commit()
