@@ -1,30 +1,18 @@
 import {
-  AddOutlined,
-  AddPhotoAlternateOutlined,
   CodeOutlined,
-  CreateNewFolderOutlined,
   DataObjectOutlined,
-  DeleteOutlined,
   FolderOutlined,
   ImageOutlined,
   InsertDriveFileOutlined
 } from '@vicons/material'
-import { NIcon, NInput, type TreeOption, useDialog } from 'naive-ui'
+import { NIcon, type TreeOption } from 'naive-ui'
 
-import {
-  onDelete,
-  onLeaveRename,
-  onNewFolder,
-  onNewJson,
-  onNewTask,
-  onUploadImage
-} from './TaskTreeAction'
+import { onLeaveRename } from './TaskTreeAction'
 
 import { renameInto, renameKey } from '@/data'
 import { type PathKey, path } from '@/filesystem'
 
 import AutoFocusInput from '@/components/atomic/AutoFocusInput.vue'
-import IconButton from '@/components/atomic/IconButton.vue'
 
 export function renderLabel({ option }: { option: TreeOption }) {
   const key = option.key as PathKey
@@ -95,76 +83,6 @@ export function renderPrefix({ option }: { option: TreeOption }) {
         <NIcon>
           <InsertDriveFileOutlined></InsertDriveFileOutlined>
         </NIcon>
-      )
-    }
-  }
-}
-
-export function renderSuffix({ option }: { option: TreeOption }) {
-  const dialog = useDialog()
-  const key = option.key as PathKey
-  if (path.key_is_dir(key)) {
-    return (
-      <div class="flex gap-2 mr-2">
-        <IconButton
-          icon={AddPhotoAlternateOutlined}
-          onClick={() => {
-            onUploadImage(dialog, key)
-          }}
-        ></IconButton>
-        <IconButton
-          icon={AddOutlined}
-          onClick={() => {
-            onNewJson(key)
-          }}
-        ></IconButton>
-        <IconButton
-          icon={CreateNewFolderOutlined}
-          onClick={() => {
-            onNewFolder(key)
-          }}
-        ></IconButton>
-        {/* <IconButton
-          icon={DeleteOutlined}
-          onClick={() => {
-            onDelete(key)
-          }}
-        ></IconButton> */}
-      </div>
-    )
-  } else {
-    const [dir, file, hash] = path.divide(key)
-    if (!hash) {
-      return (
-        <div class="flex gap-2 mr-2">
-          {file.endsWith('.json') ? (
-            <IconButton
-              icon={AddOutlined}
-              onClick={() => {
-                onNewTask(dir, file)
-              }}
-            ></IconButton>
-          ) : (
-            []
-          )}
-          <IconButton
-            icon={DeleteOutlined}
-            onClick={() => {
-              onDelete(key)
-            }}
-          ></IconButton>
-        </div>
-      )
-    } else {
-      return (
-        <div class="flex gap-2 mr-2">
-          <IconButton
-            icon={DeleteOutlined}
-            onClick={() => {
-              onDelete(key)
-            }}
-          ></IconButton>
-        </div>
       )
     }
   }

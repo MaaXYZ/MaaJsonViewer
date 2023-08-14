@@ -1,9 +1,10 @@
 import type { TreeOption, TreeSelectOption } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import { type PathSegments, fs, path } from '@/filesystem'
+import { type PathKey, type PathSegments, fs, path } from '@/filesystem'
 import type { TaskData } from '@/types'
 
+export const expandKey = ref<PathKey[]>(['/' as PathKey])
 export const renameKey = ref<string | null>(null)
 export const renameInto = ref<string | null>(null)
 

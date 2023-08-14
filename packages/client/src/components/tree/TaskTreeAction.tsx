@@ -100,7 +100,8 @@ export function onNewJson(key: PathKey) {
   }
 }
 
-export function onNewTask(dir: PathSegments, file: string) {
+export function onNewTask(key: PathKey) {
+  const [dir, file] = path.divide(key)
   for (let i = 0; ; i++) {
     const name = `__NewTask${i}`
     if (name in taskIndex.value) {

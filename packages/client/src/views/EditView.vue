@@ -26,8 +26,6 @@ import MainLayout from '@/layout/MainLayout.vue'
 
 const router = useRouter()
 
-const expands = ref<PathKey[]>(['/' as PathKey])
-
 function handleKey(ev: KeyboardEvent) {
   if (ev.key === 'F2') {
     if (active.value) {
@@ -135,7 +133,7 @@ onUnmounted(() => {
       style="max-width: 400px"
       content-style="max-height: 100%; display: flex; flex-direction: column"
     >
-      <TaskTree v-model:expand="expands"></TaskTree>
+      <TaskTree></TaskTree>
     </NCard>
     <NCard class="min-h-0" content-style="max-height: 100%">
       <template v-if="active && getTask(active)">

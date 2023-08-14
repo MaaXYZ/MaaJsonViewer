@@ -1,26 +1,14 @@
 <script setup lang="ts">
 import { SearchOutlined } from '@vicons/material'
-import { useVModel } from '@vueuse/core'
 import { NIcon, NInput, NTree } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import { renderLabel, renderPrefix, renderSuffix } from './TaskTreeRender'
+import { renderLabel, renderPrefix } from './TaskTreeRender'
 
-import { active, filesystemTree, navigate } from '@/data'
-import { type PathKey, path } from '@/filesystem'
+import { active, expandKey, filesystemTree, navigate } from '@/data'
+import { type PathKey } from '@/filesystem'
 
-const props = defineProps<{
-  expand: PathKey[]
-}>()
-
-const emits = defineEmits<{
-  'update:expand': [PathKey[]]
-}>()
-
-const expand = useVModel(props, 'expand', emits, {
-  passive: true,
-  deep: true
-})
+import TaskTreeActions from './TaskTreeActions.vue'
 
 const searchText = ref('')
 
@@ -49,20 +37,23 @@ const treeHeight = computed(() => {
 
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
-    <NInput v-model:value="searchText" placeholder="task">
-      <template #prefix>
-        <NIcon>
-          <SearchOutlined></SearchOutlined>
-        </NIcon>
-      </template>
-    </NInput>
+    <div class="flex gap-2">
+      <NInput v-model:value="searchText" placeholder="task">
+        <template #prefix>
+          <NIcon>
+            <SearchOutlined></SearchOutlined>
+          </NIcon>
+        </template>
+      </NInput>
+      <TaskTreeActions></TaskTreeActions>
+    </div>
     <div ref="treeParentEl" class="flex flex-col flex-1 min-h-0">
       <NTree
         :style="{
           height: treeHeight
         }"
         :data="[filesystemTree]"
-        v-model:expanded-keys="expand"
+        v-model:expanded-keys="expandKey"
         v-model:selected-keys="selectedKeysFilter"
         block-line
         selectable
@@ -74,7 +65,6 @@ const treeHeight = computed(() => {
         virtual-scroll
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
-        :render-suffix="renderSuffix"
       ></NTree>
     </div>
   </div>
