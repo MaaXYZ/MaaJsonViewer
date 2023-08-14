@@ -7,10 +7,9 @@ export const imageIndex = computed(() => {
   fs.tree.travel(
     fs.tree.root,
     () => void 0,
-    () => {},
     (dir, name, ref) => {
       if (name.endsWith('.png')) {
-        res[path.to_zip(path.seg_to_path(path.join(dir, name)))] = ref
+        res[path.seg_to_zip(path.join(dir, name))] = ref
       }
     },
     void 0

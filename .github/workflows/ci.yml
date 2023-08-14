@@ -37,24 +37,14 @@ jobs:
         with:
           node-version: 18
 
-      - name: Build webpage
+      - name: Build
         run: |
           npm ci
           npm run build
-
-      - name: Build server
-        run: |
-          cd server
-          npm ci
-          cd MaaJSLoader
-          npm ci
-          cd ..
-          npm run build
-          cd ..
 
       - name: Prepare MaaFramework
         run: |
-          cd server
+          cd packages/server
           wget https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v0.3.5/MAA-win-x86_64-v0.3.5.zip -O maa.zip
           mkdir maaframework
           cd maaframework
@@ -64,11 +54,11 @@ jobs:
           rm -r lib
           mv share/MaaAgentBinary .
           rm -r share
-          cd ../..
+          cd ../../..
 
       - name: Prepare Model
         run: |
-          cd server
+          cd packages/server
           mkdir -p maaframework/model
           wget https://github.com/MaaAssistantArknights/MAA1999/releases/download/v0.3.2/MAA1999-win-x64-v0.3.2.zip -O maa1999.zip
           mkdir 1999
@@ -76,11 +66,11 @@ jobs:
           unzip ../maa1999.zip
           cd ..
           cp -r ./1999/resource/model/* maaframework/model/
-          cd ..
+          cd ../..
 
       - name: Build Package
         run: |
-          cd server
+          cd packages/server
 
           echo '{}' > test.json
           zip res.zip test.json
@@ -95,12 +85,12 @@ jobs:
           cp -r web/* out/web/
           cp -r res.zip out/saves/
 
-          cd ..
+          cd ../..
 
       - uses: actions/upload-artifact@v3
         with:
           name: MaaJsonViewer-win
-          path: 'server/out'
+          path: 'packages/server/out'
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')

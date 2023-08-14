@@ -14,8 +14,8 @@ import {
   MaaFrameworkLoader,
   MaaInstance,
   MaaResource
-} from '../MaaJSLoader'
-import { MaaAdbControllerTypeEnum } from '../MaaJSLoader/src/framework/types'
+} from '@maa/loader'
+import { MaaAdbControllerTypeEnum } from '@maa/loader/src/framework/types'
 
 interface Config {
   port: number
