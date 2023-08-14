@@ -33,11 +33,7 @@ const selectedKeysFilter = computed({
     if (v.length === 0) {
       return
     } else {
-      const s = v[0] as PathKey
-      if (path.key_is_dir(s)) {
-        return
-      }
-      navigate(s)
+      navigate(v[0] as PathKey)
     }
   },
   get() {

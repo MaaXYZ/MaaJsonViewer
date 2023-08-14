@@ -1,20 +1,19 @@
 import {
+  type DialogApi,
   NButton,
   NInput,
   NSwitch,
   NUpload,
   NUploadDragger,
   type UploadCustomRequestOptions,
-  type UploadFileInfo,
-  useDialog
+  type UploadFileInfo
 } from 'naive-ui'
-import type { DialogApiInjection } from 'naive-ui/es/dialog/src/DialogProvider'
 import { computed, ref } from 'vue'
 
 import { deleteTask, setTask, taskIndex } from '@/data'
 import { type PathKey, type PathSegments, fs, path, pool } from '@/filesystem'
 
-export function onUploadImage(dialog: DialogApiInjection, key: PathKey) {
+export function onUploadImage(dialog: DialogApi, key: PathKey) {
   const fl = ref<UploadFileInfo[]>([])
   const result: Record<string, ArrayBuffer> = {}
   const fakeRequest = async ({
@@ -70,7 +69,7 @@ export function onUploadImage(dialog: DialogApiInjection, key: PathKey) {
   })
 }
 
-export function onNewFolder(dialog: DialogApiInjection, key: PathKey) {
+export function onNewFolder(dialog: DialogApi, key: PathKey) {
   const name = ref<string>('')
   const p = computed(() => path.joinkey(key, name.value))
   const pathExists = computed(() => {
@@ -102,7 +101,7 @@ export function onNewFolder(dialog: DialogApiInjection, key: PathKey) {
   })
 }
 
-export function onNewJson(dialog: DialogApiInjection, key: PathKey) {
+export function onNewJson(dialog: DialogApi, key: PathKey) {
   const name = ref<string>('')
   const nameWithSfx = computed(() =>
     name.value.endsWith('.json') ? name.value : `${name.value}.json`
@@ -148,7 +147,7 @@ export function onNewTask(dir: PathSegments, file: string) {
 }
 
 export function onDeleteFile(
-  dialog: DialogApiInjection,
+  dialog: DialogApi,
   dir: PathSegments,
   file: string
 ) {

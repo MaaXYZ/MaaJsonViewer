@@ -9,7 +9,7 @@ import {
   ImageOutlined,
   InsertDriveFileOutlined
 } from '@vicons/material'
-import { NButton, NIcon, type TreeOption, useDialog } from 'naive-ui'
+import { NIcon, type TreeOption, useDialog } from 'naive-ui'
 
 import {
   onDeleteFile,
