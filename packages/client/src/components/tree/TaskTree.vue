@@ -53,7 +53,6 @@ function handleDrop({ node, dragNode, dropPosition }: TreeDropInfo) {
   const [td, tf, th] = path.divide(toKey)
   if (path.key_is_dir(fromKey)) {
     // dragging directory
-
     switch (dropPosition) {
       case 'inside': {
         if (!path.key_is_dir(toKey)) {
@@ -160,7 +159,7 @@ function handleDrop({ node, dragNode, dropPosition }: TreeDropInfo) {
 <template>
   <div class="flex flex-col gap-2 flex-1 min-h-0">
     <div class="flex gap-2">
-      <NInput v-model:value="searchText" placeholder="task">
+      <NInput v-model:value="searchText" placeholder="task" clearable>
         <template #prefix>
           <NIcon>
             <SearchOutlined></SearchOutlined>

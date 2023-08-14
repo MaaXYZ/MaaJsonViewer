@@ -2,26 +2,11 @@
 import { NAvatar, NPopover } from 'naive-ui'
 import { computed } from 'vue'
 
-import { type Path, fs, pool } from '@/filesystem'
+import { makePngUrl } from '@/data'
 
 const props = defineProps<{
   url: string | string[]
 }>()
-
-function makeUrl(v: string | null) {
-  const fallback = '/favicon-32x32.png'
-  if (v && v.endsWith('.png')) {
-    // TODO: maybe check?
-    const hash = fs.tree.readFile(v as Path)
-    if (hash) {
-      const url = pool.query(hash)
-      if (url) {
-        return url
-      }
-    }
-  }
-  return fallback
-}
 
 const first = computed(() => {
   return props.url instanceof Array
@@ -37,15 +22,15 @@ const first = computed(() => {
     <template #trigger>
       <!-- <img :src="url" /> -->
       <div class="w-8 h-8 flex justify-center items-center">
-        <NAvatar object-fit="contain" :src="makeUrl(first)"></NAvatar>
+        <NAvatar object-fit="contain" :src="makePngUrl(first)"></NAvatar>
       </div>
     </template>
 
     <div class="flex flex-col items-center">
       <template v-if="props.url instanceof Array">
-        <img v-for="(u, i) in props.url" :key="i" :src="makeUrl(u)" />
+        <img v-for="(u, i) in props.url" :key="i" :src="makePngUrl(u)" />
       </template>
-      <img v-else :src="makeUrl(first)" />
+      <img v-else :src="makePngUrl(first)" />
     </div>
   </NPopover>
 </template>

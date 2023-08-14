@@ -2,7 +2,6 @@
 import {
   BuildOutlined,
   CropOutlined,
-  EditOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
   NavigateBeforeOutlined,
@@ -16,8 +15,8 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { onEnterRename } from '@/components/tree/TaskTreeAction'
-import { active, getTask, history, setTask } from '@/data'
-import { type PathKey, fs } from '@/filesystem'
+import { active, getTask, history, makePngUrl, setTask } from '@/data'
+import { fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
 
 import TaskEdit from '@/components/TaskEdit.vue'
@@ -146,6 +145,20 @@ onUnmounted(() => {
             }
           "
         ></TaskEdit>
+      </template>
+      <template
+        v-else-if="
+          active && active.endsWith('.png') && fs.tree.existsFile(active)
+        "
+      >
+        <div class="flex flex-col gap-4 max-h-full">
+          <div class="flex justify-center gap-2 items-center">
+            <span class="text-lg"> {{ active }} </span>
+          </div>
+          <div class="flex justify-center">
+            <img :src="makePngUrl(active)" />
+          </div>
+        </div>
       </template>
     </NCard>
   </MainLayout>
