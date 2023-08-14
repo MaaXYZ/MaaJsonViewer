@@ -124,12 +124,12 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             onNewFolder(key)
           }}
         ></IconButton>
-        <IconButton
+        {/* <IconButton
           icon={DeleteOutlined}
           onClick={() => {
             onDelete(key)
           }}
-        ></IconButton>
+        ></IconButton> */}
       </div>
     )
   } else {

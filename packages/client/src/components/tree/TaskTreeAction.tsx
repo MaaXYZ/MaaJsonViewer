@@ -114,8 +114,15 @@ export function onNewTask(dir: PathSegments, file: string) {
 export function onDelete(key: PathKey) {
   const [dir, file, hash] = path.divide(key)
   if (path.key_is_dir(key)) {
+    // TODO: not supported yet
   } else {
     if (hash) {
+      fs.scope(() => {
+        filterTask(temp => {
+          return temp === hash ? null : temp
+        })
+        delTask(taskIndex.value[hash])
+      })
     } else {
       const isJson = file.endsWith('.json')
       const p = path.joinkey(dir, file)

@@ -6,6 +6,7 @@
     "run:server": "cd packages/server && npm run run",
     "build:client": "cd packages/client && npm run build",
     "build:server": "cd packages/server && npm run build",
+    "dev": "run-p dev:client run:server",
     "build": "run-p build:client build:server"
   },
   "workspaces": [
