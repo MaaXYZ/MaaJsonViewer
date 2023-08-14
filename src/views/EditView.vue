@@ -20,7 +20,7 @@ import { type PathKey, fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
 
 import TaskEdit from '@/components/TaskEdit.vue'
-import TaskTree from '@/components/TaskTree.vue'
+import TaskTree from '@/components/tree/TaskTree.vue'
 import MainLayout from '@/layout/MainLayout.vue'
 
 const router = useRouter()

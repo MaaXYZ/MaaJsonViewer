@@ -216,9 +216,7 @@ function tryDelete() {
           </NCollapseItem>
           <NCollapseItem title="引用" name="ref">
             <FormLayout>
-              <ClearButton propkey="<unknown>" :value="null">
-                前序任务
-              </ClearButton>
+              <ClearButton propkey="" :value="null"> 前序任务 </ClearButton>
               <ArrayNavigateEdit
                 :value="
                   (taskBackwardIndex[hash] ?? []).sort((a, b) =>
