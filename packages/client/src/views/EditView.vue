@@ -4,6 +4,7 @@ import {
   CropOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
+  HealthAndSafetyOutlined,
   NavigateBeforeOutlined,
   NavigateNextOutlined,
   RedoOutlined,
@@ -20,6 +21,7 @@ import { fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
 
 import TaskEdit from '@/components/TaskEdit.vue'
+import ValidateTask from '@/components/task/ValidateTask.vue'
 import TaskTree from '@/components/tree/TaskTree.vue'
 import MainLayout from '@/layout/MainLayout.vue'
 
@@ -59,9 +61,13 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKey)
 })
+
+const validateEl = ref<InstanceType<typeof ValidateTask> | null>(null)
 </script>
 
 <template>
+  <ValidateTask ref="validateEl"></ValidateTask>
+
   <MainLayout>
     <template #action>
       <NButton @click="router.push('/eval')">
@@ -75,6 +81,13 @@ onUnmounted(() => {
         <template #icon>
           <NIcon>
             <CropOutlined></CropOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="validateEl?.performValidate()">
+        <template #icon>
+          <NIcon>
+            <HealthAndSafetyOutlined></HealthAndSafetyOutlined>
           </NIcon>
         </template>
       </NButton>
