@@ -100,62 +100,6 @@ export function getTask(p: PathKey | null) {
   return obj[hash] ?? null
 }
 
-function performRename(
-  task: Record<string, unknown>,
-  key: string,
-  from: string,
-  to: string | null
-) {
-  if (!(key in task)) {
-    return
-  }
-  const val = task[key]
-  if (typeof val === 'string') {
-    if (val === from) {
-      if (to) {
-        task[key] = to
-      } else {
-        delete task[key]
-      }
-      return
-    }
-  } else if (
-    val instanceof Array &&
-    val.length > 0 &&
-    typeof val[0] === 'string'
-  ) {
-    if (to) {
-      task[key] = val.map(x => {
-        if (x === from) {
-          return to
-        } else {
-          return x
-        }
-      })
-    } else {
-      task[key] = val.filter(x => x !== from)
-    }
-  }
-}
-
-export function moveTask(from: PathKey, to: PathKey) {
-  const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
-
-  const [fd, ff, fh] = path.divide(from)
-  const [td, tf, th] = path.divide(to)
-
-  fs.scope(() => {
-    filterTask(temp => {
-      return temp === fh ? th : temp
-    })
-    const task = getTask(from)
-    if (task) {
-      delTask(from)
-      setTask(to, task)
-    }
-  })
-}
-
 export function duplicateTask(name: PathKey) {
   const [dir, file, hash] = path.divide(name)
   const task = getTask(name)

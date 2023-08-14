@@ -11,8 +11,11 @@ import {
 import { computed, ref } from 'vue'
 
 import {
+  delTask,
   deleteTask,
+  filterTask,
   filterTemplate,
+  getTask,
   renameInto,
   renameKey,
   setTask,
@@ -130,13 +133,9 @@ export function onEnterRename(key: PathKey) {
   if (key === '/') {
     return
   }
-  const [dir, file, hash] = path.divide(key)
-  if (hash) {
-    // Not supported yet
-    return
-  }
+  const [, file, hash] = path.divide(key)
   renameKey.value = key
-  renameInto.value = file
+  renameInto.value = hash ?? file
 }
 
 export function onLeaveRename() {
@@ -147,22 +146,45 @@ export function onLeaveRename() {
   }
   if (path.key_is_dir(key)) {
     const [dir, file] = path.divide(key)
-    fs.tree.renameDir(key, path.joinkey(dir, renameInto.value!))
-  } else {
-    const [dir, file] = path.divide(key)
-    const to = path.joinkey(dir, renameInto.value!)
+    const tk = path.joinkey(dir, renameInto.value!)
+    const zf = path.seg_to_zip(path.to_seg(key)) + '/'
+    const tf = path.seg_to_zip(path.to_seg(tk)) + '/'
 
     fs.scope(() => {
-      fs.tree.renameFile(key, to)
-
-      if (file.endsWith('.png')) {
-        const zf = path.seg_to_zip(path.to_seg(key))
-        const tf = path.seg_to_zip(path.join(dir, renameInto.value!))
-
-        filterTemplate(temp => {
-          return temp === zf ? tf : temp
-        })
-      }
+      fs.tree.renameDir(key, tk)
+      filterTemplate(temp => {
+        return temp.startsWith(zf) ? temp.replace(zf, tf) : temp
+      })
     })
+  } else {
+    const [dir, file, hash] = path.divide(key)
+    if (hash) {
+      const into = renameInto.value!
+      const to = path.joinkey(dir, file, into)
+      fs.scope(() => {
+        filterTask(temp => {
+          return temp === hash ? into : temp
+        })
+        const task = getTask(key)
+        if (task) {
+          delTask(key)
+          setTask(to, task)
+        }
+      })
+    } else {
+      const to = path.joinkey(dir, renameInto.value!)
+      fs.scope(() => {
+        fs.tree.renameFile(key, to)
+
+        if (file.endsWith('.png')) {
+          const zf = path.seg_to_zip(path.to_seg(key))
+          const zt = path.seg_to_zip(path.join(dir, renameInto.value!))
+
+          filterTemplate(temp => {
+            return temp === zf ? zt : temp
+          })
+        }
+      })
+    }
   }
 }

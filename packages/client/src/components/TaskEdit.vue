@@ -3,8 +3,7 @@ import {
   CheckOutlined,
   CloseOutlined,
   ContentCopyOutlined,
-  DeleteOutlined,
-  EditOutlined
+  DeleteOutlined
 } from '@vicons/material'
 import { useVModel } from '@vueuse/core'
 import {
@@ -13,20 +12,12 @@ import {
   NCollapse,
   NCollapseItem,
   NIcon,
-  NInput,
   NModal,
   NSwitch
 } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import {
-  deleteTask,
-  duplicateTask,
-  moveTask,
-  navigate,
-  taskBackwardIndex,
-  taskIndex
-} from '@/data'
+import { deleteTask, duplicateTask, taskBackwardIndex, taskIndex } from '@/data'
 import { type PathKey, path } from '@/filesystem'
 import type { Task } from '@/types'
 
@@ -58,25 +49,6 @@ const hash = computed(() => {
   return hash!
 })
 
-const showRename = ref(false)
-const titleCache = ref('')
-
-function enterRename() {
-  titleCache.value = hash.value
-  showRename.value = true
-}
-
-function tryRename() {
-  if (!titleCache || titleCache.value in taskIndex.value) {
-    return
-  }
-  showRename.value = false
-  const [dir, file] = path.divide(props.name)
-  const into = path.joinkey(dir, file, titleCache.value)
-  moveTask(props.name, into)
-  navigate(into)
-}
-
 function tryDuplicate() {
   duplicateTask(props.name)
 }
@@ -105,36 +77,6 @@ function tryDelete() {
 </script>
 
 <template>
-  <NModal v-model:show="showRename">
-    <NCard
-      style="width: 60vw"
-      content-style="display: flex; flex-direction: column; gap: 0.5rem"
-    >
-      <span class="text-lg">重命名 {{ hash }}</span>
-      <NInput v-model:value="titleCache" placeholder="task"></NInput>
-      <div class="flex gap-2 justify-end">
-        <NButton
-          @click="tryRename"
-          type="primary"
-          :disabled="!titleCache || titleCache in taskIndex"
-        >
-          <template #icon>
-            <NIcon>
-              <CheckOutlined></CheckOutlined>
-            </NIcon>
-          </template>
-        </NButton>
-        <NButton @click="showRename = false">
-          <template #icon>
-            <NIcon>
-              <CloseOutlined></CloseOutlined>
-            </NIcon>
-          </template>
-        </NButton>
-      </div>
-    </NCard>
-  </NModal>
-
   <NModal v-model:show="showDelete">
     <NCard
       style="width: 60vw"
@@ -177,13 +119,6 @@ function tryDelete() {
   <div class="flex flex-col gap-4 max-h-full">
     <div class="flex justify-center gap-2 items-center">
       <span class="text-lg"> {{ hash }} </span>
-      <NButton @click="enterRename">
-        <template #icon>
-          <NIcon>
-            <EditOutlined></EditOutlined>
-          </NIcon>
-        </template>
-      </NButton>
       <NButton @click="tryDuplicate">
         <template #icon>
           <NIcon>
