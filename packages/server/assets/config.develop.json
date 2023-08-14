@@ -1,0 +1,15 @@
+{
+  "port": 8080,
+  "web": "./web",
+  "date": "yyyyMMdd-HHmmss",
+  "saves": "./save.zip",
+  "active": "./save.zip",
+  "maaframework": {
+    "emulator": false,
+    "adb": "adb",
+    "address": "127.0.0.1:5555",
+    "root": "./library/maaframework",
+    "log": "./debug",
+    "debug": false
+  }
+}
