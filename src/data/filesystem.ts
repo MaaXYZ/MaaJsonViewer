@@ -43,12 +43,6 @@ export const filesystemTree = computed<TreeOption>(() => {
         })
       }
     },
-    (dir, name, content, param) => {
-      param.children?.push({
-        key: path.joinkey(dir, name),
-        label: name
-      })
-    },
     rootOption
   )
 
@@ -73,7 +67,6 @@ export const filesystemDirectoryTree = computed<TreeSelectOption>(() => {
       param.children?.push(opt)
       return opt
     },
-    (dir, name, content, param) => {},
     (dir, name, content, param) => {},
     rootOption
   )

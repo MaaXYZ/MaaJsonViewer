@@ -125,7 +125,7 @@ export function renderSuffix({ option }: { option: TreeOption }) {
           <IconButton
             icon={DeleteOutlined}
             onClick={() => {
-              onDeleteFile(dialog, dir, file)
+              onDeleteFile(dir, file)
             }}
           ></IconButton>
         </div>

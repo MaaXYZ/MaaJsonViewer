@@ -10,10 +10,9 @@ export type PathKey = string & { __key: 'PathKey' }
 // abc/def/ghi
 export type PathZip = string & { __key: 'PathZip' }
 
-export type FileContentRef = string & { __key: 'FileContentRef' }
+export type FileContentRef = string
 
 export type DirEntry = {
   dir: Record<string, DirEntry>
   file: Record<string, string>
-  bin: Record<string, FileContentRef>
 }

@@ -136,7 +136,7 @@ const showSave = ref(false)
 const targetDir = ref('/')
 const targetFile = ref('test')
 const isExists = computed(() => {
-  return fs.tree.existsBinary(
+  return fs.tree.existsFile(
     path.joinkey(targetDir.value as PathKey, targetFile.value + '.png')
   )
 })
@@ -150,7 +150,7 @@ function doSave() {
     cropEl.value!.toDataURL().replace('data:image/png;base64,', ''),
     'base64'
   )
-  fs.tree.writeBinary(
+  fs.tree.writeFile(
     path.joinkey(targetDir.value as PathKey, targetFile.value + '.png'),
     pool.put(data.buffer)
   )

@@ -54,7 +54,7 @@ export function onUploadImage(dialog: DialogApi, key: PathKey) {
           fs.history.pause()
 
           for (const name in result) {
-            fs.tree.writeBinary(path.joinkey(key, name), pool.put(result[name]))
+            fs.tree.writeFile(path.joinkey(key, name), pool.put(result[name]))
           }
 
           fs.history.resume()
@@ -146,50 +146,17 @@ export function onNewTask(dir: PathSegments, file: string) {
   }
 }
 
-export function onDeleteFile(
-  dialog: DialogApi,
-  dir: PathSegments,
-  file: string
-) {
-  const remRef = ref(true)
-  dialog.warning({
-    title: '删除文件',
-    content: () => {
-      if (file.endsWith('.json')) {
-        return (
-          <div class="flex flex-col gap-2">
-            <span>{`是否要删除 ${file} ?`}</span>
-            <div class="flex gap-2">
-              <span>移除所有引用</span>
-              <NSwitch
-                value={remRef.value}
-                onUpdate:value={v => (remRef.value = v)}
-              ></NSwitch>
-            </div>
-          </div>
-        )
-      } else {
-        return (
-          <div class="flex flex-col gap-2">
-            <span>{`是否要删除 ${file} ?`}</span>
-          </div>
-        )
-      }
-    },
-    positiveText: '是',
-    onPositiveClick: () => {
-      const p = path.joinkey(dir, file)
+export function onDeleteFile(dir: PathSegments, file: string) {
+  const isJson = file.endsWith('.json')
+  const p = path.joinkey(dir, file)
 
-      fs.history.pause()
-
+  fs.scope(() => {
+    if (isJson) {
       const obj = JSON.parse(fs.tree.readFile(p) ?? '{}')
       for (const name in obj) {
         deleteTask(taskIndex.value[name], null)
       }
-      fs.tree.removeFile(p)
-
-      fs.history.resume()
-      fs.history.commit()
     }
+    fs.tree.removeFile(p)
   })
 }

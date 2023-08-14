@@ -33,7 +33,7 @@ export function initFilesystem() {
             if (file.endsWith('.json')) {
               tree.writeFile(path, await entry.async('string'))
             } else {
-              tree.writeBinary(path, pool.put(await entry.async('arraybuffer')))
+              tree.writeFile(path, pool.put(await entry.async('arraybuffer')))
             }
           }
         })()
@@ -53,10 +53,11 @@ export function initFilesystem() {
         return zip.folder(name)!
       },
       (dir, name, content, zip) => {
-        zip.file(name, content)
-      },
-      (dir, name, content, zip) => {
-        zip.file(name, pool.get(content)!)
+        if (name.endsWith('.json')) {
+          zip.file(name, content)
+        } else {
+          zip.file(name, pool.get(content)!)
+        }
       },
       zip
     )
@@ -65,5 +66,12 @@ export function initFilesystem() {
     })
   }
 
-  return { tree, history, loadZip, saveZip }
+  function scope(action: () => void) {
+    history.pause()
+    action()
+    history.resume()
+    history.commit()
+  }
+
+  return { tree, history, loadZip, saveZip, scope }
 }

@@ -12,7 +12,7 @@ function makeUrl(v: string | null) {
   const fallback = '/favicon-32x32.png'
   if (v && v.endsWith('.png')) {
     // TODO: maybe check?
-    const hash = fs.tree.readBinary(v as Path)
+    const hash = fs.tree.readFile(v as Path)
     if (hash) {
       const url = pool.query(hash)
       if (url) {
