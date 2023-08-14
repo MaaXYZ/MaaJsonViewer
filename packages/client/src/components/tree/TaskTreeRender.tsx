@@ -10,10 +10,9 @@ import {
   InsertDriveFileOutlined
 } from '@vicons/material'
 import { NIcon, NInput, type TreeOption, useDialog } from 'naive-ui'
-import { ref } from 'vue'
 
 import {
-  onDeleteFile,
+  onDelete,
   onLeaveRename,
   onNewFolder,
   onNewJson,
@@ -125,6 +124,12 @@ export function renderSuffix({ option }: { option: TreeOption }) {
             onNewFolder(key)
           }}
         ></IconButton>
+        <IconButton
+          icon={DeleteOutlined}
+          onClick={() => {
+            onDelete(key)
+          }}
+        ></IconButton>
       </div>
     )
   } else {
@@ -145,7 +150,18 @@ export function renderSuffix({ option }: { option: TreeOption }) {
           <IconButton
             icon={DeleteOutlined}
             onClick={() => {
-              onDeleteFile(dir, file)
+              onDelete(key)
+            }}
+          ></IconButton>
+        </div>
+      )
+    } else {
+      return (
+        <div class="flex gap-2 mr-2">
+          <IconButton
+            icon={DeleteOutlined}
+            onClick={() => {
+              onDelete(key)
             }}
           ></IconButton>
         </div>

@@ -2,7 +2,7 @@ import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
 import { parse, stringify } from 'zipson'
 
-import { divide, zip_to_path } from './path'
+import { divide } from './path'
 import * as pool from './pool'
 import { useTree } from './tree'
 import { type PathZip } from './types'
@@ -66,10 +66,17 @@ export function initFilesystem() {
     })
   }
 
+  let level = 0
   function scope(action: () => void) {
-    history.pause()
+    if (level === 0) {
+      history.pause()
+    }
+    level += 1
     action()
-    history.resume(true)
+    level -= 1
+    if (level == 0) {
+      history.resume(true)
+    }
   }
 
   return { tree, history, loadZip, saveZip, scope }

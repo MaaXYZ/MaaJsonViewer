@@ -1,18 +1,15 @@
 import {
   type DialogApi,
   NButton,
-  NInput,
-  NSwitch,
   NUpload,
   NUploadDragger,
   type UploadCustomRequestOptions,
   type UploadFileInfo
 } from 'naive-ui'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 import {
   delTask,
-  deleteTask,
   filterTask,
   filterTemplate,
   getTask,
@@ -44,7 +41,7 @@ export function onUploadImage(dialog: DialogApi, key: PathKey) {
     }
   }
   const dlg = dialog.create({
-    title: '添加文件',
+    title: '添加图片',
     content: () => (
       <NUpload
         accept="image/png"
@@ -114,19 +111,29 @@ export function onNewTask(dir: PathSegments, file: string) {
   }
 }
 
-export function onDeleteFile(dir: PathSegments, file: string) {
-  const isJson = file.endsWith('.json')
-  const p = path.joinkey(dir, file)
+export function onDelete(key: PathKey) {
+  const [dir, file, hash] = path.divide(key)
+  if (path.key_is_dir(key)) {
+  } else {
+    if (hash) {
+    } else {
+      const isJson = file.endsWith('.json')
+      const p = path.joinkey(dir, file)
 
-  fs.scope(() => {
-    if (isJson) {
-      const obj = JSON.parse(fs.tree.readFile(p) ?? '{}')
-      for (const name in obj) {
-        deleteTask(taskIndex.value[name], null)
-      }
+      fs.scope(() => {
+        if (isJson) {
+          const obj = JSON.parse(fs.tree.readFile(p) ?? '{}')
+          for (const name in obj) {
+            filterTask(temp => {
+              return temp === name ? null : temp
+            })
+            delTask(taskIndex.value[name])
+          }
+        }
+        fs.tree.removeFile(p)
+      })
     }
-    fs.tree.removeFile(p)
-  })
+  }
 }
 
 export function onEnterRename(key: PathKey) {

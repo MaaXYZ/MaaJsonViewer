@@ -1,7 +1,5 @@
 import { computed } from 'vue'
 
-import { filterTask } from '.'
-
 import { fs, path } from '@/filesystem'
 import type { PathKey } from '@/filesystem'
 import type { Task, TaskData } from '@/types'
@@ -98,33 +96,4 @@ export function getTask(p: PathKey | null) {
   }
   const obj = JSON.parse(f) as TaskData
   return obj[hash] ?? null
-}
-
-export function duplicateTask(name: PathKey) {
-  const [dir, file, hash] = path.divide(name)
-  const task = getTask(name)
-  if (!task) {
-    return
-  }
-  for (let i = 0; ; i++) {
-    const name2 = `${hash}${i}`
-    if (!(name2 in taskIndex.value)) {
-      setTask(path.joinkey(dir, file, name2), task)
-      return
-    }
-  }
-}
-
-export function deleteTask(from: PathKey, to: PathKey | null) {
-  const keys = ['target', 'begin', 'end', 'next', 'timeout_next', 'runout_next']
-
-  const [fd, ff, fh] = path.divide(from)
-  const th = to ? path.divide(to)[2] : null
-
-  fs.scope(() => {
-    filterTask(temp => {
-      return temp === fh ? th : temp
-    })
-    delTask(from)
-  })
 }
