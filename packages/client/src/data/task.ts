@@ -68,17 +68,21 @@ export function setTask(p: PathKey | null, v: Task) {
 
 export function delTask(p: PathKey | null) {
   if (!p) {
-    return
+    return null
   }
   const [, , hash] = path.divide(p)
   if (!hash) {
-    return
+    return null
   }
   const fd = fs.tree.openFile(p)
   const obj = JSON.parse(fd.value) as TaskData
   if (hash in obj) {
+    const task = obj[hash]
     delete obj[hash]
     fd.value = JSON.stringify(obj, null, 4)
+    return task
+  } else {
+    return null
   }
 }
 
