@@ -1,5 +1,7 @@
 import { computed } from 'vue'
 
+import { filterTask } from '.'
+
 import { fs, path } from '@/filesystem'
 import type { PathKey } from '@/filesystem'
 import type { Task, TaskData } from '@/types'
@@ -142,26 +144,16 @@ export function moveTask(from: PathKey, to: PathKey) {
   const [fd, ff, fh] = path.divide(from)
   const [td, tf, th] = path.divide(to)
 
-  fs.history.pause()
-
-  for (const name in taskIndex.value) {
-    const task = getTask(taskIndex.value[name])
-    if (!task) {
-      continue
-    }
-    for (const key of keys) {
-      performRename(task, key, fh!, th)
-    }
-    if (name === fh) {
+  fs.scope(() => {
+    filterTask(temp => {
+      return temp === fh ? th : temp
+    })
+    const task = getTask(from)
+    if (task) {
       delTask(from)
       setTask(to, task)
-    } else {
-      setTask(taskIndex.value[name], task)
     }
-  }
-
-  fs.history.pause()
-  fs.history.commit()
+  })
 }
 
 export function duplicateTask(name: PathKey) {
@@ -170,7 +162,7 @@ export function duplicateTask(name: PathKey) {
   if (!task) {
     return
   }
-  for (let i = 1; ; i++) {
+  for (let i = 0; ; i++) {
     const name2 = `${hash}${i}`
     if (!(name2 in taskIndex.value)) {
       setTask(path.joinkey(dir, file, name2), task)
@@ -185,23 +177,10 @@ export function deleteTask(from: PathKey, to: PathKey | null) {
   const [fd, ff, fh] = path.divide(from)
   const th = to ? path.divide(to)[2] : null
 
-  fs.history.pause()
-
-  for (const name in taskIndex.value) {
-    if (name === fh) {
-      delTask(from)
-    } else {
-      const task = getTask(taskIndex.value[name])
-      if (!task) {
-        continue
-      }
-      for (const key of keys) {
-        performRename(task, key, fh!, th)
-      }
-      setTask(taskIndex.value[name], task)
-    }
-  }
-
-  fs.history.pause()
-  fs.history.commit()
+  fs.scope(() => {
+    filterTask(temp => {
+      return temp === fh ? th : temp
+    })
+    delTask(from)
+  })
 }
