@@ -9,7 +9,7 @@ import { NIcon, type TreeOption } from 'naive-ui'
 
 import { onLeaveRename } from './TaskTreeAction'
 
-import { renameInto, renameKey } from '@/data'
+import { active, renameInto, renameKey } from '@/data'
 import { type PathKey, path } from '@/filesystem'
 
 import AutoFocusInput from '@/components/atomic/AutoFocusInput.vue'
@@ -33,15 +33,21 @@ export function renderLabel({ option }: { option: TreeOption }) {
     )
   }
 
+  const actived = active.value === key
+
   if (!path.key_is_dir(key)) {
     const [dir, file, hash] = path.divide(key)
     if (hash) {
-      return <span>{hash}</span>
+      return <span class={actived ? 'underline' : ''}>{hash}</span>
     } else {
       if (file.endsWith('.json')) {
-        return <span class=" text-green-600">{file}</span>
+        return (
+          <span class={actived ? 'underline text-green-600' : 'text-green-600'}>
+            {file}
+          </span>
+        )
       } else {
-        return <span>{file}</span>
+        return <span class={actived ? 'underline' : ''}>{file}</span>
       }
     }
   } else {

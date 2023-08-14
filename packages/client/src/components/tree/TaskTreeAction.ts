@@ -1,80 +1,15 @@
 import {
-  type DialogApi,
-  NButton,
-  NUpload,
-  NUploadDragger,
-  type UploadCustomRequestOptions,
-  type UploadFileInfo
-} from 'naive-ui'
-import { ref } from 'vue'
-
-import {
   delTask,
   filterTask,
   filterTemplate,
   getTask,
+  history,
   renameInto,
   renameKey,
   setTask,
   taskIndex
 } from '@/data'
-import { type PathKey, type PathSegments, fs, path, pool } from '@/filesystem'
-
-export function onUploadImage(dialog: DialogApi, key: PathKey) {
-  const fl = ref<UploadFileInfo[]>([])
-  const result: Record<string, ArrayBuffer> = {}
-  const fakeRequest = async ({
-    file,
-    onFinish,
-    onError
-  }: UploadCustomRequestOptions) => {
-    if (file.name in result) {
-      onError()
-      return
-    }
-    if (file.file) {
-      const buf = await file.file.arrayBuffer()
-      result[file.name] = buf
-      onFinish()
-    } else {
-      onError()
-    }
-  }
-  const dlg = dialog.create({
-    title: '添加图片',
-    content: () => (
-      <NUpload
-        accept="image/png"
-        listType="image-card"
-        fileList={fl.value}
-        onUpdateFileList={data => {
-          fl.value = data
-        }}
-        customRequest={fakeRequest}
-      >
-        <NUploadDragger>上传</NUploadDragger>
-      </NUpload>
-    ),
-    action: () => (
-      <NButton
-        onClick={() => {
-          fs.history.pause()
-
-          for (const name in result) {
-            fs.tree.writeFile(path.joinkey(key, name), pool.put(result[name]))
-          }
-
-          fs.history.resume()
-          fs.history.commit()
-
-          dlg.destroy()
-        }}
-      >
-        添加
-      </NButton>
-    )
-  })
-}
+import { type PathKey, fs, path } from '@/filesystem'
 
 export function onNewFolder(key: PathKey) {
   for (let i = 0; ; i++) {
@@ -124,6 +59,7 @@ export function onDelete(key: PathKey) {
         })
         delTask(taskIndex.value[hash])
       })
+      history.pop()
     } else {
       const isJson = file.endsWith('.json')
       const p = path.joinkey(dir, file)
@@ -140,6 +76,7 @@ export function onDelete(key: PathKey) {
         }
         fs.tree.removeFile(p)
       })
+      history.pop()
     }
   }
 }

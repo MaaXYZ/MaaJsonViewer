@@ -15,6 +15,12 @@ class History {
   push(v: PathKey) {
     this.cur.value = v
   }
+
+  pop() {
+    if (this.info.canUndo.value) {
+      this.info.undo()
+    }
+  }
 }
 
 export const history = new History()

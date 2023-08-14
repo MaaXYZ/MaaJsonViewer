@@ -7,20 +7,15 @@ import {
   UnfoldLessOutlined
 } from '@vicons/material'
 import { useDialog } from 'naive-ui'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
-import {
-  onDelete,
-  onNewFolder,
-  onNewJson,
-  onNewTask,
-  onUploadImage
-} from './TaskTreeAction'
+import { onDelete, onNewFolder, onNewJson, onNewTask } from './TaskTreeAction'
 
 import { active, expandKey } from '@/data'
 import { type PathKey, path } from '@/filesystem'
 
 import IconButton from '@/components/atomic/IconButton.vue'
+import UploadImage from '@/components/filesystem/UploadImage.vue'
 
 const dialog = useDialog()
 const isTask = computed(() => {
@@ -37,9 +32,13 @@ const isJson = computed(() => {
     path.divide(active.value)[1].endsWith('.json')
   )
 })
+
+const uploadEl = ref<InstanceType<typeof UploadImage> | null>(null)
 </script>
 
 <template>
+  <UploadImage ref="uploadEl"></UploadImage>
+
   <div class="flex gap-2">
     <template v-if="active && path.key_is_dir(active)">
       <IconButton
@@ -47,7 +46,7 @@ const isJson = computed(() => {
         @click="
           () => {
             if (active) {
-              onUploadImage(dialog, active)
+              uploadEl?.popup(active)
             }
           }
         "
