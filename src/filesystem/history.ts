@@ -69,8 +69,7 @@ export function initFilesystem() {
   function scope(action: () => void) {
     history.pause()
     action()
-    history.resume()
-    history.commit()
+    history.resume(true)
   }
 
   return { tree, history, loadZip, saveZip, scope }

@@ -8,6 +8,10 @@ export function seg_to_path(seg: PathSegments): Path {
   return ('/' + seg.join('/')).replace(/\/+/, '/') as Path
 }
 
+export function seg_to_zip(seg: PathSegments): PathZip {
+  return seg.join('/').replace(/\/+/, '/') as PathZip
+}
+
 export function dir_to_key(path: Path): PathKey {
   return (path.replace(/\/+/, '/') + '/') as PathKey
 }

@@ -7,6 +7,7 @@ export * from './config'
 export * from './filesystem'
 export * from './history'
 export * from './image'
+export * from './refactor'
 export * from './task'
 
 export const active = computed(() => {

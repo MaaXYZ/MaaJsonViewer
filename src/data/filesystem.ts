@@ -1,8 +1,11 @@
 import type { TreeOption, TreeSelectOption } from 'naive-ui'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { type PathSegments, fs, path } from '@/filesystem'
 import type { TaskData } from '@/types'
+
+export const renameKey = ref<string | null>(null)
+export const renameInto = ref<string | null>(null)
 
 export const filesystemTree = computed<TreeOption>(() => {
   const rootOption: TreeOption = {

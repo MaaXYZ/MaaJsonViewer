@@ -67,6 +67,7 @@ const treeHeight = computed(() => {
         block-line
         selectable
         expand-on-click
+        :keyboard="false"
         :pattern="searchText"
         :show-irrelevant-nodes="false"
         :cancelable="false"

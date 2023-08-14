@@ -15,6 +15,7 @@ import { NButton, NCard, NIcon } from 'naive-ui'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { onEnterRename } from '@/components/tree/TaskTreeAction'
 import { active, getTask, history, setTask } from '@/data'
 import { type PathKey, fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
@@ -28,6 +29,12 @@ const router = useRouter()
 const expands = ref<PathKey[]>(['/' as PathKey])
 
 function handleKey(ev: KeyboardEvent) {
+  if (ev.key === 'F2') {
+    if (active.value) {
+      onEnterRename(active.value)
+    }
+    return
+  }
   if (ev.ctrlKey) {
     if (ev.key === 'z' || ev.key === 'Z') {
       ev.stopPropagation()

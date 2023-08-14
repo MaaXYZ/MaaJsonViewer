@@ -9,22 +9,42 @@ import {
   ImageOutlined,
   InsertDriveFileOutlined
 } from '@vicons/material'
-import { NIcon, type TreeOption, useDialog } from 'naive-ui'
+import { NIcon, NInput, type TreeOption, useDialog } from 'naive-ui'
+import { ref } from 'vue'
 
 import {
   onDeleteFile,
+  onLeaveRename,
   onNewFolder,
   onNewJson,
   onNewTask,
   onUploadImage
 } from './TaskTreeAction'
 
+import { renameInto, renameKey } from '@/data'
 import { type PathKey, path } from '@/filesystem'
 
+import AutoFocusInput from '@/components/atomic/AutoFocusInput.vue'
 import IconButton from '@/components/atomic/IconButton.vue'
 
 export function renderLabel({ option }: { option: TreeOption }) {
   const key = option.key as PathKey
+
+  if (renameKey.value === key) {
+    return (
+      <div class="flex items-center">
+        <AutoFocusInput
+          value={renameInto.value ?? ''}
+          onUpdate:value={v => {
+            renameInto.value = v
+          }}
+          onBlur={() => {
+            onLeaveRename()
+          }}
+        ></AutoFocusInput>
+      </div>
+    )
+  }
 
   if (!path.key_is_dir(key)) {
     const [dir, file, hash] = path.divide(key)
@@ -96,13 +116,13 @@ export function renderSuffix({ option }: { option: TreeOption }) {
         <IconButton
           icon={AddOutlined}
           onClick={() => {
-            onNewJson(dialog, key)
+            onNewJson(key)
           }}
         ></IconButton>
         <IconButton
           icon={CreateNewFolderOutlined}
           onClick={() => {
-            onNewFolder(dialog, key)
+            onNewFolder(key)
           }}
         ></IconButton>
       </div>

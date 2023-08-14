@@ -10,7 +10,14 @@ import {
 } from 'naive-ui'
 import { computed, ref } from 'vue'
 
-import { deleteTask, setTask, taskIndex } from '@/data'
+import {
+  deleteTask,
+  filterTemplate,
+  renameInto,
+  renameKey,
+  setTask,
+  taskIndex
+} from '@/data'
 import { type PathKey, type PathSegments, fs, path, pool } from '@/filesystem'
 
 export function onUploadImage(dialog: DialogApi, key: PathKey) {
@@ -69,70 +76,28 @@ export function onUploadImage(dialog: DialogApi, key: PathKey) {
   })
 }
 
-export function onNewFolder(dialog: DialogApi, key: PathKey) {
-  const name = ref<string>('')
-  const p = computed(() => path.joinkey(key, name.value))
-  const pathExists = computed(() => {
-    return !!fs.tree.existsDir(p.value)
-  })
-
-  const dlg = dialog.create({
-    title: '创建目录',
-    content: () => (
-      <NInput
-        value={name.value}
-        onUpdateValue={v => (name.value = v)}
-        placeholder={'文件名'}
-      ></NInput>
-    ),
-    action: () => (
-      <NButton
-        disabled={pathExists.value}
-        onClick={() => {
-          if (!pathExists.value) {
-            fs.tree.touchDir(p.value)
-            dlg.destroy()
-          }
-        }}
-      >
-        确认
-      </NButton>
-    )
-  })
+export function onNewFolder(key: PathKey) {
+  for (let i = 0; ; i++) {
+    const name = `__NewFolder${i}`
+    const to = path.joinkey(key, name)
+    if (fs.tree.existsDir(to)) {
+      continue
+    }
+    fs.tree.touchDir(to)
+    break
+  }
 }
 
-export function onNewJson(dialog: DialogApi, key: PathKey) {
-  const name = ref<string>('')
-  const nameWithSfx = computed(() =>
-    name.value.endsWith('.json') ? name.value : `${name.value}.json`
-  )
-  const to = computed(() => path.joinkey(key, nameWithSfx.value))
-  const pathExists = computed(() => {
-    return fs.tree.existsFile(to.value)
-  })
-  const dlg = dialog.create({
-    title: '创建json',
-    content: () => (
-      <NInput
-        value={name.value}
-        onUpdateValue={v => (name.value = v)}
-        placeholder={'文件名'}
-      ></NInput>
-    ),
-    action: () => (
-      <NButton
-        disabled={!name.value || pathExists.value}
-        onClick={() => {
-          if (!pathExists.value) {
-            fs.tree.writeFile(to.value, '{}')
-            dlg.destroy()
-          }
-        }}
-      >
-        确认
-      </NButton>
-    )
-  })
+export function onNewJson(key: PathKey) {
+  for (let i = 0; ; i++) {
+    const name = `__NewJson${i}.json`
+    const to = path.joinkey(key, name)
+    if (fs.tree.existsFile(to)) {
+      continue
+    }
+    fs.tree.writeFile(to, '{}')
+    break
+  }
 }
 
 export function onNewTask(dir: PathSegments, file: string) {
@@ -159,4 +124,45 @@ export function onDeleteFile(dir: PathSegments, file: string) {
     }
     fs.tree.removeFile(p)
   })
+}
+
+export function onEnterRename(key: PathKey) {
+  if (key === '/') {
+    return
+  }
+  const [dir, file, hash] = path.divide(key)
+  if (hash) {
+    // Not supported yet
+    return
+  }
+  renameKey.value = key
+  renameInto.value = file
+}
+
+export function onLeaveRename() {
+  const key = renameKey.value as PathKey | null
+  renameKey.value = null
+  if (!key) {
+    return
+  }
+  if (path.key_is_dir(key)) {
+    const [dir, file] = path.divide(key)
+    fs.tree.renameDir(key, path.joinkey(dir, renameInto.value!))
+  } else {
+    const [dir, file] = path.divide(key)
+    const to = path.joinkey(dir, renameInto.value!)
+
+    fs.scope(() => {
+      fs.tree.renameFile(key, to)
+
+      if (file.endsWith('.png')) {
+        const zf = path.seg_to_zip(path.to_seg(key))
+        const tf = path.seg_to_zip(path.join(dir, renameInto.value!))
+
+        filterTemplate(temp => {
+          return temp === zf ? tf : temp
+        })
+      }
+    })
+  }
 }

@@ -83,7 +83,7 @@ export function delTask(p: PathKey | null) {
 }
 
 export function getTask(p: PathKey | null) {
-  if (!p) {
+  if (!p || p === '/') {
     return
   }
   const [dir, file, hash] = path.divide(p)
