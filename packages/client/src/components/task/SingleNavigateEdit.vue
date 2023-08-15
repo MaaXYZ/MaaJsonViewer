@@ -60,7 +60,9 @@ const options = computed(() => {
 <template>
   <div class="flex gap-2 w-full">
     <NButton
+      secondary
       :disabled="!(value in taskIndex)"
+      :type="value in taskIndex ? 'default' : 'error'"
       @click="navigate(taskIndex[value])"
     >
       <template #icon>

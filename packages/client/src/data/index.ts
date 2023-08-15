@@ -9,6 +9,7 @@ export * from './history'
 export * from './image'
 export * from './refactor'
 export * from './task'
+export * from './validator'
 
 export const active = computed(() => {
   return history.cur.value

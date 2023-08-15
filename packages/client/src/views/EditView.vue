@@ -16,7 +16,14 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { onEnterRename } from '@/components/tree/TaskTreeAction'
-import { active, getTask, history, makePngUrl, setTask } from '@/data'
+import {
+  active,
+  getTask,
+  history,
+  makePngUrl,
+  performValidate,
+  setTask
+} from '@/data'
 import { fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
 
@@ -63,6 +70,12 @@ onUnmounted(() => {
 })
 
 const validateEl = ref<InstanceType<typeof ValidateTask> | null>(null)
+function doValidate() {
+  if (validateEl.value) {
+    validateEl.value.show = true
+    performValidate()
+  }
+}
 </script>
 
 <template>
@@ -84,7 +97,7 @@ const validateEl = ref<InstanceType<typeof ValidateTask> | null>(null)
           </NIcon>
         </template>
       </NButton>
-      <NButton @click="validateEl?.performValidate()">
+      <NButton @click="doValidate">
         <template #icon>
           <NIcon>
             <HealthAndSafetyOutlined></HealthAndSafetyOutlined>

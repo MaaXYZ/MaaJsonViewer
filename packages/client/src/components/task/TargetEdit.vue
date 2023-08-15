@@ -90,7 +90,7 @@ const marks = {
     </div>
     <SingleNavigateEdit
       v-if="state === 2"
-      value="(target as string)"
+      :value="target as string"
       @update:value="
         v => {
           target = v
