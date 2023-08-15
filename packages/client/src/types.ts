@@ -142,6 +142,7 @@ export type Task = Recognition &
     next?: string | string[]
     is_sub?: boolean
     inverse?: boolean
+    enabled?: boolean
     timeout?: number
     timeout_next?: string | string[]
     times_limit?: number

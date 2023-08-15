@@ -514,6 +514,7 @@ function checkTask(name: string, task: Task) {
   checkNext(name, task.next, 'next')
   checkBool(name, task.is_sub, 'is_sub')
   checkBool(name, task.inverse, 'inverse')
+  checkBool(name, task.enabled, 'enabled')
   checkUInt(name, task.timeout, 'timeout')
   checkNext(name, task.timeout_next, 'timeout_next')
   checkUInt(name, task.times_limit, 'times_limit')

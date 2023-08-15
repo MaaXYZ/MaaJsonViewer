@@ -26,6 +26,7 @@ const value = useVModel(props, 'value', emits, {
 const tNext = wrapProp(value, 'next')
 const tSub = wrapProp(value, 'is_sub')
 const tInv = wrapProp(value, 'inverse')
+const tEnable = wrapProp(value, 'enabled')
 const tTimeout = wrapProp(value, 'timeout')
 const tTimeoutNext = wrapProp(value, 'timeout_next')
 const tTimes = wrapProp(value, 'times_limit')
@@ -59,6 +60,17 @@ const tNotify = wrapProp(value, 'notify')
         @update:value="
           v => {
             tInv = v
+          }
+        "
+      ></NSwitch>
+    </div>
+    <ClearButton propkey="enabled" v-model:value="tEnable"> 启用 </ClearButton>
+    <div>
+      <NSwitch
+        :value="tEnable ?? true"
+        @update:value="
+          v => {
+            tEnable = v
           }
         "
       ></NSwitch>
