@@ -17,6 +17,16 @@ function checkRect(rect: unknown) {
   )
 }
 
+function checkRepl(repl: unknown) {
+  return (
+    repl instanceof Array &&
+    repl.length === 2 &&
+    repl.every(x => typeof x === 'string') &&
+    repl[0].length > 0 &&
+    repl[0] !== repl[1]
+  )
+}
+
 function checkRoi(name: string, roi?: unknown) {
   if (roi === undefined) {
     return
@@ -145,6 +155,63 @@ function checkBool(name: string, value: unknown | undefined, prop: string) {
   }
 }
 
+function checkText(name: string, text?: unknown) {
+  if (text === undefined) {
+    msg.value.push([name, `text is required`, undefined])
+    return
+  }
+  if (typeof text !== 'string' && !(text instanceof Array)) {
+    msg.value.push([name, `text should be string | string[]`, text])
+    return
+  }
+  if (text instanceof Array) {
+    for (const [idx, txt] of text.entries()) {
+      msg.value.push([name, `text[${idx}] should be string`, txt])
+      return
+    }
+  }
+}
+
+function checkReplace(name: string, replace?: unknown) {
+  if (replace === undefined) {
+    return
+  }
+  if (!(replace instanceof Array)) {
+    msg.value.push([name, 'replace should be TextRepl | TextRepl[]', replace])
+    return
+  }
+  if (replace.length > 0) {
+    if (typeof replace[0] === 'string') {
+      if (!checkRepl(replace)) {
+        msg.value.push([name, 'replace should be TextRepl', replace])
+        return
+      }
+    } else {
+      for (const [idx, rpl] of replace.entries()) {
+        if (!checkRepl(rpl)) {
+          msg.value.push([name, `replace[${idx}] should be TextRepl`, rpl])
+          return
+        }
+      }
+    }
+  }
+}
+
+function checkCustom(name: string, value: unknown | undefined, prop: string) {
+  if (value === undefined) {
+    msg.value.push([name, `${prop} is required`, undefined])
+    return
+  }
+  if (typeof value !== 'string') {
+    msg.value.push([name, `text should be string`, undefined])
+    return
+  }
+  if (value.length === 0) {
+    msg.value.push([name, `text should be non-empty`, undefined])
+    return
+  }
+}
+
 function checkRecognition(name: string, task: Task) {
   switch (task.recognition ?? 'DirectHit') {
     case 'DirectHit':
@@ -156,11 +223,187 @@ function checkRecognition(name: string, task: Task) {
       checkMethod(name, task.method)
       checkBool(name, task.green_mask, 'green_mask')
       break
+    case 'OCR':
+      checkRoi(name, task.roi)
+      checkText(name, task.text)
+      checkReplace(name, task.replace)
+      checkBool(name, task.only_rec, 'only_rec')
+      break
+    case 'Custom':
+      checkCustom(name, task.custom_recognizer, 'custom_recognizer')
+      break
+  }
+}
+
+function checkTarget(
+  name: string,
+  task: Task,
+  prop: 'target' | 'begin' | 'end'
+) {
+  const value = task[prop]
+  if (value === undefined || value === true) {
+    if (task.inverse) {
+      msg.value.push([
+        name,
+        `${prop} shouldn't be true when inverse is set`,
+        value
+      ])
+      return
+    }
+    if (task.recognition ?? 'DirectHit' === 'DirectHit') {
+      msg.value.push([
+        name,
+        `${prop} shouldn't be true when recognition is 'DirectHit'`,
+        value
+      ])
+      return
+    }
+  } else if (typeof value === 'string') {
+    if (!(value in taskIndex.value)) {
+      msg.value.push([name, `${prop} not exists in task index`, value])
+      return
+    }
+  } else if (value instanceof Array) {
+    if (!checkRect(value)) {
+      msg.value.push([name, `${prop} should be true | string | Rect`, value])
+      return
+    }
+  } else {
+    msg.value.push([name, `${prop} should be true | string | Rect`, value])
+    return
+  }
+}
+
+function checkOffset(name: string, value: unknown | undefined, prop: string) {
+  if (value === undefined) {
+    return
+  }
+  if (!checkRect(value)) {
+    msg.value.push([name, `${prop} should be Rect`, value])
+    return
+  }
+}
+
+function checkDuration(name: string, value?: unknown) {
+  if (value === undefined) {
+    return
+  }
+  if (typeof value !== 'number') {
+    msg.value.push([name, 'duration should be Rect', value])
+    return
+  }
+  if (value <= 0) {
+    msg.value.push([name, 'duration should be positive', value])
+    return
+  }
+  if (Math.floor(value) !== value) {
+    msg.value.push([name, 'duration should be integer', value])
+    return
+  }
+}
+
+function checkSingleKey(
+  name: string,
+  value: unknown | undefined,
+  prop: string
+) {
+  if (typeof value !== 'number') {
+    msg.value.push([name, `${prop} should be number`, value])
+    return
+  }
+  if (value <= 0 || value >= 128) {
+    msg.value.push([name, `${prop} should be inside [1, 127]`, value])
+    return
+  }
+  if (Math.floor(value) !== value) {
+    msg.value.push([name, `${prop} should be integer`, value])
+    return
+  }
+}
+
+function checkKey(name: string, value?: unknown) {
+  if (typeof value === 'number') {
+    checkSingleKey(name, value, 'key')
+  } else if (value instanceof Array) {
+    for (const [idx, dur] of value.entries()) {
+      checkSingleKey(name, dur, `key[${idx}]`)
+    }
+  } else {
+    msg.value.push([name, 'key should be number | number[]', value])
+  }
+}
+
+function checkPackageEntry(name: string, entry?: unknown) {
+  if (entry === undefined) {
+    return
+  }
+  if (typeof entry !== 'string') {
+    msg.value.push([name, 'package should be string', entry])
+    return
+  }
+  if (
+    !/^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*\/[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/.test(
+      entry
+    )
+  ) {
+    msg.value.push([
+      name,
+      'package should match /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*\/[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/',
+      entry
+    ])
+    return
+  }
+}
+
+function checkPackage(name: string, entry?: unknown) {
+  if (entry === undefined) {
+    return
+  }
+  if (typeof entry !== 'string') {
+    msg.value.push([name, 'package should be string', entry])
+    return
+  }
+  if (!/^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/.test(entry)) {
+    msg.value.push([
+      name,
+      'package should match /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/',
+      entry
+    ])
+    return
+  }
+}
+
+function checkAction(name: string, task: Task) {
+  switch (task.action ?? 'DoNothing') {
+    case 'Click':
+      checkTarget(name, task, 'target')
+      checkOffset(name, task.target_offset, 'target_offset')
+      break
+    case 'Swipe':
+      checkTarget(name, task, 'begin')
+      checkOffset(name, task.begin_offset, 'begin_offset')
+      checkTarget(name, task, 'end')
+      checkOffset(name, task.end_offset, 'end_offset')
+      checkDuration(name, task.duration)
+      break
+    case 'Key':
+      checkKey(name, task.key)
+      break
+    case 'StartApp':
+      checkPackageEntry(name, task.package)
+      break
+    case 'StopApp':
+      checkPackage(name, task.package)
+      break
+    case 'Custom':
+      checkCustom(name, task.custom_action, 'custom_action')
+      break
   }
 }
 
 function checkTask(name: string, task: Task) {
   checkRecognition(name, task)
+  checkAction(name, task)
 }
 
 function performValidate() {

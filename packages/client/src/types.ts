@@ -26,7 +26,7 @@ export type TextRepl = [string, string]
 // type RecCustom = {
 //   recognition: 'Custom'
 //   custom_recognizer: string
-//   custom_recognizer_param: unknown
+//   custom_recognizer_param?: unknown
 // }
 
 type Recognition = {
@@ -67,7 +67,7 @@ type Recognition = {
 
 // type Key = {
 //   action: 'Key'
-//   key: string | number | number[]
+//   key: number | number[]
 // }
 
 // type StartApp = {
@@ -87,7 +87,7 @@ type Recognition = {
 // type ActCustom = {
 //   action: 'Custom'
 //   custom_action: string
-//   custom_action_param: unknown
+//   custom_action_param?: unknown
 // }
 
 type Action = {
