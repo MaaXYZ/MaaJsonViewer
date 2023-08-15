@@ -1,5 +1,5 @@
 import type { TreeOption, TreeSelectOption } from 'naive-ui'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import {
   type Path,
@@ -14,6 +14,12 @@ import type { TaskData } from '@/types'
 export const expandKey = ref<PathKey[]>(['/' as PathKey])
 export const renameKey = ref<string | null>(null)
 export const renameInto = ref<string | null>(null)
+
+watch(expandKey, nv => {
+  if (!nv.includes('/' as PathKey)) {
+    expandKey.value = ['/' as PathKey, ...nv]
+  }
+})
 
 export function makePngUrl(v: string | null) {
   const fallback = '/favicon-32x32.png'

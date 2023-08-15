@@ -51,7 +51,11 @@ export function renderLabel({ option }: { option: TreeOption }) {
       }
     }
   } else {
-    return <span>{option.key === '/' ? '[ROOT]' : option.label}</span>
+    return (
+      <span class={actived ? 'underline' : ''}>
+        {option.key === '/' ? '[ROOT]' : option.label}
+      </span>
+    )
   }
 }
 
