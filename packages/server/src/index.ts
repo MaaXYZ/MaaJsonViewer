@@ -4,7 +4,7 @@ import {
   MaaFrameworkLoader,
   MaaInstance,
   MaaResource
-} from '@maa/loader'
+} from '@nekosu/loader'
 import history from 'connect-history-api-fallback'
 import { format } from 'date-fns'
 import express, { json } from 'express'
