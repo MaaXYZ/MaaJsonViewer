@@ -6,7 +6,6 @@ import {
   MaaResource
 } from '@maa/loader'
 import history from 'connect-history-api-fallback'
-import { format } from 'date-fns'
 import express, { json } from 'express'
 import expressWs from 'express-ws'
 import extract from 'extract-zip'
@@ -19,9 +18,7 @@ import sms from 'source-map-support'
 interface Config {
   port: number
   web: string
-  date: string
-  saves: string
-  active: string
+  save: string
   maaframework: {
     emulator: boolean
     adb: string
@@ -37,7 +34,6 @@ let loader: MaaFrameworkLoader
 let controller: MaaController
 let resource: MaaResource
 let instance: MaaInstance
-let loaded = false
 const instanceListener: ((msg: string, detail: unknown) => void)[] = []
 
 sms.install()
@@ -52,7 +48,7 @@ async function main() {
   app.use(json())
 
   app.post('/api/load', async (req, res) => {
-    res.sendFile(path.resolve(config.active))
+    res.sendFile(path.resolve(config.save))
   })
 
   const cache = memoryStorage()
@@ -63,19 +59,11 @@ async function main() {
   app.post('/api/save', multerInst.single('file'), async (req, res) => {
     const buffer = req.file?.buffer
     if (buffer) {
-      const newFileName = config.saves.replaceAll(
-        '{date}',
-        format(new Date(), config.date)
-      )
-      await fs.mkdir(path.dirname(newFileName), { recursive: true })
-      await fs.writeFile(newFileName, buffer)
-      console.log('saved to', newFileName)
-      config.active = newFileName
-      fs.writeFile('config.json', JSON.stringify(config, null, 2))
+      await fs.writeFile(config.save, buffer)
+      console.log('saved to', config.save)
       res.send({
         success: true
       })
-      loaded = await prepareResource()
     } else {
       res.send({
         success: false
@@ -159,6 +147,9 @@ async function main() {
   })
 
   app.ws('/api/instance', async (ws, req) => {
+    const layer = req.query.layer as string
+    const loaded = await prepareResourceFor(layer)
+
     if (!loaded || !instance.inited()) {
       ws.close()
       return
@@ -217,7 +208,6 @@ async function main() {
 
     controller = ctrl
     resource = new MaaResource(loader)
-    loaded = await prepareResource()
     instance = new MaaInstance(loader, (msg, detail) => {
       detail = JSON.parse(detail)
       for (const cb of instanceListener) {
@@ -230,35 +220,68 @@ async function main() {
   }
 }
 
-async function prepareResource() {
-  const tempResourceDir = path.join(os.tmpdir(), 'MaaJsonViewer', 'resource')
-  await fs.rm(tempResourceDir, {
+async function prepareResourceFor(target: string) {
+  const extractDir = path.join(os.tmpdir(), 'MaaJsonViewer', 'extract')
+  await fs.rm(extractDir, {
     force: true,
     recursive: true
   })
-  await fs.mkdir(path.join(tempResourceDir, 'model'), {
-    recursive: true
+  await extract(config.save, {
+    dir: extractDir
   })
-  await extract(config.active, {
-    dir: path.join(tempResourceDir, 'pipeline')
-  })
-  await fs.cp(
-    path.join(config.maaframework.root, 'model'),
-    path.join(tempResourceDir, 'model'),
+  const cfg = JSON.parse(
+    await fs.readFile(path.join(extractDir, '.config.json'), 'utf-8')
+  ) as Record<
+    string,
     {
-      recursive: true
+      save: string
+      extends?: string
     }
-  )
-  await fs.writeFile(
-    path.join(tempResourceDir, 'properties.json'),
-    JSON.stringify({ is_base: true })
-  )
-  console.log('resource prepared at', tempResourceDir)
+  >
 
-  const loaded = await resource.load(tempResourceDir)
-  console.log('resource load:', loaded)
+  const track = (t: string, v: string[]) => {
+    if (cfg[t].extends) {
+      track(cfg[t].extends!, v)
+      v.push(t)
+    }
+  }
 
-  return loaded
+  const layers: string[] = []
+  track(target, layers)
+
+  let AllLoaded = true
+
+  const resourceBaseDir = path.join(os.tmpdir(), 'MaaJsonViewer', 'resources')
+  for (const [idx, layer] of layers.entries()) {
+    const resourceDir = path.join(resourceBaseDir, layer)
+    await fs.rm(resourceDir, {
+      force: true,
+      recursive: true
+    })
+    await fs.mkdir(path.join(resourceDir, 'model'), {
+      recursive: true
+    })
+    await extract(path.join(extractDir, cfg[layer].save), {
+      dir: path.join(resourceDir, 'pipeline')
+    })
+    await fs.cp(
+      path.join(config.maaframework.root, 'model'),
+      path.join(resourceDir, 'model'),
+      {
+        recursive: true
+      }
+    )
+    await fs.writeFile(
+      path.join(resourceDir, 'properties.json'),
+      JSON.stringify({ is_base: idx === 0 })
+    )
+    console.log(`resource layer ${layer} prepared at`, resourceDir)
+    const loaded = await resource.load(resourceDir)
+    console.log(`resource layer ${layer} load:`, loaded)
+    AllLoaded = AllLoaded && loaded
+  }
+
+  return AllLoaded
 }
 
 async function prepareController() {

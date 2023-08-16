@@ -1,0 +1,9 @@
+{
+  "base": {
+    "save": "base.zip"
+  },
+  "test": {
+    "extends": "base",
+    "save": "test.zip"
+  }
+}

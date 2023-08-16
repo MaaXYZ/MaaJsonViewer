@@ -46,9 +46,11 @@ export async function controller() {
   })
 }
 
-export async function instance() {
+export async function instance(layer: string) {
   return new Promise<WebSocket>(resolve => {
-    const ws = new WebSocket('ws://' + window.location.host + '/api/instance')
+    const ws = new WebSocket(
+      'ws://' + window.location.host + '/api/instance?layer=' + layer
+    )
     ws.onopen = () => {
       resolve(ws)
     }
