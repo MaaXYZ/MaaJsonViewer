@@ -1,6 +1,6 @@
 {
   "name": "maa-json-viewer",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "scripts": {
     "dev:client": "cd packages/client && npm run dev",
     "run:server": "npm run build:server && cd running && node ../packages/server/dist/index.js",
