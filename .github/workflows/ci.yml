@@ -92,6 +92,19 @@ jobs:
           name: MaaJsonViewer-win
           path: 'packages/server/out'
 
+      - name: Clean for env
+        run: |
+          cd packages/server
+          rm -r out/library/maaframework/bin
+          mkdir -p out/library/maaframework/bin
+          rm -r out/web
+          rm ./server.exe
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: MaaJsonViewer-env
+          path: 'packages/server/out'
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [meta, build]
