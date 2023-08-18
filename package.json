@@ -3,7 +3,7 @@
   "version": "1.0.10",
   "scripts": {
     "dev:client": "cd packages/client && npm run dev",
-    "run:server": "cd packages/server && npm run run",
+    "run:server": "npm run build:server && cd running && node ../packages/server/dist/index.js",
     "build:client": "cd packages/client && npm run build",
     "build:server": "cd packages/server && npm run build",
     "dev": "run-p dev:client run:server",
@@ -14,6 +14,8 @@
   ],
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "axios": "^1.4.0",
+    "extract-zip": "^2.0.1",
     "prettier": "^3.0.1"
   }
 }
