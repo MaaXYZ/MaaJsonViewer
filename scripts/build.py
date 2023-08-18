@@ -6,7 +6,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
-# MAAjsonViever release版
+# MAAjsonViever release版号
 RELEASES_TAG = "v1.0.8"
 
 SAVEPATH = os.path.join(Path(__file__).parent, f'{RELEASES_TAG}.zip')
@@ -25,7 +25,7 @@ def reporthook(a, b, c):
     if per > 100:
         per = 100
     print(
-        f'download:{RELEASES_TAG}.zip, size:{round(c/1024/1024,2)}MB, {round(per,2)}%')
+        f'---- {round(a*b/1024/1024,2)}MB / {round(c/1024/1024,2)}MB, {round(per,2)}%')
 
 
 def extractlib(zipPath: str, libPath: str):
@@ -49,10 +49,8 @@ def extractlib(zipPath: str, libPath: str):
         zfile.close()
 
 
-print(SAVEPATH, projectDir, serverDir)
-
-
 def npmIstall():
+    '''下载npm package'''
     print(f'git submodule MaaJSLoader')
     os.system('git submodule update --init --recursive')
     print(f'project npm ci')
@@ -71,15 +69,15 @@ if __name__ == "__main__":
     shutil.copyfile(f'{serverDir}/assets\config.json',
                     f'{serverDir}\config.json')
     print(f'start install npm package')
-    # npmIstall()
+    npmIstall()
     print(f'successed install npm package')
     if os.path.exists(f'{serverDir}\library') is False:
         try:
-            print(f'download MaaJsonViever-release{RELEASES_TAG}')
+            print(f'download MaaJsonViever-release{RELEASES_TAG}.zip')
             resStr, resHM = request.urlretrieve(zipurl, SAVEPATH, reporthook)
             print(resStr, resHM)
             extractlib(SAVEPATH, serverDir)
             print(f'success!!')
         except error.URLError as e:
             print(
-                f'{e}\ndownload MaaJsonViever-release{RELEASES_TAG} failed\n请手动下载release包并解压！！')
+                f'{e}\ndownload MaaJsonViever-release{RELEASES_TAG} failed\n请手动下载release包并解压!!')
