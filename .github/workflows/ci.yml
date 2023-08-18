@@ -96,7 +96,6 @@ jobs:
         run: |
           cd packages/server
           rm -r out/library/maaframework/bin
-          mkdir -p out/library/maaframework/bin
           rm -r out/web
           rm out/server.exe
 

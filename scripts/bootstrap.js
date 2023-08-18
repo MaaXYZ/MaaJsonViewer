@@ -1,8 +1,9 @@
 const { spawn } = require('child_process')
 const { createWriteStream } = require('fs')
-const { mkdir, readFile, rm, copyFile } = require('fs/promises')
+const { mkdir, readFile, rm, copyFile, cp } = require('fs/promises')
 const { join, resolve } = require('path')
 const { chdir } = require('process')
+const { arch, platform } = require('os')
 
 // fs.copyFile(
 //   './packages/server/assets/config.develop.json',
@@ -20,9 +21,57 @@ const { chdir } = require('process')
 //   './packages/server/library/maaframework/controller_config.json'
 // )
 
+async function downloadTo(url, path) {
+  const axios = require('axios')
+  const writer = createWriteStream(path)
+
+  return await axios({
+    method: 'get',
+    url,
+    responseType: 'stream'
+  }).then(response => {
+    return new Promise((resolve, reject) => {
+      response.data.pipe(writer)
+      let error = null
+      writer.on('error', err => {
+        error = err
+        writer.close()
+        reject(err)
+      })
+      writer.on('close', () => {
+        if (!error) {
+          resolve(true)
+        }
+      })
+    })
+  })
+}
+
+const archMapper = {
+  x64: 'x86_64',
+  arm64: 'aarch64'
+}
+
+const platMapper = {
+  win32: 'win',
+  linux: 'linux',
+  darwin: 'macos'
+}
+
 async function main() {
   const version = JSON.parse(await readFile('package.json', 'utf-8')).version
-  const url = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-win-v${version}.zip`
+  const frameworkVersion = '0.3.6'
+
+  const ar = archMapper[arch()]
+  const os = platMapper[platform()]
+
+  if (!ar || !os) {
+    console.log(`platform ${platform()} arch ${arch()} not supported`)
+    return
+  }
+
+  const envUrl = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-win-v${version}.zip`
+  const frameworkUrl = `https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v${frameworkVersion}/MAA-${os}-${arch}-v${frameworkVersion}.zip`
   const targetDir = join('.', 'running')
   const libraryDir = join(targetDir, 'library')
 
@@ -48,41 +97,23 @@ async function main() {
   })
 
   await mkdir(libraryDir, { recursive: true })
-  console.log('download', url)
-  const releasePath = 'release.zip'
-  {
-    const axios = require('axios')
-    const writer = createWriteStream(releasePath)
-
-    await axios({
-      method: 'get',
-      url,
-      responseType: 'stream'
-    }).then(response => {
-      return new Promise((resolve, reject) => {
-        response.data.pipe(writer)
-        let error = null
-        writer.on('error', err => {
-          error = err
-          writer.close()
-          reject(err)
-        })
-        writer.on('close', () => {
-          if (!error) {
-            resolve(true)
-          }
-        })
-      })
-    })
-  }
-
   const extract = require('extract-zip')
+
+  console.log('download', envUrl)
+  const releasePath = 'release.zip'
+  await downloadTo(envUrl, releasePath)
   await extract(releasePath, {
     dir: resolve(targetDir)
   })
 
-  console.log('clean')
-  await rm(join(targetDir, 'server.exe'))
+  console.log('download', frameworkUrl)
+  const frameworkPath = 'framework.zip'
+  await downloadTo(frameworkUrl, frameworkPath)
+  const extractPath = join(targetDir, 'library', 'maaframework', 'install')
+  await extract(frameworkPath, {
+    dir: resolve(extractPath)
+  })
+  await cp(join(extractPath, 'bin'), join(targetDir, 'library', 'maaframework'))
 }
 
 main()
