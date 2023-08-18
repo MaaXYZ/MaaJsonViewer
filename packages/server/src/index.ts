@@ -4,7 +4,7 @@ import {
   MaaFrameworkLoader,
   MaaInstance,
   MaaResource
-} from '@nekosu/loader'
+} from '@maa/loader'
 import history from 'connect-history-api-fallback'
 import { format } from 'date-fns'
 import express, { json } from 'express'
@@ -267,7 +267,7 @@ async function prepareController() {
     config.maaframework.adb,
     config.maaframework.address,
     MaaAdbControllerTypeEnum.Input_Preset_Adb |
-      MaaAdbControllerTypeEnum.Screencap_Encode,
+    MaaAdbControllerTypeEnum.Screencap_Encode,
     await fs.readFile(
       path.join(config.maaframework.root, 'controller_config.json'),
       'utf-8'
