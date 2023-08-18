@@ -98,7 +98,7 @@ jobs:
           rm -r out/library/maaframework/bin
           mkdir -p out/library/maaframework/bin
           rm -r out/web
-          rm ./server.exe
+          rm out/server.exe
 
       - uses: actions/upload-artifact@v3
         with:
