@@ -28,7 +28,12 @@ async function downloadTo(url, path) {
   return await axios({
     method: 'get',
     url,
-    responseType: 'stream'
+    responseType: 'stream',
+    proxy: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 7890
+    }
   }).then(response => {
     return new Promise((resolve, reject) => {
       response.data.pipe(writer)
@@ -80,13 +85,15 @@ async function main() {
   console.log('update submodules')
   await new Promise(resolve => {
     spawn('git', ['submodule', 'update', '--init', '--recursive'], {
-      stdio: 'inherit'
+      stdio: 'inherit',
+      shell: true
     }).addListener('close', resolve)
   })
   chdir('packages/MaaJSLoader')
   await new Promise(resolve => {
     spawn('git', ['checkout', 'main'], {
-      stdio: 'inherit'
+      stdio: 'inherit',
+      shell: true
     }).addListener('close', resolve)
   })
   chdir('../..')
@@ -94,7 +101,8 @@ async function main() {
   console.log('install node modules')
   await new Promise(resolve => {
     spawn('npm', ['install'], {
-      stdio: 'inherit'
+      stdio: 'inherit',
+      shell: true
     }).addListener('close', resolve)
   })
 
