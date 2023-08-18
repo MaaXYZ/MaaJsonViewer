@@ -28,4 +28,4 @@ coverage
 *.sw?
 
 running
-release.zip
+*.zip

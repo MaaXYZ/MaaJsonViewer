@@ -65,13 +65,15 @@ async function main() {
   const ar = archMapper[arch()]
   const os = platMapper[platform()]
 
+  console.log(`${os}-${ar}`)
+
   if (!ar || !os) {
     console.log(`platform ${platform()} arch ${arch()} not supported`)
     return
   }
 
-  const envUrl = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-win-v${version}.zip`
-  const frameworkUrl = `https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v${frameworkVersion}/MAA-${os}-${arch}-v${frameworkVersion}.zip`
+  const envUrl = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-env-v${version}.zip`
+  const frameworkUrl = `https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v${frameworkVersion}/MAA-${os}-${ar}-v${frameworkVersion}.zip`
   const targetDir = join('.', 'running')
   const libraryDir = join(targetDir, 'library')
 
@@ -113,7 +115,16 @@ async function main() {
   await extract(frameworkPath, {
     dir: resolve(extractPath)
   })
-  await cp(join(extractPath, 'bin'), join(targetDir, 'library', 'maaframework'))
+  await cp(
+    join(extractPath, 'bin'),
+    join(targetDir, 'library', 'maaframework', 'bin'),
+    {
+      recursive: true
+    }
+  )
+  await rm(extractPath, {
+    recursive: true
+  })
 }
 
 main()
