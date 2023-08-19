@@ -283,7 +283,7 @@ async function prepareController() {
   console.log('controller connect:', connected)
 
   if (!connected) {
-    ctrl.destroy()
+    // ctrl.destroy()
     return null
   }
 

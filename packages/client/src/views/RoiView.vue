@@ -11,6 +11,7 @@ import { computed, nextTick, onActivated, onDeactivated, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { type FileContentRef, type PathKey, fs, path, pool } from '@/filesystem'
+import type { Rect } from '@/types'
 
 import ChooseDir from '@/components/filesystem/ChooseDir.vue'
 import MonitorView from '@/components/framework/MonitorView.vue'
@@ -76,7 +77,7 @@ watch(targetEl, el => {
 
 const imageURL = ref<string>('')
 const image = ref<HTMLImageElement | null>(null)
-const rect = computed(() => {
+const rect = computed<Rect | null>(() => {
   if (!oldPos.value) {
     return null
   }
@@ -85,6 +86,16 @@ const rect = computed(() => {
   const r = Math.max(oldPos.value[0], np[0])
   const t = Math.min(oldPos.value[1], np[1])
   const b = Math.max(oldPos.value[1], np[1])
+  return [l, t, r - l, b - t]
+})
+const suggestRect = computed<Rect | null>(() => {
+  if (!rect.value) {
+    return null
+  }
+  const l = Math.max(rect.value[0] - 50, 0)
+  const t = Math.max(rect.value[1] - 50, 0)
+  const r = Math.min(rect.value[0] + rect.value[2] + 50, 1280)
+  const b = Math.min(rect.value[1] + rect.value[3] + 50, 720)
   return [l, t, r - l, b - t]
 })
 
@@ -214,14 +225,21 @@ function doSave() {
       :width="1280"
       :height="720"
     ></MonitorView>
-    <canvas
-      v-if="imageURL"
-      ref="targetEl"
-      style="width: 1280px; height: 720px"
-    ></canvas>
+    <div class="flex gap-2">
+      <canvas
+        v-if="imageURL"
+        ref="targetEl"
+        style="width: 1280px; height: 720px"
+      ></canvas>
+      <div class="flex flex-col gap-2">
+        <span v-if="rect">
+          {{ rect.join(',') }}
+        </span>
+        <span v-if="suggestRect">
+          {{ suggestRect.join(',') }}
+        </span>
+      </div>
+    </div>
     <canvas v-if="rect" ref="cropEl"></canvas>
-    <span v-if="rect">
-      {{ rect.join(',') }}
-    </span>
   </div>
 </template>
