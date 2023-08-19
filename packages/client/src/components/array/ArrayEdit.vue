@@ -1,6 +1,8 @@
 <script setup lang="ts" generic="T">
 import {
   AddOutlined,
+  ArrowDownwardOutlined,
+  ArrowUpwardOutlined,
   DataArrayOutlined,
   DeleteOutlined
 } from '@vicons/material'
@@ -89,6 +91,22 @@ function add() {
   }
 }
 
+function up(idx: number) {
+  if (isSingle.value) {
+    return
+  }
+  const v = value.value as T[]
+  v.splice(idx - 1, 0, ...v.splice(idx, 1))
+}
+
+function down(idx: number) {
+  if (isSingle.value) {
+    return
+  }
+  const v = value.value as T[]
+  v.splice(idx + 1, 0, ...v.splice(idx, 1))
+}
+
 function set(idx: number, val: T) {
   if (isSingle.value) {
     ;(value.value as U) = val
@@ -139,9 +157,28 @@ function remove(idx: number) {
           :value="v"
           :update="(v: T) => set(i, v)"
         ></slot>
-        <div>
+        <div v-if="!readonly" class="flex gap-2">
           <NButton
-            v-if="!readonly"
+            :disabled="single || valarr.length === 1 || i === 0"
+            @click="up(i)"
+          >
+            <template #icon>
+              <NIcon>
+                <ArrowUpwardOutlined></ArrowUpwardOutlined>
+              </NIcon>
+            </template>
+          </NButton>
+          <NButton
+            :disabled="single || valarr.length === 1 || i === valarr.length - 1"
+            @click="down(i)"
+          >
+            <template #icon>
+              <NIcon>
+                <ArrowDownwardOutlined></ArrowDownwardOutlined>
+              </NIcon>
+            </template>
+          </NButton>
+          <NButton
             :disabled="!nullable && (single || valarr.length === 1)"
             @click="remove(i)"
           >
