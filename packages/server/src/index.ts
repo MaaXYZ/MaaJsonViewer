@@ -123,11 +123,18 @@ async function main() {
     let pending = false
     let quit = false
 
+    let skipCount = 0
+
     const timer = setInterval(async () => {
       if (controller) {
-        console.log(`/api/controller ${id} start push`)
+        // console.log(`/api/controller ${id} start push`)
         if (pending) {
-          console.log(`/api/controller ${id} skipped`)
+          // console.log(`/api/controller ${id} skipped`)
+          skipCount += 1
+          if (skipCount > 10) {
+            console.log(`/api/controller ${id} skip too much`)
+            ws.close()
+          }
           return
         }
         pending = true
@@ -138,19 +145,19 @@ async function main() {
           if (quit) {
             return
           }
-          console.log(`/api/controller ${id} get image`)
+          // console.log(`/api/controller ${id} get image`)
           const buffer = controller.image()
           pending = false
           if (buffer) {
-            console.log(`/api/controller ${id} push image`)
+            // console.log(`/api/controller ${id} push image`)
             ws.send(buffer)
           }
         } else {
-          console.log(`/api/controller ${id} screencap failed`)
+          // console.log(`/api/controller ${id} screencap failed`)
           pending = false
         }
       }
-    }, 500)
+    }, 100)
     ws.on('close', () => {
       quit = true
       console.log(`/api/controller ${id} closed`)

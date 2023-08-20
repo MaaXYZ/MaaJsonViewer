@@ -29,10 +29,14 @@ async function tryConnect() {
   }
   socket = await api.controller()
   socket.onclose = () => {
+    console.log('close!')
     socket = null
+    setTimeout(() => {
+      tryConnect()
+    }, 100)
   }
   socket.onmessage = async ev => {
-    console.log('got image')
+    // console.log('got image')
     fr += 1
     const cur = fr
 
@@ -43,11 +47,11 @@ async function tryConnect() {
     const image = new Image(1280, 720)
     image.onload = () => {
       if (cur < prefr) {
-        console.log('skip image')
+        // console.log('skip image')
         return
       }
       prefr = cur
-      console.log('draw image')
+      // console.log('draw image')
       ctx.drawImage(image, 0, 0, 1280, 720, 0, 0, props.width, props.height)
     }
     image.src = url
