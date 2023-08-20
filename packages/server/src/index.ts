@@ -150,7 +150,7 @@ async function main() {
           pending = false
         }
       }
-    }, 1000)
+    }, 500)
     ws.on('close', () => {
       quit = true
       console.log(`/api/controller ${id} closed`)
@@ -267,7 +267,7 @@ async function prepareController() {
     config.maaframework.adb,
     config.maaframework.address,
     MaaAdbControllerTypeEnum.Input_Preset_Adb |
-      MaaAdbControllerTypeEnum.Screencap_Encode,
+      MaaAdbControllerTypeEnum.Screencap_MinicapStream,
     await fs.readFile(
       path.join(config.maaframework.root, 'controller_config.json'),
       'utf-8'

@@ -4,13 +4,14 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 import * as api from '@/api'
 
-defineProps<{
+const props = defineProps<{
   width: number
   height: number
 }>()
 
-const imageData = ref<ArrayBuffer | null>(null)
 const imageURL = ref<string | null>(null)
+
+const canvasEl = ref<HTMLCanvasElement | null>(null)
 
 defineExpose({
   imageURL
@@ -19,14 +20,37 @@ defineExpose({
 let socket: WebSocket | null
 
 async function tryConnect() {
+  let url: string | null = null
+  let fr = 0
+  let prefr = 0
+  const ctx = canvasEl.value?.getContext('2d')
+  if (!ctx) {
+    return
+  }
   socket = await api.controller()
   socket.onclose = () => {
     socket = null
   }
   socket.onmessage = async ev => {
-    imageData.value = await (ev.data as Blob).arrayBuffer()
-    imageURL.value =
-      'data:image/png;base64,' + Buffer.from(imageData.value).toString('base64')
+    console.log('got image')
+    fr += 1
+    const cur = fr
+
+    if (url) {
+      URL.revokeObjectURL(url)
+    }
+    url = URL.createObjectURL(ev.data as Blob)
+    const image = new Image(1280, 720)
+    image.onload = () => {
+      if (cur < prefr) {
+        console.log('skip image')
+        return
+      }
+      prefr = cur
+      console.log('draw image')
+      ctx.drawImage(image, 0, 0, 1280, 720, 0, 0, props.width, props.height)
+    }
+    image.src = url
   }
 }
 
@@ -63,15 +87,13 @@ function handleClick(ev: MouseEvent) {
 
 <template>
   <div>
-    <img
+    <canvas
       id="monitor"
-      v-if="imageURL"
+      ref="canvasEl"
       :width="width"
       :height="height"
-      :src="imageURL"
       @click="handleClick"
-    />
-    <span v-else> no data </span>
+    ></canvas>
   </div>
 </template>
 
