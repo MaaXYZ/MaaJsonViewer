@@ -106,15 +106,36 @@ async function main() {
     console.log(`/api/controller ${id} connected`)
     ws.on('message', async data => {
       const action = JSON.parse(data.toString('utf-8')) as {
-        action: 'click'
+        action: 'click' | 'swipe'
         x: number
         y: number
+        x1: number
+        y1: number
+        x2: number
+        y2: number
+        dur: number
       }
       // console.log(action)
       if (controller) {
         switch (action.action) {
           case 'click': {
             controller.click(action.x, action.y)
+            break
+          }
+          case 'swipe': {
+            controller.swipe([
+              {
+                x: action.x1,
+                y: action.y1,
+                delay: action.dur
+              },
+              {
+                x: action.x2,
+                y: action.y2,
+                delay: 0
+              }
+            ])
+            break
           }
         }
       }
@@ -273,7 +294,7 @@ async function prepareController() {
     loader,
     config.maaframework.adb,
     config.maaframework.address,
-    MaaAdbControllerTypeEnum.Input_Preset_Adb |
+    MaaAdbControllerTypeEnum.Input_Preset_Minitouch |
       MaaAdbControllerTypeEnum.Screencap_MinicapStream,
     await fs.readFile(
       path.join(config.maaframework.root, 'controller_config.json'),

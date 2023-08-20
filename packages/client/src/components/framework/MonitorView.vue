@@ -84,8 +84,46 @@ function sendClick(x: number, y: number) {
   })
 }
 
-function handleClick(ev: MouseEvent) {
-  sendClick(ev.offsetX, ev.offsetY)
+function sendSwipe(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  dur: number
+) {
+  send({
+    action: 'swipe',
+    x1,
+    y1,
+    x2,
+    y2,
+    dur
+  })
+}
+
+const pointerDownTrack = ref<[number, number] | null>(null)
+
+function handlePointerDown(ev: PointerEvent) {
+  console.log(ev)
+  if (ev.pointerId !== 1) {
+    return
+  }
+  pointerDownTrack.value = [ev.offsetX, ev.offsetY]
+}
+
+function handlePointerUp(ev: PointerEvent) {
+  console.log(ev)
+  if (ev.pointerId !== 1) {
+    return
+  }
+  if (pointerDownTrack.value) {
+    const [ox, oy] = pointerDownTrack.value
+    if (Math.abs(ox - ev.offsetX) + Math.abs(oy - ev.offsetY) > 5) {
+      sendSwipe(ox, oy, ev.offsetX, ev.offsetY, 100)
+    } else {
+      sendClick(ev.offsetX, ev.offsetY)
+    }
+  }
 }
 </script>
 
@@ -96,7 +134,8 @@ function handleClick(ev: MouseEvent) {
       ref="canvasEl"
       :width="width"
       :height="height"
-      @click="handleClick"
+      @pointerdown="handlePointerDown"
+      @pointerup="handlePointerUp"
     ></canvas>
   </div>
 </template>
