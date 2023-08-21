@@ -28,12 +28,12 @@ async function downloadTo(url, path) {
   return await axios({
     method: 'get',
     url,
-    responseType: 'stream',
-    proxy: {
-      protocol: 'http',
-      host: '127.0.0.1',
-      port: 7890
-    }
+    responseType: 'stream'
+    // proxy: {
+    //   protocol: 'http',
+    //   host: '127.0.0.1',
+    //   port: 7890
+    // }
   }).then(response => {
     return new Promise((resolve, reject) => {
       response.data.pipe(writer)
@@ -65,7 +65,8 @@ const platMapper = {
 
 async function main() {
   const version = JSON.parse(await readFile('package.json', 'utf-8')).version
-  const frameworkVersion = '0.3.6'
+  // const frameworkVersion = '0.3.6'
+  const frameworkVersion = '5922995900'
 
   const ar = archMapper[arch()]
   const os = platMapper[platform()]
@@ -76,11 +77,6 @@ async function main() {
     console.log(`platform ${platform()} arch ${arch()} not supported`)
     return
   }
-
-  const envUrl = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-env-v${version}.zip`
-  const frameworkUrl = `https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v${frameworkVersion}/MAA-${os}-${ar}-v${frameworkVersion}.zip`
-  const targetDir = join('.', 'running')
-  const libraryDir = join(targetDir, 'library')
 
   console.log('update submodules')
   await new Promise(resolve => {
@@ -105,6 +101,29 @@ async function main() {
       shell: true
     }).addListener('close', resolve)
   })
+
+  const envUrl = `https://github.com/MaaAssistantArknights/MaaJsonViewer/releases/download/v${version}/MaaJsonViewer-env-v${version}.zip`
+  const targetDir = join('.', 'running')
+  const libraryDir = join(targetDir, 'library')
+
+  let frameworkUrl = `https://github.com/MaaAssistantArknights/MaaFramework/releases/download/v${frameworkVersion}/MAA-${os}-${ar}-v${frameworkVersion}.zip`
+  if (/^\d+$/.test(frameworkVersion)) {
+    // workflow
+    const axios = require('axios')
+    const name = `MAA-${os}-${ar}`
+
+    const info = (
+      await axios({
+        url: `https://api.github.com/repos/MaaAssistantArknights/MaaFramework/actions/runs/${frameworkVersion}/artifacts`,
+        responseType: 'json'
+      })
+    ).data
+    const idx = info.artifacts.findIndex(obj => obj.name === name)
+    if (idx === -1) {
+      console.log(`cannot locate ${name} from workflow ${frameworkVersion}`)
+    }
+    frameworkUrl = info.artifacts[idx].archive_download_url
+  }
 
   await mkdir(libraryDir, { recursive: true })
   const extract = require('extract-zip')
