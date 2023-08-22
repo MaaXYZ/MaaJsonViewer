@@ -37,6 +37,12 @@ async function downloadTo(url, path) {
   }).then(response => {
     return new Promise((resolve, reject) => {
       response.data.pipe(writer)
+      const length = response.headers['content-length']
+      let current = 0
+      response.data.on('data', chunk => {
+        current += chunk.length
+        process.stdout.write(`${current} / ${length}    \r`)
+      })
       let error = null
       writer.on('error', err => {
         error = err
