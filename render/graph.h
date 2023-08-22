@@ -1,15 +1,19 @@
 #pragma once
 // http://leungwensen.github.io/blog/2017/a-technique-for-drawing-directed-graphs.html
 
+#include <map>
 #include <set>
 #include <vector>
 
-using GraphEdges = std::vector<std::set<int>>;
+using Graph = std::vector<std::set<int>>;
+using GraphWithValue = std::vector<std::map<int, int>>;
 
-GraphEdges getFAC(const GraphEdges &edges);
+Graph getFAC(const Graph &edges);
 
-std::vector<std::vector<int>> getNaiveLayer(const GraphEdges &edges);
+std::vector<std::vector<int>> getNaiveLayer(const Graph &edges);
+void compactLayer(const Graph &edges, std::map<int, int> &layer);
 
-GraphEdges filterGraph(const GraphEdges &edges, const std::vector<int> &verts);
-GraphEdges buildIndirectGraph(const GraphEdges &edges);
-std::vector<std::vector<int>> splitGraph(const GraphEdges &edges);
+Graph filterGraph(const Graph &edges, const std::vector<int> &verts);
+Graph buildIndirectGraph(const Graph &edges);
+GraphWithValue buildIndirectGraphWithOrder(const Graph &edges);
+std::vector<std::vector<int>> splitGraph(const Graph &edges);

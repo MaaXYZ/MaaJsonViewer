@@ -36,7 +36,7 @@ void tarjan(int cur, int &idx, const std::vector<std::set<int>> &edges,
   }
 }
 
-std::vector<std::vector<int>> getSCC(const GraphEdges &edges) {
+std::vector<std::vector<int>> getSCC(const Graph &edges) {
   int n = edges.size();
   int idx = 0;
   std::vector<int> idxs(n, -1);
@@ -52,7 +52,7 @@ std::vector<std::vector<int>> getSCC(const GraphEdges &edges) {
   return result;
 }
 
-void findLoop(int cur, const GraphEdges &edges, const GraphEdges &erased,
+void findLoop(int cur, const Graph &edges, const Graph &erased,
               std::vector<int> &path, std::vector<int> &vis,
               std::map<std::pair<int, int>, int> &result) {
   path.push_back(cur);
@@ -76,9 +76,9 @@ void findLoop(int cur, const GraphEdges &edges, const GraphEdges &erased,
   vis[cur] = 0;
 }
 
-GraphEdges getFAC(const GraphEdges &edges) {
+Graph getFAC(const Graph &edges) {
   int n = edges.size();
-  GraphEdges result(n);
+  Graph result(n);
 
   // std::vector<int> inbound(n, 0);
   // std::vector<int> outbound(n);

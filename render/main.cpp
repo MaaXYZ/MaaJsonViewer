@@ -14,7 +14,7 @@ std::vector<T> convertToVector(const emscripten::val &arr) {
   return vec;
 }
 
-void dumpGraph(const GraphEdges &edges) {
+void dumpGraph(const Graph &edges) {
   int n = edges.size();
   printf("dump graph begin\n");
   for (int i = 0; i < n; i++) {
@@ -60,7 +60,7 @@ void layoutGraph(int n, const emscripten::val &v_edges,
     for (int i = 0; i < m; i++) {
       toSub[toMain[i]] = i;
     }
-    GraphEdges subGraph(m);
+    Graph subGraph(m);
     for (auto from : toMain) {
       for (auto to : edges[from]) {
         subGraph[toSub[from]].insert(toSub[to]);
@@ -68,11 +68,26 @@ void layoutGraph(int n, const emscripten::val &v_edges,
     }
 
     auto initLayers = getNaiveLayer(subGraph);
+    std::map<int, int> layer;
+    printf("dump naive layer\n");
+    for (int i = 0; i < initLayers.size(); i++) {
+      printf("%d:", i);
+      for (auto v : initLayers[i]) {
+        layer[v] = i;
+        printf(" %s", names[toMain[v]].c_str());
+      }
+      puts("");
+    }
+    compactLayer(subGraph, layer);
 
-    int level = 0;
-    for (const auto &layer : initLayers) {
-      printf("%d:", level++);
-      for (auto v : layer) {
+    printf("dump compact layer\n");
+    std::map<int, std::set<int>> flatLayer;
+    for (auto [vt, lv] : layer) {
+      flatLayer[lv].insert(vt);
+    }
+    for (const auto &[lv, vts] : flatLayer) {
+      printf("%d:", lv);
+      for (auto v : vts) {
         printf(" %s", names[toMain[v]].c_str());
       }
       puts("");

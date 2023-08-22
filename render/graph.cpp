@@ -2,9 +2,9 @@
 
 #include <stdio.h>
 
-GraphEdges filterGraph(const GraphEdges &edges, const std::vector<int> &verts) {
+Graph filterGraph(const Graph &edges, const std::vector<int> &verts) {
   int n = edges.size();
-  GraphEdges result(n);
+  Graph result(n);
   std::vector<int> vertBucket(n, 0);
   for (auto v : verts) {
     vertBucket[v] = 1;
@@ -23,9 +23,9 @@ GraphEdges filterGraph(const GraphEdges &edges, const std::vector<int> &verts) {
   return result;
 }
 
-GraphEdges buildIndirectGraph(const GraphEdges &edges) {
+Graph buildIndirectGraph(const Graph &edges) {
   int n = edges.size();
-  GraphEdges result(n);
+  Graph result(n);
   for (int from = 0; from < n; from++) {
     for (auto to : edges[from]) {
       result[from].insert(to);
@@ -35,7 +35,19 @@ GraphEdges buildIndirectGraph(const GraphEdges &edges) {
   return result;
 }
 
-void travel(int cur, const GraphEdges &edges, std::vector<int> &vis,
+GraphWithValue buildIndirectGraphWithOrder(const Graph &edges) {
+  int n = edges.size();
+  GraphWithValue result(n);
+  for (int from = 0; from < n; from++) {
+    for (auto to : edges[from]) {
+      result[from][to] = 1;
+      result[to][from] = -1;
+    }
+  }
+  return result;
+}
+
+void travel(int cur, const Graph &edges, std::vector<int> &vis,
             std::vector<int> &verts) {
   vis[cur] = 1;
   verts.push_back(cur);
@@ -46,7 +58,7 @@ void travel(int cur, const GraphEdges &edges, std::vector<int> &vis,
   }
 }
 
-std::vector<std::vector<int>> splitGraph(const GraphEdges &edges) {
+std::vector<std::vector<int>> splitGraph(const Graph &edges) {
   int n = edges.size();
   std::vector<std::vector<int>> result;
   std::vector<int> vis(n, 0);
