@@ -47,6 +47,8 @@ jobs:
           cd build
           emcmake cmake ..
           cmake --build .
+          mkdir Release
+          cp render.js render.wasm Release/
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
