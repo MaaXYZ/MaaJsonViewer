@@ -12,7 +12,7 @@ function render() {
       edges.push(vertIndex.indexOf(to))
     }
   }
-  Module.layoutGraph(vertIndex.length, edges)
+  Module.layoutGraph(vertIndex.length, edges, vertIndex)
 }
 </script>
 
