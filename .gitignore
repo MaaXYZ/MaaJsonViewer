@@ -29,3 +29,6 @@ coverage
 
 running
 *.zip
+
+build
+CMakeUserPresets.json

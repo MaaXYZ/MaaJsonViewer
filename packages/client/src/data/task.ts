@@ -31,6 +31,26 @@ function wrapNext(v?: string | string[]) {
   return v ? (typeof v === 'string' ? [v] : v) : []
 }
 
+export const taskForwardIndex = computed(() => {
+  const res: Record<string, string[]> = {}
+  for (const name in taskIndex.value) {
+    const st = new Set<string>()
+    const keys = ['next', 'timeout_next', 'runout_next'] as const
+    const task = getTask(taskIndex.value[name])
+    if (!task) {
+      continue
+    }
+    for (const key of keys) {
+      let arr = wrapNext(task[key])
+      for (const to of arr) {
+        st.add(to)
+      }
+    }
+    res[name] = [...st]
+  }
+  return res
+})
+
 export const taskBackwardIndex = computed(() => {
   const res: Record<string, string[]> = {}
   for (const name in taskIndex.value) {

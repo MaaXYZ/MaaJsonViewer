@@ -5,6 +5,7 @@ import {
   FileDownloadOutlined,
   FileUploadOutlined,
   HealthAndSafetyOutlined,
+  MapOutlined,
   NavigateBeforeOutlined,
   NavigateNextOutlined,
   RedoOutlined,
@@ -94,6 +95,13 @@ function doValidate() {
         <template #icon>
           <NIcon>
             <CropOutlined></CropOutlined>
+          </NIcon>
+        </template>
+      </NButton>
+      <NButton @click="router.push('/visual')">
+        <template #icon>
+          <NIcon>
+            <MapOutlined></MapOutlined>
           </NIcon>
         </template>
       </NButton>
