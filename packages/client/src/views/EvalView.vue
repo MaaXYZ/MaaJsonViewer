@@ -16,6 +16,7 @@ import { config, taskIndex } from '@/data'
 import { DispatcherStatus, type TaskRunInfo } from '@/types'
 
 import ConfigEdit from '@/components/ConfigEdit.vue'
+import NavigationButtons from '@/components/NavigationButtons.vue'
 import ArrayEdit from '@/components/array/ArrayEdit.vue'
 import ClearButton from '@/components/atomic/ClearButton.vue'
 import MonitorView from '@/components/framework/MonitorView.vue'
@@ -108,13 +109,7 @@ async function tryStart() {
 <template>
   <MainLayout>
     <template #action>
-      <NButton @click="router.push('/edit')">
-        <template #icon>
-          <NIcon>
-            <EditOutlined></EditOutlined>
-          </NIcon>
-        </template>
-      </NButton>
+      <NavigationButtons></NavigationButtons>
       <NButton @click="tryStart" :disabled="!inited">
         <template #icon>
           <NIcon>

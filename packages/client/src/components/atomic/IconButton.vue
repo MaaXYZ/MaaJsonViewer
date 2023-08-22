@@ -2,9 +2,24 @@
 import { NButton, NIcon } from 'naive-ui'
 import { type Component, h } from 'vue'
 
-const props = defineProps<{
-  icon: Component
-}>()
+const props = withDefaults(
+  defineProps<{
+    icon: Component
+    text?: boolean
+    type?:
+      | 'default'
+      | 'tertiary'
+      | 'primary'
+      | 'info'
+      | 'success'
+      | 'warning'
+      | 'error'
+  }>(),
+  {
+    text: true,
+    type: 'default'
+  }
+)
 
 const emits = defineEmits<{
   click: []
@@ -17,7 +32,8 @@ function Icon() {
 
 <template>
   <NButton
-    text
+    :text="text"
+    :type="type"
     @click="
       ev => {
         ev.stopPropagation()

@@ -13,18 +13,22 @@ const router = createRouter({
       redirect: '/edit'
     },
     {
+      name: 'edit',
       path: '/edit',
       component: EditView
     },
     {
+      name: 'eval',
       path: '/eval',
       component: EvalView
     },
     {
+      name: 'roi',
       path: '/roi',
       component: RoiView
     },
     {
+      name: 'visual',
       path: '/visual',
       component: VisualView
     }

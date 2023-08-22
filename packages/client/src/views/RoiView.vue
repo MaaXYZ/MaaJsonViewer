@@ -13,6 +13,7 @@ import { useRouter } from 'vue-router'
 import { type FileContentRef, type PathKey, fs, path, pool } from '@/filesystem'
 import type { Rect } from '@/types'
 
+import NavigationButtons from '@/components/NavigationButtons.vue'
 import ChooseDir from '@/components/filesystem/ChooseDir.vue'
 import MonitorView from '@/components/framework/MonitorView.vue'
 
@@ -189,13 +190,7 @@ function doSave() {
 
   <div class="flex flex-col gap-2">
     <div class="flex gap-2">
-      <NButton @click="router.push('/edit')">
-        <template #icon>
-          <NIcon>
-            <EditOutlined></EditOutlined>
-          </NIcon>
-        </template>
-      </NButton>
+      <NavigationButtons></NavigationButtons>
       <NButton @click="takeImage" :disabled="!monitor?.imageURL">
         <template #icon>
           <NIcon>

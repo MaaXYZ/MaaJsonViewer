@@ -3,6 +3,9 @@ import { NButton } from 'naive-ui'
 
 import { taskForwardIndex } from '@/data'
 
+import NavigationButtons from '@/components/NavigationButtons.vue'
+import MainLayout from '@/layout/MainLayout.vue'
+
 function render() {
   const vertIndex = Object.keys(taskForwardIndex.value)
   const edges: number[] = []
@@ -17,7 +20,10 @@ function render() {
 </script>
 
 <template>
-  <div>
-    <NButton @click="render">计算</NButton>
-  </div>
+  <MainLayout>
+    <template #action>
+      <NavigationButtons></NavigationButtons>
+      <NButton @click="render">计算</NButton>
+    </template>
+  </MainLayout>
 </template>

@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import {
-  BuildOutlined,
-  CropOutlined,
   FileDownloadOutlined,
   FileUploadOutlined,
   HealthAndSafetyOutlined,
-  MapOutlined,
   NavigateBeforeOutlined,
   NavigateNextOutlined,
   RedoOutlined,
@@ -28,6 +25,7 @@ import {
 import { fs } from '@/filesystem'
 import { loadFS, saveCfg, saveFS } from '@/loader'
 
+import NavigationButtons from '@/components/NavigationButtons.vue'
 import TaskEdit from '@/components/TaskEdit.vue'
 import ValidateTask from '@/components/task/ValidateTask.vue'
 import TaskTree from '@/components/tree/TaskTree.vue'
@@ -84,27 +82,7 @@ function doValidate() {
 
   <MainLayout>
     <template #action>
-      <NButton @click="router.push('/eval')">
-        <template #icon>
-          <NIcon>
-            <BuildOutlined></BuildOutlined>
-          </NIcon>
-        </template>
-      </NButton>
-      <NButton @click="router.push('/roi')">
-        <template #icon>
-          <NIcon>
-            <CropOutlined></CropOutlined>
-          </NIcon>
-        </template>
-      </NButton>
-      <NButton @click="router.push('/visual')">
-        <template #icon>
-          <NIcon>
-            <MapOutlined></MapOutlined>
-          </NIcon>
-        </template>
-      </NButton>
+      <NavigationButtons></NavigationButtons>
       <NButton @click="doValidate">
         <template #icon>
           <NIcon>
