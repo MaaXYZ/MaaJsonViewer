@@ -25,8 +25,8 @@ void dumpGraph(const Graph &edges) {
   printf("dump graph end\n");
 }
 
-void layoutGraph(int n, const emscripten::val &v_edges,
-                 const emscripten::val &v_names) {
+emscripten::val layoutGraph(int n, const emscripten::val &v_edges,
+                            const emscripten::val &v_names) {
   auto edgeVerts = convertToVector<int>(v_edges);
   auto names = convertToVector<std::string>(v_names);
   std::vector<std::set<int>> edges(n);
@@ -54,6 +54,8 @@ void layoutGraph(int n, const emscripten::val &v_edges,
 
   auto vertsGroups = splitGraph(buildIndirectGraph(edges));
 
+  emscripten::val result = emscripten::val::array();
+
   for (const auto &toMain : vertsGroups) {
     int m = toMain.size();
     std::vector<int> toSub(n, -1);
@@ -69,30 +71,30 @@ void layoutGraph(int n, const emscripten::val &v_edges,
 
     auto initLayers = getNaiveLayer(subGraph);
     std::map<int, int> layer;
-    printf("dump naive layer\n");
     for (int i = 0; i < initLayers.size(); i++) {
-      printf("%d:", i);
       for (auto v : initLayers[i]) {
         layer[v] = i;
-        printf(" %s", names[toMain[v]].c_str());
       }
-      puts("");
     }
     compactLayer(subGraph, layer);
 
-    printf("dump compact layer\n");
     std::map<int, std::set<int>> flatLayer;
     for (auto [vt, lv] : layer) {
       flatLayer[lv].insert(vt);
     }
+
+    emscripten::val partResult = emscripten::val::array();
     for (const auto &[lv, vts] : flatLayer) {
-      printf("%d:", lv);
+      emscripten::val row = emscripten::val::array(); // printf("%d:", lv);
       for (auto v : vts) {
-        printf(" %s", names[toMain[v]].c_str());
+        row.call<void>("push", toMain[v]);
       }
-      puts("");
+      partResult.call<void>("push", row);
     }
+    result.call<void>("push", partResult);
   }
+
+  return result;
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {

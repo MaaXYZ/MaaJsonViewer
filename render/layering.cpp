@@ -1,5 +1,7 @@
 #include "graph.h"
 
+#include <stdio.h>
+
 std::vector<std::vector<int>> getNaiveLayer(const Graph &edges) {
   int n = edges.size();
   std::vector<int> inbound(n, 0);
@@ -89,10 +91,16 @@ void compactLayer(const Graph &edges, std::map<int, int> &layer) {
         }
       }
     }
+    int delta;
     if (vis[findFrom]) {
-      layer[findTo] = layer[findFrom] + 1;
+      delta = layer[findTo] - (layer[findFrom] + 1);
     } else {
-      layer[findFrom] = layer[findTo] - 1;
+      delta = layer[findFrom] - (layer[findTo] - 1);
+    }
+    for (int i = 0; i < n; i++) {
+      if (vis[i]) {
+        layer[i] += delta;
+      }
     }
   }
 }
