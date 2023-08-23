@@ -142,11 +142,13 @@ function handleDown(ev: PointerEvent) {
   if (ev.pointerId !== 1) {
     return
   }
-  ev.stopPropagation()
-  svgEl.value?.setPointerCapture(1)
-  saveBase = base.value
-  saveX = ev.offsetX
-  saveY = ev.offsetY
+  if (ev.buttons === 4) {
+    ev.stopPropagation()
+    svgEl.value?.setPointerCapture(1)
+    saveBase = base.value
+    saveX = ev.offsetX
+    saveY = ev.offsetY
+  }
 }
 
 function handleMove(ev: PointerEvent) {
@@ -172,6 +174,8 @@ function handleUp(ev: PointerEvent) {
     saveBase = null
     saveX = null
     saveY = null
+  } else {
+    active.value = ''
   }
 }
 
@@ -212,8 +216,9 @@ function handleWheel(ev: WheelEvent) {
           <g
             v-for="vert in vertexs"
             :key="vert.name"
-            @mousedown="
-              () => {
+            @pointerup="
+              ev => {
+                ev.stopPropagation()
                 active = vert.name
               }
             "
@@ -236,15 +241,17 @@ function handleWheel(ev: WheelEvent) {
             <path
               v-bind="edge.path"
               :stroke="
-                edge.from === active
-                  ? 'red'
-                  : edge.to === active
-                  ? 'blue'
+                active
+                  ? edge.from === active
+                    ? 'red'
+                    : edge.to === active
+                    ? 'blue'
+                    : 'gray'
                   : edge.path.stroke!
               "
               :stroke-width="edge.from === active || edge.to === active ? 2 : 1"
             ></path>
-            <polygon v-bind="edge.poly"></polygon>
+            <polygon v-bind="edge.poly" fill="transparent"></polygon>
           </g>
         </g>
       </svg>
