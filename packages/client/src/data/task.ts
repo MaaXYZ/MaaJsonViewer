@@ -4,6 +4,23 @@ import { fs, path } from '@/filesystem'
 import type { PathKey } from '@/filesystem'
 import type { Task, TaskData } from '@/types'
 
+export const jsonIndex = computed(() => {
+  const res: Record<PathKey, string[]> = {}
+  fs.tree.travel(
+    fs.tree.root,
+    () => void 0,
+    (dir, name, content) => {
+      if (name.endsWith('.json')) {
+        const data = JSON.parse(content) as TaskData
+        res[path.joinkey(dir, name)] = Object.keys(data)
+      }
+    },
+    () => {},
+    void 0
+  )
+  return res
+})
+
 export const taskIndex = computed(() => {
   const res: Record<string, PathKey> = {}
   fs.tree.travel(
@@ -27,15 +44,21 @@ export const taskIndex = computed(() => {
   return res
 })
 
+const keys = ['next', 'timeout_next', 'runout_next'] as const
+type NaviKey = (typeof keys)[number]
+
 function wrapNext(v?: string | string[]) {
   return v ? (typeof v === 'string' ? [v] : v) : []
 }
 
 export const taskForwardIndex = computed(() => {
-  const res: Record<string, string[]> = {}
+  const res: Record<string, Record<NaviKey, string[]>> = {}
   for (const name in taskIndex.value) {
-    const st = new Set<string>()
-    const keys = ['next', 'timeout_next', 'runout_next'] as const
+    const r: Record<NaviKey, string[]> = {
+      next: [],
+      timeout_next: [],
+      runout_next: []
+    }
     const task = getTask(taskIndex.value[name])
     if (!task) {
       continue
@@ -43,10 +66,10 @@ export const taskForwardIndex = computed(() => {
     for (const key of keys) {
       let arr = wrapNext(task[key])
       for (const to of arr) {
-        st.add(to)
+        r[key].push(to)
       }
     }
-    res[name] = [...st]
+    res[name] = r
   }
   return res
 })

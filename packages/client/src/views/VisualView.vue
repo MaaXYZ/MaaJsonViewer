@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { Graphviz } from '@hpcc-js/wasm/graphviz'
 import { NButton } from 'naive-ui'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onActivated, onDeactivated, onMounted, ref } from 'vue'
 
-import { getTask, taskForwardIndex, taskIndex } from '@/data'
+import { getTask, jsonIndex, taskForwardIndex, taskIndex } from '@/data'
+import type { PathKey } from '@/filesystem'
 
 import NavigationButtons from '@/components/NavigationButtons.vue'
 import MainLayout from '@/layout/MainLayout.vue'
+
+type ClusterInfo = {
+  name: string
+  poly: Record<string, string | null>
+  text: Record<string, string | null>
+}
 
 type VertexInfo = {
   name: string
@@ -19,17 +26,14 @@ type EdgeInfo = {
   to: string
   path: Record<string, string | null>
   poly: Record<string, string | null>
+  text: {
+    attr: Record<string, string | null>
+    text: string
+  }
 }
 
 let graphviz: Graphviz | null = null
 let loaded = ref(false)
-
-onMounted(async () => {
-  if (!graphviz) {
-    graphviz = await Graphviz.load()
-    loaded.value = true
-  }
-})
 
 function isSVGG(node: ChildNode | null): node is SVGGElement {
   return node?.nodeName === 'g'
@@ -48,6 +52,7 @@ const width = ref(0)
 const height = ref(0)
 const scale = ref(1)
 const base = ref<[number, number]>([0, 0])
+const transform = ref('')
 const viewBox = computed(() => {
   return [
     base.value[0],
@@ -57,15 +62,21 @@ const viewBox = computed(() => {
   ]
 })
 
-onMounted(() => {
-  viewWidth.value = containerEl.value!.clientWidth
-  viewHeight.value = containerEl.value!.clientHeight
+onMounted(async () => {
+  viewWidth.value = containerEl.value?.clientWidth ?? 0
+  viewHeight.value = containerEl.value?.clientHeight ?? 0
   new ResizeObserver(() => {
-    viewWidth.value = containerEl.value!.clientWidth
-    viewHeight.value = containerEl.value!.clientHeight
+    viewWidth.value = containerEl.value?.clientWidth ?? 0
+    viewHeight.value = containerEl.value?.clientHeight ?? 0
   }).observe(containerEl.value!)
+  if (!graphviz) {
+    graphviz = await Graphviz.load()
+    loaded.value = true
+  }
+  updateSvg()
 })
 
+const clusters = ref<ClusterInfo[]>([])
 const vertexs = ref<VertexInfo[]>([])
 const edges = ref<EdgeInfo[]>([])
 
@@ -78,20 +89,43 @@ function dumpAttr(el: Element) {
 }
 
 function updateSvg() {
-  let dotString = 'digraph {\n'
+  const dotString = ['digraph {']
+
+  const clusterIndex = Object.keys(jsonIndex.value)
+  for (const [idx, cluster] of clusterIndex.entries()) {
+    dotString.push(
+      `subgraph cluster_${idx} {`,
+      `label = "${cluster}"`,
+      ...jsonIndex.value[cluster as PathKey].map(x => `${x};`),
+      '}'
+    )
+  }
+
   const vertIndex = Object.keys(taskForwardIndex.value)
   for (const from of vertIndex) {
-    for (const to of taskForwardIndex.value[from]) {
-      dotString += `${from} -> ${to}\n`
+    for (const [idx, to] of taskForwardIndex.value[from].next.entries()) {
+      dotString.push(`${from} -> ${to} [label="${idx}"]`)
+    }
+    for (const [idx, to] of taskForwardIndex.value[
+      from
+    ].runout_next.entries()) {
+      dotString.push(`${from} -> ${to} [label="R${idx}"]`)
+    }
+    for (const [idx, to] of taskForwardIndex.value[
+      from
+    ].timeout_next.entries()) {
+      dotString.push(`${from} -> ${to} [label="T${idx}"]`)
     }
   }
-  dotString += '}'
+
+  dotString.push('}')
 
   const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = graphviz?.layout(dotString, 'svg') ?? ''
+  tempDiv.innerHTML = graphviz?.layout(dotString.join('\n'), 'svg') ?? ''
 
   if (tempDiv.childElementCount >= 1) {
     const svgEl = tempDiv.firstElementChild?.firstElementChild as SVGGElement
+    transform.value = svgEl.getAttribute('transform') ?? ''
     console.log(tempDiv.firstElementChild)
     width.value = parseFloat(tempDiv.firstElementChild?.getAttribute('width')!)
     height.value = parseFloat(
@@ -104,10 +138,17 @@ function updateSvg() {
           if (!name) {
             continue
           }
-          if (child.getAttribute('class') === 'node') {
+          if (child.getAttribute('class') === 'cluster') {
+            const polygon = child.childNodes[3] as SVGPolygonElement
+            const text = child.childNodes[5] as SVGTextElement
+            clusters.value.push({
+              name: text.textContent ?? '',
+              poly: dumpAttr(polygon),
+              text: dumpAttr(text)
+            })
+          } else if (child.getAttribute('class') === 'node') {
             const ellipse = child.childNodes[3] as SVGEllipseElement
             const text = child.childNodes[5] as SVGTextElement
-            ellipse.getAttributeNames
             vertexs.value.push({
               name,
               ellipse: dumpAttr(ellipse),
@@ -120,12 +161,16 @@ function updateSvg() {
             }
             const path = child.childNodes[3] as SVGPathElement
             const polygon = child.childNodes[5] as SVGPolygonElement
-
+            const text = child.childNodes[7] as SVGTextElement
             edges.value.push({
               from: match[1],
               to: match[2],
               path: dumpAttr(path),
-              poly: dumpAttr(polygon)
+              poly: dumpAttr(polygon),
+              text: {
+                attr: dumpAttr(text),
+                text: text.textContent ?? ''
+              }
             })
           }
         }
@@ -187,6 +232,16 @@ function handleWheel(ev: WheelEvent) {
   const dlt = ev.deltaY > 0 ? 1.1 : 1 / 1.1
   scale.value *= dlt
 }
+
+onActivated(() => {
+  updateSvg()
+})
+
+onDeactivated(() => {
+  clusters.value = []
+  vertexs.value = []
+  edges.value = []
+})
 </script>
 
 <template>
@@ -212,7 +267,13 @@ function handleWheel(ev: WheelEvent) {
         @pointerup="handleUp"
         style="user-select: none; background-color: wheat"
       >
-        <g transform="scale(1 1) rotate(0) translate(4 1408)">
+        <g :transform="transform">
+          <g v-for="clus in clusters" :key="`${clus.name}`">
+            <polygon v-bind="clus.poly" fill="rgba(255,255,255,0.2)"></polygon>
+            <text v-bind="clus.text">
+              {{ clus.name }}
+            </text>
+          </g>
           <g
             v-for="vert in vertexs"
             :key="vert.name"
@@ -246,12 +307,27 @@ function handleWheel(ev: WheelEvent) {
                     ? 'red'
                     : edge.to === active
                     ? 'blue'
-                    : 'gray'
+                    : 'lightgray'
                   : edge.path.stroke!
               "
               :stroke-width="edge.from === active || edge.to === active ? 2 : 1"
             ></path>
-            <polygon v-bind="edge.poly" fill="transparent"></polygon>
+            <polygon
+              v-bind="edge.poly"
+              fill="transparent"
+              :stroke="
+                active
+                  ? edge.from === active
+                    ? 'red'
+                    : edge.to === active
+                    ? 'blue'
+                    : 'lightgray'
+                  : edge.path.stroke!
+              "
+            ></polygon>
+            <text v-if="active && edge.from === active" v-bind="edge.text.attr">
+              {{ edge.text.text }}
+            </text>
           </g>
         </g>
       </svg>
