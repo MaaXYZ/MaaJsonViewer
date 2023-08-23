@@ -34,25 +34,26 @@ function render() {
     }
   }
   const result = Module.layoutGraph(vertIndex.length, edges, vertIndex)
+  console.log(result)
   const vertArray: VertInfo[] = []
-  const vertMapper: Record<string, VertInfo> = {}
+  const vertMapper: Record<number, VertInfo> = {}
   const edgeArray: EdgeInfo[] = []
-  for (const part of result) {
+  for (const part of result.vert) {
     for (const [yy, layer] of part.entries()) {
       for (const [xx, id] of layer.entries()) {
         const vi: VertInfo = {
-          name: vertIndex[id],
+          name: id < vertIndex.length ? vertIndex[id] : '',
           x: xx,
           y: yy
         }
-        vertMapper[vertIndex[id]] = vi
+        vertMapper[id] = vi
         vertArray.push(vi)
       }
     }
   }
-  for (const from of vertIndex) {
-    const vf = vertMapper[from]
-    for (const to of taskForwardIndex.value[from]) {
+  for (const part of result.edge) {
+    for (const [from, to] of part) {
+      const vf = vertMapper[from]
       const vt = vertMapper[to]
       edgeArray.push({
         x1: vf.x,
@@ -67,11 +68,11 @@ function render() {
 }
 
 function mX(x: number) {
-  return x * 40 + 20
+  return x * 20 + 10
 }
 
 function mY(y: number) {
-  return y * 40 + 20
+  return y * 20 + 10
 }
 </script>
 
@@ -83,15 +84,15 @@ function mY(y: number) {
     </template>
 
     <div>
-      <svg width="1000" height="1000">
+      <svg width="1500" height="1000">
         <circle
-          v-for="info in vertInfo"
-          :key="info.name"
+          v-for="(info, idx) in vertInfo"
+          :key="info.name ?? idx"
           :cx="mX(info.x)"
           :cy="mY(info.y)"
           r="5"
-          fill="wheat"
-          @mouseover="() => console.log(info.name)"
+          :fill="info.name ? 'red' : 'white'"
+          stroke="black"
         ></circle>
         <line
           v-for="(info, idx) in edgeInfo"

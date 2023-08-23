@@ -47,6 +47,16 @@ GraphWithValue buildIndirectGraphWithOrder(const Graph &edges) {
   return result;
 }
 
+GraphWithValue buildIndirectTreeGraph(std::vector<std::pair<int, int>> &tree) {
+  int n = tree.size() + 1;
+  GraphWithValue result(n);
+  for (auto [f, t] : tree) {
+    result[f].emplace(t, 1);
+    result[t].emplace(f, -1);
+  }
+  return result;
+}
+
 void travel(int cur, const Graph &edges, std::vector<int> &vis,
             std::vector<int> &verts) {
   vis[cur] = 1;

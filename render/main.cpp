@@ -54,7 +54,13 @@ emscripten::val layoutGraph(int n, const emscripten::val &v_edges,
 
   auto vertsGroups = splitGraph(buildIndirectGraph(edges));
 
-  emscripten::val result = emscripten::val::array();
+  emscripten::val result = emscripten::val::object();
+  emscripten::val vertResult = emscripten::val::array();
+  emscripten::val edgeResult = emscripten::val::array();
+  result.set("vert", vertResult);
+  result.set("edge", edgeResult);
+
+  int extraAllocVert = n;
 
   for (const auto &toMain : vertsGroups) {
     int m = toMain.size();
@@ -77,21 +83,48 @@ emscripten::val layoutGraph(int n, const emscripten::val &v_edges,
       }
     }
     compactLayer(subGraph, layer);
+    auto subIndirectGraph = buildIndirectGraphWithOrder(subGraph);
+    std::vector<std::pair<int, int>> tree;
+    getCompactSpanTree(subIndirectGraph, layer, tree);
+    // optimzieLayerViaCutValue(subIndirectGraph, layer, tree);
 
-    std::map<int, std::set<int>> flatLayer;
-    for (auto [vt, lv] : layer) {
-      flatLayer[lv].insert(vt);
-    }
+    Graph splittedGraph;
+    std::map<int, int> splittedLayer;
+    splitLongEdge(subGraph, layer, splittedGraph, splittedLayer);
 
-    emscripten::val partResult = emscripten::val::array();
-    for (const auto &[lv, vts] : flatLayer) {
+    std::vector<std::vector<int>> flatLayer;
+    getNaiveLayerLayout(splittedGraph, splittedLayer, flatLayer);
+
+    optimizeLayerLayoutOrder(splittedGraph, flatLayer);
+
+    int mm = splittedGraph.size();
+    int extraVertOffset = extraAllocVert - toMain.size();
+    extraAllocVert += mm - toMain.size();
+
+    auto tM = [&toMain, extraVertOffset](int x) {
+      return x < toMain.size() ? toMain[x] : (x + extraVertOffset);
+    };
+
+    emscripten::val partVertResult = emscripten::val::array();
+    for (const auto &vts : flatLayer) {
       emscripten::val row = emscripten::val::array(); // printf("%d:", lv);
       for (auto v : vts) {
-        row.call<void>("push", toMain[v]);
+        row.call<void>("push", tM(v));
       }
-      partResult.call<void>("push", row);
+      partVertResult.call<void>("push", row);
     }
-    result.call<void>("push", partResult);
+    vertResult.call<void>("push", partVertResult);
+
+    emscripten::val partEdgeResult = emscripten::val::array();
+    for (int i = 0; i < mm; i++) {
+      for (auto j : splittedGraph[i]) {
+        emscripten::val edge = emscripten::val::array();
+        edge.call<void>("push", tM(i));
+        edge.call<void>("push", tM(j));
+        partEdgeResult.call<void>("push", edge);
+      }
+    }
+    edgeResult.call<void>("push", partEdgeResult);
   }
 
   return result;

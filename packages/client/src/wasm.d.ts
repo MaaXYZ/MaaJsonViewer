@@ -3,5 +3,8 @@ declare const Module: {
     vertCount: number,
     edges: number[],
     names: string[]
-  ) => number[][][]
+  ) => {
+    vert: number[][][]
+    edge: [number, number][][]
+  }
 }

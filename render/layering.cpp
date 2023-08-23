@@ -103,4 +103,96 @@ void compactLayer(const Graph &edges, std::map<int, int> &layer) {
       }
     }
   }
+
+  int minLayer = layer[0];
+  for (auto [v, l]: layer) {
+    if (l < minLayer) {
+      minLayer = l;
+    }
+  }
+  for (auto& [v, l]: layer) {
+    l -= minLayer;
+  }
+}
+
+void travelCompactTree(int cur, std::vector<int> &vis,
+                       const GraphWithValue &edges, std::map<int, int> &layer,
+                       std::vector<std::pair<int, int>> &tree) {
+  vis[cur] = 1;
+  for (auto [to, dir] : edges[cur]) {
+    if (!vis[to] && std::abs(layer[cur] - layer[to]) == 1) {
+      if (dir == 1) {
+        tree.emplace_back(cur, to);
+      } else {
+        tree.emplace_back(to, cur);
+      }
+      travelCompactTree(to, vis, edges, layer, tree);
+    }
+  }
+}
+
+void getCompactSpanTree(const GraphWithValue &edges, std::map<int, int> &layer,
+                        std::vector<std::pair<int, int>> &tree) {
+  int n = edges.size();
+  int startVert = 0;
+  std::vector<int> vis(n, 0);
+  travelCompactTree(startVert, vis, edges, layer, tree);
+  if (tree.size() != n - 1) {
+    puts("Bad span tree created!");
+  }
+}
+
+void findHeadVerts(int cur, const GraphWithValue &tree, int tail,
+                   std::vector<int> &verts) {
+  verts[cur] = 1;
+  for (auto [to, dir] : tree[cur]) {
+    if (to == tail) {
+      continue;
+    }
+    findHeadVerts(to, tree, tail, verts);
+  }
+}
+
+int caculateCutValue(const GraphWithValue &edges, const GraphWithValue &tree,
+                     int head, int tail) {
+  int n = edges.size();
+  std::vector<int> isHeadVerts(n, 0);
+  findHeadVerts(head, tree, tail, isHeadVerts);
+  int sum = 0;
+  for (int i = 0; i < n; i++) {
+    for (auto [j, dir] : edges[i]) {
+      if (isHeadVerts[i] != isHeadVerts[j]) {
+        sum += dir;
+      }
+    }
+  }
+  return sum;
+}
+
+std::vector<std::pair<int, std::pair<int, int>>>
+caculateAllCutValue(const GraphWithValue &edges,
+                    std::vector<std::pair<int, int>> &tree) {
+  auto tg = buildIndirectTreeGraph(tree);
+  std::vector<std::pair<int, std::pair<int, int>>> result;
+  for (auto [f, t] : tree) {
+    int cv = caculateCutValue(edges, tg, f, t);
+    result.emplace_back(cv, std::make_pair(f, t));
+  }
+  return result;
+}
+
+void optimzieLayerViaCutValue(const GraphWithValue &edges,
+                              std::map<int, int> &layer,
+                              std::vector<std::pair<int, int>> &tree) {
+  auto cvs = caculateAllCutValue(edges, tree);
+  std::sort(cvs.begin(), cvs.end());
+  cvs.erase(std::remove_if(cvs.begin(), cvs.end(),
+                           [](const std::pair<int, std::pair<int, int>> &pr) {
+                             return pr.first >= 0;
+                           }),
+            cvs.end());
+  for (auto [cv, e] : cvs) {
+    printf("edge %d -> %d cut value %d\n", e.first, e.second, cv);
+  }
+  // TODO: optimize it
 }
