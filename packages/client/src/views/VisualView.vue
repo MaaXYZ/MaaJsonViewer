@@ -92,7 +92,7 @@ function mY(y: number) {
           :cy="mY(info.y)"
           r="5"
           :fill="info.name ? 'red' : 'white'"
-          stroke="black"
+          @mousedown="() => console.log(info.name)"
         ></circle>
         <line
           v-for="(info, idx) in edgeInfo"

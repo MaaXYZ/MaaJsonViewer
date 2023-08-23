@@ -185,8 +185,34 @@ bool transposeIfNeeded(const Graph &edges,
         std::swap(fakeDown[0], fakeDown[1]);
         int post = countCrossingRow(edges, up, fakeDown);
         if (post < prev) {
-          // printf("%d -> %d\n", prev, post);
+          printf("down: %d -> %d\n", prev, post);
           std::swap(down[j], down[j + 1]);
+          improved = true;
+          changed = true;
+        }
+      }
+    }
+  }
+  return changed;
+}
+
+bool transposeIfNeededUpside(const Graph &edges,
+                             std::vector<std::vector<int>> &layout) {
+  bool improved = true;
+  bool changed = false;
+  while (improved) {
+    improved = false;
+    for (int i = layout.size() - 1; i > 1; i--) {
+      const auto &down = layout[i];
+      auto &up = layout[i - 1];
+      for (int j = 0; j + 1 < up.size(); j++) {
+        std::vector<int> fakeUp = {up[j], up[j + 1]};
+        int prev = countCrossingRow(edges, fakeUp, down);
+        std::swap(fakeUp[0], fakeUp[1]);
+        int post = countCrossingRow(edges, fakeUp, down);
+        if (post < prev) {
+          printf("up: %d -> %d\n", prev, post);
+          std::swap(up[j], up[j + 1]);
           improved = true;
           changed = true;
         }
@@ -202,9 +228,9 @@ void optimizeLayerLayoutOrder(const Graph &edges,
   std::vector<std::vector<int>> bestLayout = layout;
   int bestCross = countCrossing(edges, bestLayout);
   for (int i = 0; i < MaxiIterations; i++) {
-    bool changed = false;
-    changed = changed || sortAccordingMedian(edges, layout);
-    changed = changed || transposeIfNeeded(edges, layout);
+    bool changed = sortAccordingMedian(edges, layout);
+    changed = transposeIfNeeded(edges, layout) || changed;
+    changed = transposeIfNeededUpside(edges, layout) || changed;
     int newCross = countCrossing(edges, layout);
     if (newCross < bestCross) {
       printf("optimize crossing %d -> %d\n", bestCross, newCross);
