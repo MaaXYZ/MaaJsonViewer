@@ -32,24 +32,6 @@ jobs:
           submodules: true # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v11
-
-      - name: Install cmake
-        run: |
-          sudo apt-get update
-          sudo apt-get install cmake
-
-      - name: Build wasm module
-        run: |
-          cd render
-          mkdir build
-          cd build
-          emcmake cmake ..
-          cmake --build .
-          mkdir Release
-          cp render.js render.wasm Release/
-
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
