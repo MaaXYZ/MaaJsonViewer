@@ -9,12 +9,6 @@ import type { PathKey } from '@/filesystem'
 import NavigationButtons from '@/components/NavigationButtons.vue'
 import MainLayout from '@/layout/MainLayout.vue'
 
-type ClusterInfo = {
-  name: string
-  poly: Record<string, string | null>
-  text: Record<string, string | null>
-}
-
 type VertexInfo = {
   name: string
   ellipse: Record<string, string | null>
@@ -76,11 +70,10 @@ onMounted(async () => {
   updateSvg()
 })
 
-const clusters = ref<ClusterInfo[]>([])
 const vertexs = ref<VertexInfo[]>([])
 const edges = ref<EdgeInfo[]>([])
 
-const active = ref<string>('')
+const active = ref<string[]>([])
 
 function dumpAttr(el: Element) {
   return Object.fromEntries(
@@ -90,16 +83,6 @@ function dumpAttr(el: Element) {
 
 function updateSvg() {
   const dotString = ['digraph {']
-
-  const clusterIndex = Object.keys(jsonIndex.value)
-  for (const [idx, cluster] of clusterIndex.entries()) {
-    dotString.push(
-      `subgraph cluster_${idx} {`,
-      `label = "${cluster}"`,
-      ...jsonIndex.value[cluster as PathKey].map(x => `${x};`),
-      '}'
-    )
-  }
 
   const vertIndex = Object.keys(taskForwardIndex.value)
   for (const from of vertIndex) {
@@ -138,15 +121,7 @@ function updateSvg() {
           if (!name) {
             continue
           }
-          if (child.getAttribute('class') === 'cluster') {
-            const polygon = child.childNodes[3] as SVGPolygonElement
-            const text = child.childNodes[5] as SVGTextElement
-            clusters.value.push({
-              name: text.textContent ?? '',
-              poly: dumpAttr(polygon),
-              text: dumpAttr(text)
-            })
-          } else if (child.getAttribute('class') === 'node') {
+          if (child.getAttribute('class') === 'node') {
             const ellipse = child.childNodes[3] as SVGEllipseElement
             const text = child.childNodes[5] as SVGTextElement
             vertexs.value.push({
@@ -220,7 +195,7 @@ function handleUp(ev: PointerEvent) {
     saveX = null
     saveY = null
   } else {
-    active.value = ''
+    active.value = []
   }
 }
 
@@ -238,7 +213,6 @@ onActivated(() => {
 })
 
 onDeactivated(() => {
-  clusters.value = []
   vertexs.value = []
   edges.value = []
 })
@@ -268,19 +242,19 @@ onDeactivated(() => {
         style="user-select: none; background-color: wheat"
       >
         <g :transform="transform">
-          <g v-for="clus in clusters" :key="`${clus.name}`">
-            <polygon v-bind="clus.poly" fill="rgba(255,255,255,0.2)"></polygon>
-            <text v-bind="clus.text">
-              {{ clus.name }}
-            </text>
-          </g>
           <g
             v-for="vert in vertexs"
             :key="vert.name"
             @pointerup="
               ev => {
                 ev.stopPropagation()
-                active = vert.name
+                active = [vert.name]
+              }
+            "
+            @dblclick="
+              ev => {
+                active =
+                  jsonIndex[taskIndex[vert.name].replace(/#.*$/, '') as PathKey]
               }
             "
           >
@@ -289,9 +263,11 @@ onDeactivated(() => {
               :fill="
                 getTask(taskIndex[vert.name])?.is_sub ? 'white' : 'lightgray'
               "
-              :stroke="vert.name === active ? 'red' : vert.ellipse['stroke']!"
+              :stroke="
+                active.includes(vert.name) ? 'red' : vert.ellipse['stroke']!
+              "
               :stroke-width="
-                vert.name === active ? '2' : vert.ellipse['stroke-width']!
+                active.includes(vert.name) ? '2' : vert.ellipse['stroke-width']!
               "
             ></ellipse>
             <text v-bind="vert.text">
@@ -302,30 +278,39 @@ onDeactivated(() => {
             <path
               v-bind="edge.path"
               :stroke="
-                active
-                  ? edge.from === active
-                    ? 'red'
-                    : edge.to === active
+                active.length
+                  ? active.includes(edge.from)
+                    ? active.includes(edge.to)
+                      ? 'black'
+                      : 'red'
+                    : active.includes(edge.to)
                     ? 'blue'
                     : 'lightgray'
                   : edge.path.stroke!
               "
-              :stroke-width="edge.from === active || edge.to === active ? 2 : 1"
+              :stroke-width="
+                active.includes(edge.from) || active.includes(edge.to) ? 2 : 1
+              "
             ></path>
             <polygon
               v-bind="edge.poly"
               fill="transparent"
               :stroke="
-                active
-                  ? edge.from === active
-                    ? 'red'
-                    : edge.to === active
+                active.length
+                  ? active.includes(edge.from)
+                    ? active.includes(edge.to)
+                      ? 'black'
+                      : 'red'
+                    : active.includes(edge.to)
                     ? 'blue'
                     : 'lightgray'
-                  : edge.path.stroke!
+                  : edge.poly.stroke!
               "
             ></polygon>
-            <text v-if="active && edge.from === active" v-bind="edge.text.attr">
+            <text
+              v-if="active.length && active.includes(edge.from)"
+              v-bind="edge.text.attr"
+            >
               {{ edge.text.text }}
             </text>
           </g>
