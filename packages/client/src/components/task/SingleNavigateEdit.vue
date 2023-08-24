@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { findLengthOfLCS } from '@algorithm.ts/lcs'
 import {
   AdsClickOutlined,
   ErrorOutlineOutlined,
@@ -38,18 +39,27 @@ const navTask = computed(() => {
 })
 
 const options = computed(() => {
-  const lowerSearch = value.value.toLowerCase()
+  const low = value.value.toLowerCase()
   return Object.keys(taskIndex.value)
-    .map(name => ({
-      name,
-      type: name.toLowerCase().startsWith(lowerSearch)
-        ? 0
-        : name.toLowerCase().indexOf(lowerSearch) !== -1
-        ? 1
-        : 2
-    }))
-    .filter(({ type }) => type < 2)
-    .sort((a, b) => a.type - b.type)
+    .map(name => {
+      const lowName = name.toLowerCase()
+      return {
+        name,
+        point: findLengthOfLCS(
+          low.length,
+          lowName.length,
+          (i, j) => low[i] === lowName[j]
+        )
+      }
+    })
+    .sort((a, b) => {
+      if (a.point !== b.point) {
+        return b.point - a.point
+      } else {
+        return a.name.localeCompare(b.name)
+      }
+    })
+    .slice(0, 20)
     .map(x => ({
       label: x.name,
       value: x.name

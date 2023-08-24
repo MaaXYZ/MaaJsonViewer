@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { findLengthOfLCS } from '@algorithm.ts/lcs'
 import { useVModel } from '@vueuse/core'
 import { NAutoComplete } from 'naive-ui'
 import { computed } from 'vue'
@@ -18,22 +19,27 @@ const value = useVModel(props, 'value', emits, {
 })
 
 const options = computed(() => {
-  const lowerSearch = value.value
-    .toLowerCase()
-    .split(/[ /]+/)
-    .filter(x => x)
-  if (lowerSearch.length === 0) {
-    return []
-  }
+  const low = value.value.toLowerCase()
   return Object.keys(imageIndex.value)
-    .map(name => ({
-      name,
-      type: lowerSearch
-        .map(key => (name.toLowerCase().indexOf(key) !== -1 ? 0 : 1) as number)
-        .reduce((a, b) => a + b, 0)
-    }))
-    .filter(({ type }) => type < 2)
-    .sort((a, b) => a.type - b.type)
+    .map(name => {
+      const lowName = name.toLowerCase()
+      return {
+        name,
+        point: findLengthOfLCS(
+          low.length,
+          lowName.length,
+          (i, j) => low[i] === lowName[j]
+        )
+      }
+    })
+    .sort((a, b) => {
+      if (a.point !== b.point) {
+        return b.point - a.point
+      } else {
+        return a.name.localeCompare(b.name)
+      }
+    })
+    .slice(0, 20)
     .map(x => ({
       label: x.name,
       value: x.name
